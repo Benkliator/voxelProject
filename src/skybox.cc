@@ -30,7 +30,7 @@ Skybox::Skybox(std::vector<const char*> texturePath)
         0, 5, 4,
     };
     unsigned int vertexShader = loadShader(GL_VERTEX_SHADER, "./res/shaders/skybox.vert");
-    unsigned int fragmentShader = loadShader(GL_FRAGMENT_SHADER, "./res/shaders/skybox.frag");    
+    unsigned int fragmentShader = loadShader(GL_FRAGMENT_SHADER, "./res/shaders/skybox.frag");
     shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
@@ -69,7 +69,7 @@ void Skybox::draw(glm::mat4 view)
     glUseProgram(shaderProgram);
     glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
     glBindVertexArray(VAO);
-     
+
     glDepthMask(false);
     glCullFace(GL_FRONT);
     glm::mat4 scaling = glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
@@ -77,14 +77,14 @@ void Skybox::draw(glm::mat4 view)
                                 0.0f, 0.0f, 1.0f, 0.0f,
                                 0.0f, 0.0f, 0.0f, 0.001f);
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), 1.8f, 0.1f, 1000.0f);
-    
+
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "scaling"), 1, GL_FALSE, glm::value_ptr(scaling));
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VBO);
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-    
+
     glCullFace(GL_BACK);
     glDepthMask(true);
 }

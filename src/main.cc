@@ -39,20 +39,14 @@ Camera skyboxCam{};
 void init()
 {
     // General gl settings
-
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
-    // Texture
-    
-    
     GLenum error = glGetError();
     if (error != GL_NO_ERROR) {
-        // Handle or log the error
         std::cerr << "OpenGL error: " << error << std::endl;
     }
-    
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -101,7 +95,7 @@ void display(GLFWwindow* window)
         "./res/textures/monotoneSky.png",
     };
     Skybox skybox{skyFaces}; 
-    World world{1};
+    World world{10};
     float currentFrame = 0.0f;
     while(!glfwWindowShouldClose(window))
     {
@@ -158,5 +152,5 @@ int main(void)
     display(window);
 
     // Cleanup
-    glfwTerminate();   
+    glfwTerminate();
 }

@@ -15,7 +15,7 @@ class Camera
 
     glm::mat4 lookAt()
     {
-    return glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        return glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     }
 
     void processMouseMovement(GLFWwindow* window, double xoffset, double yoffset, GLboolean constrainPitch = true)
@@ -40,7 +40,7 @@ class Camera
         cameraFront.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
         cameraFront = glm::normalize(cameraFront);
     }
-    
+
     void processKeyboardInput(GLFWwindow* window, float deltaTime)
     {
         const float cameraSpeed = 12.0f * deltaTime;
@@ -58,7 +58,7 @@ class Camera
     glm::vec3 cameraPos   = glm::vec3(0.0f, 5.0f,  0.0f);
     glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
     glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
-    
+
     float mouseSensitivity = 0.3f;
     bool firstMouse = true;
 
