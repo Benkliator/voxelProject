@@ -101,7 +101,7 @@ std::pair< std::vector<unsigned int>, std::vector<float> > Chunk::generateMesh()
             vertexMesh.push_back(blockVertices[20] + pos.x + chunkPos.x);
             vertexMesh.push_back(blockVertices[21] + pos.y);
             vertexMesh.push_back(blockVertices[22] + pos.z + chunkPos.z);
-            vertexMesh.push_back(blockTexCoords[8] + (blockType.top & 240)/16);
+            vertexMesh.push_back(blockVertices[8] + (blockType.top & 240)/16);
             vertexMesh.push_back(blockVertices[9] + (blockType.top & 15));
 
             vertexMesh.push_back(blockVertices[0] + pos.x + chunkPos.x);
