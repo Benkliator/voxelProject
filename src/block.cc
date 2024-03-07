@@ -8,22 +8,22 @@ Block::Block(unsigned short blockType) {
         // Grass
         case 0:
             top     = 0;
-            bottom  = 32;
-            side    = 16;
+            bottom  = 0b00100000;
+            side    = 0b00010000;
         break;
 
         // Dirt
         case 1:
-            top     = 32;
-            bottom  = 32;
-            side    = 32;
+            top     = 0b00100000;
+            bottom  = 0b00100000;
+            side    = 0b00100000;
         break;
 
         // Stone
         case 2:
-            top     = 48;
-            bottom  = 48;
-            side    = 48;
+            top     = 0b00110000;
+            bottom  = 0b00110000;
+            side    = 0b00110000;
         break;
 
         // Purple
