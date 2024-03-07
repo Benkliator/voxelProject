@@ -86,25 +86,29 @@ std::pair< std::vector<unsigned int>, std::vector<float> > Chunk::generateMesh()
         if (!count) {
             continue;
         }
+
+        // NOTE: Everything below this point is not finalized.
+        // TODO: Implement the rest of the function
+
         if (count == 1) {
-            indexMesh.push_back( 0 );
-            indexMesh.push_back( 3 );
-            indexMesh.push_back( 1 );
-            indexMesh.push_back( 2 );
-            indexMesh.push_back( 1 );
-            indexMesh.push_back( 3 );
+            indexMesh.push_back((vertexMesh.size() / 5) + 0);
+            indexMesh.push_back((vertexMesh.size() / 5) + 3);
+            indexMesh.push_back((vertexMesh.size() / 5) + 1);
+            indexMesh.push_back((vertexMesh.size() / 5) + 2);
+            indexMesh.push_back((vertexMesh.size() / 5) + 1);
+            indexMesh.push_back((vertexMesh.size() / 5) + 3);
 
             vertexMesh.push_back(blockVertices[20] + pos.x + chunkPos.x);
             vertexMesh.push_back(blockVertices[21] + pos.y);
             vertexMesh.push_back(blockVertices[22] + pos.z + chunkPos.z);
-            vertexMesh.push_back(blockVertices[23] + (blockType.top & 240)/16);
-            vertexMesh.push_back(blockVertices[24] + (blockType.top & 15));
+            vertexMesh.push_back(blockTexCoords[8] + (blockType.top & 240)/16);
+            vertexMesh.push_back(blockVertices[9] + (blockType.top & 15));
 
             vertexMesh.push_back(blockVertices[0] + pos.x + chunkPos.x);
             vertexMesh.push_back(blockVertices[1] + pos.y);
             vertexMesh.push_back(blockVertices[2] + pos.z + chunkPos.z);
-            vertexMesh.push_back(blockVertices[3] + (blockType.top & 240)/16);
-            vertexMesh.push_back(blockVertices[4] + (blockType.top & 15));
+            vertexMesh.push_back(blockVertices[13] + (blockType.top & 240)/16);
+            vertexMesh.push_back(blockVertices[14] + (blockType.top & 15));
 
             vertexMesh.push_back(blockVertices[15] + pos.x + chunkPos.x);
             vertexMesh.push_back(blockVertices[16] + pos.y);
@@ -115,8 +119,8 @@ std::pair< std::vector<unsigned int>, std::vector<float> > Chunk::generateMesh()
             vertexMesh.push_back(blockVertices[35] + pos.x + chunkPos.x);
             vertexMesh.push_back(blockVertices[36] + pos.y);
             vertexMesh.push_back(blockVertices[37] + pos.z + chunkPos.z);
-            vertexMesh.push_back(blockVertices[38] + (blockType.top & 240)/16);
-            vertexMesh.push_back(blockVertices[39] + (blockType.top & 15));
+            vertexMesh.push_back(blockVertices[3] + (blockType.top & 240)/16);
+            vertexMesh.push_back(blockVertices[4] + (blockType.top & 15));
             continue;
         }
         continue;
@@ -194,8 +198,8 @@ bool Chunk::obsBack(unsigned int thisBlock) {
     while ((blockArray[temp]           & 0b11110000)
             >= ((blockArray[thisBlock] & 0b11110000) - 16)
             && temp != -1) {
-        if ((blockArray[temp]         & 0b111100001111) 
-            == (blockArray[thisBlock] & 0b111100001111)) { 
+        if ((blockArray[temp]         & 0b111100001111)
+            == (blockArray[thisBlock] & 0b111100001111)) {
             return true;
         }
         temp--;
@@ -213,7 +217,7 @@ bool Chunk::obsFront(unsigned int thisBlock) {
             <= ((blockArray[thisBlock] & 0b11110000) + 16)
             && blockArray[temp - 1] != blockArray.back()) {
         if ((blockArray[temp]         & 0b111100001111)
-            == (blockArray[thisBlock] & 0b111100001111)) { 
+            == (blockArray[thisBlock] & 0b111100001111)) {
             return true;
         }
         temp++;

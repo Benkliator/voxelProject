@@ -80,9 +80,10 @@ class Chunk
 
 };
 
-// TODO: Add normals to the end of each row
-// of the following matrices, and modify the contents
+// TODO: Add normals and modify the contents
 // of the functions using them accordingly.
+//
+// TODO: Make texcoord arrays and finish implementing them in the createMesh func.
 //
 // NOTE: Might want to put these in a proper data structure.
 inline float blockVertices[]{
