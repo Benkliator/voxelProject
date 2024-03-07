@@ -56,7 +56,7 @@ Skybox::Skybox(std::vector<const char*> texturePath) {
 Skybox::~Skybox() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
     glDeleteShader(shaderProgram);
 }
 

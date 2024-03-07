@@ -1,2 +1,18 @@
-all:  
-	g++ -I/usr/include/GLFW -L/usr/include/GLFW -o voxelEngine ./src/main.cc ./src/chunk.cc ./src/world.cc ./src/skybox.cc ./src/block.cc ./src/BensGLUtilities.cc ./src/perlin.cc ./src/renderer.cc ./include/glad/glad.c -lglfw -lGL -lGLU -lX11 -lpthread -lXrandr -lXi -ldl -std=c++17
+CFLAGS=
+CXXCFLGS=$(CFLAGS)
+LIB=-L/usr/include/GLFW -lglfw -lGL -lGLU -lX11 -lpthread -lXrandr -lXi -ldl
+INC=-I/usr/include/GLFW -I./include/
+OBJ=obj/main.o obj/chunk.o obj/world.o obj/skybox.o obj/block.o obj/BensGLUtilities.o obj/perlin.o obj/renderer.o obj/glad.o
+all: voxelEngine
+
+obj/%.o: include/glad/%.c
+	$(CC) $(INC) -c -o $@ $< $(CFLAGS)
+
+obj/%.o: src/%.cc
+	$(CXX) $(INC) -c -o $@ $< $(CXXFLAGS) -std=c++17
+
+voxelEngine: $(OBJ)
+	$(CXX) -o voxelEngine $^ $(LIB)
+
+clean:
+	rm voxelEngine $(OBJ)
