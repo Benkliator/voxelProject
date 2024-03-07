@@ -1,7 +1,6 @@
 #include "../lib/perlin.h"
 
-glm::vec2 gradient(int ix, int iy)
-{
+glm::vec2 gradient(int ix, int iy) {
     // No precomputed gradients mean this works for any number of grid coordinates
     const unsigned w = 8 * sizeof(unsigned);
     const unsigned s = w / 2;
@@ -35,13 +34,11 @@ float dotGradient(int ix, int iy, float fx, float fy) {
     return (dx * grad.x + dy * grad.y);
 }
 
-float interpolate(float a0, float a1, float w)
-{
+float interpolate(float a0, float a1, float w) {
     return (a1 - a0) * (3.0 - w * 2.0) * w * w + a0;
 }
 
 float perlin(float fx, float fy) {
-
     if (fx < 0) fx *= (-1);
     if (fy < 0) fy *= (-1);
     // Determine grid cell corner coordinates

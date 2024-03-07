@@ -1,7 +1,6 @@
 #include "../lib/renderer.h"
 
-Renderer::Renderer()
-{
+Renderer::Renderer() {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -12,8 +11,7 @@ Renderer::Renderer()
 }
 
 Renderer::Renderer( std::vector<float>        vertices, 
-                    std::vector<unsigned int> indices )
-{
+                    std::vector<unsigned int> indices ) {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -26,8 +24,7 @@ Renderer::Renderer( std::vector<float>        vertices,
     renderInit();
 }
 
-Renderer::~Renderer()
-{
+Renderer::~Renderer() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
@@ -37,8 +34,7 @@ Renderer::~Renderer()
 }
 
 void Renderer::changeRendering( std::vector<float>        newVertices, 
-                                std::vector<unsigned int> newIndices )
-{
+                                std::vector<unsigned int> newIndices ) {
     vertexMesh  = newVertices;
     indexMesh   = newIndices;
     renderInit();
@@ -46,10 +42,8 @@ void Renderer::changeRendering( std::vector<float>        newVertices,
 
 // TODO: Implement insertion-sort for this.
 void Renderer::addRendering(std::vector<float>        addVertices, 
-                            std::vector<unsigned int> addIndices )
-{
-    for (size_t i = 0; i < addIndices.size(); i += 6)
-    {
+                            std::vector<unsigned int> addIndices ) {
+    for (size_t i = 0; i < addIndices.size(); i += 6) {
         int size = vertexMesh.size() / 5;
         indexMesh.push_back( addIndices[i]     + size );
         indexMesh.push_back( addIndices[i + 1] + size );
@@ -58,14 +52,12 @@ void Renderer::addRendering(std::vector<float>        addVertices,
         indexMesh.push_back( addIndices[i + 4] + size );
         indexMesh.push_back( addIndices[i + 5] + size );
     }
-    for (auto it : addVertices)
-    {
-    vertexMesh.push_back(it);
+    for (auto&& it : addVertices) {
+        vertexMesh.push_back(it);
     }
 }
 
-void Renderer::render(glm::mat4 view)
-{
+void Renderer::render(glm::mat4 view) {
     glUseProgram(shaderProgram);
     glBindTexture(GL_TEXTURE_2D, textureMap);
 
@@ -82,8 +74,7 @@ void Renderer::render(glm::mat4 view)
     glDrawElements(GL_TRIANGLES, indexMesh.size(), GL_UNSIGNED_INT, 0);
 }
 
-void Renderer::renderInit()
-{
+void Renderer::renderInit() {
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -99,8 +90,7 @@ void Renderer::renderInit()
     glEnableVertexAttribArray(1);
 }
 
-void Renderer::shaderInit()
-{
+void Renderer::shaderInit() {
     unsigned int vertexShader = loadShader(GL_VERTEX_SHADER, "./res/shaders/main.vert");
     unsigned int fragmentShader = loadShader(GL_FRAGMENT_SHADER, "./res/shaders/main.frag");
 

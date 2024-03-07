@@ -36,8 +36,7 @@ float frameCount = 1.0f;
 Camera camera{};
 Camera skyboxCam{};
 
-void init()
-{
+void init() {
     // General gl settings
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -49,26 +48,23 @@ void init()
     }
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-void processInput(GLFWwindow* window)
-{
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+void processInput(GLFWwindow* window) {
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
+    }
 
     camera.processKeyboardInput(window, deltaTime);
 }
 
-void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
-{
+void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
     float xpos = static_cast<float>(xposIn);
     float ypos = static_cast<float>(yposIn);
 
-    if (firstMouse)
-    {
+    if (firstMouse) {
         lastX = xpos;
         lastY = ypos;
         firstMouse = false;
@@ -83,10 +79,8 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
     skyboxCam.processMouseMovement(window, xoffset, yoffset);
 }
 
-void display(GLFWwindow* window)
-{
-    std::vector<const char*> skyFaces
-    {
+void display(GLFWwindow* window) {
+    std::vector<const char*> skyFaces {
         "./res/textures/monotoneSky.png",
         "./res/textures/monotoneSky.png",
         "./res/textures/monotoneSky.png",
@@ -94,11 +88,10 @@ void display(GLFWwindow* window)
         "./res/textures/monotoneSky.png",
         "./res/textures/monotoneSky.png",
     };
-    Skybox skybox{skyFaces}; 
+    Skybox skybox{skyFaces};
     World world{10};
     float currentFrame = 0.0f;
-    while(!glfwWindowShouldClose(window))
-    {
+    while(!glfwWindowShouldClose(window)) {
         currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;  
@@ -118,8 +111,7 @@ void display(GLFWwindow* window)
     }
 }
 
-int main(void)
-{
+int main(void) {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -127,8 +119,7 @@ int main(void)
 
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Minecraft", NULL, NULL);
 
-    if (window == NULL)
-    {
+    if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
@@ -137,8 +128,7 @@ int main(void)
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }

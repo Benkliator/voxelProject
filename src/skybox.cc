@@ -1,9 +1,7 @@
 #include "../lib/skybox.h"
 
-Skybox::Skybox(std::vector<const char*> texturePath)
-{
-   float vertices[]
-    {
+Skybox::Skybox(std::vector<const char*> texturePath) {
+   float vertices[] {
         -0.5f, -0.5f, -0.5f,
          0.5f, -0.5f, -0.5f,
          0.5f,  0.5f, -0.5f,
@@ -14,8 +12,7 @@ Skybox::Skybox(std::vector<const char*> texturePath)
         -0.5f,  0.5f,  0.5f
     };
 
-    unsigned int indices[]
-    {
+    unsigned int indices[] {
         0, 2, 1, // Front
         0, 3, 2,
         4, 5, 6, // Back
@@ -56,16 +53,14 @@ Skybox::Skybox(std::vector<const char*> texturePath)
     glEnableVertexAttribArray(0);
 }
 
-Skybox::~Skybox()
-{
+Skybox::~Skybox() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &VBO);
     glDeleteShader(shaderProgram);
 }
 
-void Skybox::draw(glm::mat4 view)
-{
+void Skybox::draw(glm::mat4 view) {
     glUseProgram(shaderProgram);
     glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
     glBindVertexArray(VAO);

@@ -3,9 +3,8 @@
 // TODO: Change this (maybe?)
 //
 // NOTE: Additional bits might be block unique, consider for future.
-Block::Block(unsigned short blockType)
-{
-    switch(blockType){
+Block::Block(unsigned short blockType) {
+    switch(blockType) {
         // Grass
         case 0:
             top     = 0;
