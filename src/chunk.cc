@@ -98,29 +98,29 @@ std::pair< std::vector<unsigned int>, std::vector<float> > Chunk::generateMesh()
             indexMesh.push_back((vertexMesh.size() / 5) + 1);
             indexMesh.push_back((vertexMesh.size() / 5) + 3);
 
-            vertexMesh.push_back(blockVertices[20] + pos.x + chunkPos.x);
-            vertexMesh.push_back(blockVertices[21] + pos.y);
-            vertexMesh.push_back(blockVertices[22] + pos.z + chunkPos.z);
-            vertexMesh.push_back(blockVertices[8] + (blockType.top & 240)/16);
-            vertexMesh.push_back(blockVertices[9] + (blockType.top & 15));
+            vertexMesh.push_back(blockVertices[12] + pos.x + chunkPos.x);
+            vertexMesh.push_back(blockVertices[13] + pos.y);
+            vertexMesh.push_back(blockVertices[14] + pos.z + chunkPos.z);
+            vertexMesh.push_back(blockTexCoords[0] + (blockType.top & 240)/16);
+            vertexMesh.push_back(blockTexCoords[1] + (blockType.top & 15));
 
             vertexMesh.push_back(blockVertices[0] + pos.x + chunkPos.x);
             vertexMesh.push_back(blockVertices[1] + pos.y);
             vertexMesh.push_back(blockVertices[2] + pos.z + chunkPos.z);
-            vertexMesh.push_back(blockVertices[13] + (blockType.top & 240)/16);
-            vertexMesh.push_back(blockVertices[14] + (blockType.top & 15));
+            vertexMesh.push_back(blockTexCoords[2] + (blockType.top & 240)/16);
+            vertexMesh.push_back(blockTexCoords[3] + (blockType.top & 15));
 
-            vertexMesh.push_back(blockVertices[15] + pos.x + chunkPos.x);
-            vertexMesh.push_back(blockVertices[16] + pos.y);
-            vertexMesh.push_back(blockVertices[17] + pos.z + chunkPos.z);
-            vertexMesh.push_back(blockVertices[18] + (blockType.top & 240)/16);
-            vertexMesh.push_back(blockVertices[19] + (blockType.top & 15));
+            vertexMesh.push_back(blockVertices[9] + pos.x + chunkPos.x);
+            vertexMesh.push_back(blockVertices[11] + pos.y);
+            vertexMesh.push_back(blockVertices[12] + pos.z + chunkPos.z);
+            vertexMesh.push_back(blockTexCoords[4] + (blockType.top & 240)/16);
+            vertexMesh.push_back(blockTexCoords[5] + (blockType.top & 15));
 
-            vertexMesh.push_back(blockVertices[35] + pos.x + chunkPos.x);
-            vertexMesh.push_back(blockVertices[36] + pos.y);
-            vertexMesh.push_back(blockVertices[37] + pos.z + chunkPos.z);
-            vertexMesh.push_back(blockVertices[3] + (blockType.top & 240)/16);
-            vertexMesh.push_back(blockVertices[4] + (blockType.top & 15));
+            vertexMesh.push_back(blockVertices[21] + pos.x + chunkPos.x);
+            vertexMesh.push_back(blockVertices[22] + pos.y);
+            vertexMesh.push_back(blockVertices[23] + pos.z + chunkPos.z);
+            vertexMesh.push_back(blockTexCoords[6] + (blockType.top & 240)/16);
+            vertexMesh.push_back(blockTexCoords[7] + (blockType.top & 15));
             continue;
         }
         continue;
