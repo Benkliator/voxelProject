@@ -83,21 +83,41 @@ class Chunk
 // TODO: Add normals and modify the contents
 // of the functions using them accordingly.
 // NOTE: Might want to put these in a proper data structure.
-inline float blockVertices[]{
-        0.5f,  0.5f,  0.5f,  // top-right
-        0.5f, -0.5f,  0.5f,  // bottom-right
-        -0.5f, -0.5f,  0.5f, // bottom-left
-        -0.5f,  0.5f,  0.5f, // top-left
-
-        0.5f,  0.5f, -0.5f,  // top-right
-        0.5f, -0.5f, -0.5f,  // bottom-right
-        -0.5f, -0.5f, -0.5f, // bottom-left
-        -0.5f,  0.5f, -0.5f, // top-left
+//
+inline float backVertices[]{
+        0.5f,  0.5f, -0.5f, 1.0f, 0.0f,// top-right
+        0.5f, -0.5f, -0.5f, 1.0f, 1.0f,// bottom-right
+        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // bottom-left
+        -0.5f,  0.5f, -0.5f, 0.0f, 0.0f,// top-left
 };
 
-inline float blockTexCoords[]{
-    1.0f, 1.0f,
-    0.0f, 1.0f,
-    0.0f, 0.0f,
-    1.0, 0.0f,
+inline float frontVertices[]{
+        0.5f,  0.5f,  0.5f, 1.0f, 0.0f,// top-right
+        0.5f, -0.5f,  0.5f, 1.0f, 1.0f,// bottom-right
+        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, // bottom-left
+        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f,// top-left
 };
+inline float leftVertices[]{
+        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f,// top-right
+        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f,// bottom-right
+        -0.5f, -0.5f, -0.5f, 1.0f, 1.0f,// bottom-left
+        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f,// top-left
+};
+inline float rightVertices[]{
+        0.5f,  0.5f, -0.5f, 1.0f, 0.0f,// top-right
+        0.5f, -0.5f, -0.5f, 1.0f, 1.0f,// bottom-right
+        0.5f, -0.5f,  0.5f, 0.0f, 1.0f,// bottom-left
+        0.5f,  0.5f,  0.5f, 0.0f, 0.0f,// top-left
+};
+inline float bottomVertices[]{
+        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f,// top-right
+        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,// bottom-right
+        0.5f, -0.5f,  0.5f, 0.0f, 1.0f,// bottom-left
+        0.5f, -0.5f, -0.5f, 1.0f, 1.0f,// top-left
+};
+inline float topVertices[]{
+        0.5f,  0.5f, -0.5f, 1.0f, 1.0f,// top-right
+        0.5f,  0.5f,  0.5f, 0.0f, 1.0f,// bottom-right
+        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f,// bottom-left
+        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f,// top-left
+}; 

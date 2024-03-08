@@ -12,7 +12,6 @@ Chunk::~Chunk() {
     std::vector<unsigned long>().swap(blockArray);
 }
 
-
 // NOTE: This function works but is the absolute
 // worst function in the entire system, it currently just
 // exists as a lazy proof of concept. Instead, store adjacent chunks
@@ -62,128 +61,127 @@ void Chunk::generateTerrain() {
 
 
 std::pair< std::vector<unsigned int>, std::vector<float> > Chunk::generateMesh() {
+    // NOTE: This implementation is quite slow, but very consitent.
+    // It will also be easy to modify whenever normals are to be added, however
+    // it can 100% be cleaned up and become even better.
     std::vector<unsigned int> indexMesh;
     std::vector<float>        vertexMesh;
-   // NOTE: This implementation is quite slow, but very consitent.
-   // It will also be easy to modify whenever normals are to be added, however
-   // it can 100% be cleaned up and become even better.
-   for (unsigned int it = 0; it < blockArray.size(); it++) {
+    for (unsigned int it = 0; it < blockArray.size(); it++) {
         unsigned int block = blockArray[it];
         glm::vec3 pos((float)(block &                 0b1111),
                       (float)(block & 0b11111111111100000000) / 256.0f,
                       (float)(block &             0b11110000) / 16.0f);
 
         Block blockType( (block & 0b111100000000000000000000) / 1048576.0f );
-        std::vector<bool>   boolVector{obsTop(it), obsBack(it), 
-                                       obsFront(it), obsLeft(it), 
-                                       obsRight(it), obsBottom(it)};
-        unsigned int count = 0;
-        for(int i = 0; i < boolVector.size(); i++) {
-            if (!boolVector[i]) {
-                count = pow(2, i);
+
+        std::vector<bool> boolVector{
+            obsTop(it)  , obsBack(it), 
+            obsFront(it), obsLeft(it), 
+            obsRight(it), obsBottom(it)
+        };
+
+        if(!boolVector[0])
+        {
+            indexMesh.push_back( vertexMesh.size() / 5);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 3);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 1);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 2);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 1);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 3);
+            for (size_t i = 0; i < 20; i+=5)
+            {
+                vertexMesh.push_back(topVertices[i]     + pos.x + chunkPos.x);
+                vertexMesh.push_back(topVertices[i + 1] + pos.y + chunkPos.y);
+                vertexMesh.push_back(topVertices[i + 2] + pos.z + chunkPos.z);
+                vertexMesh.push_back(topVertices[i + 3] + (blockType.top & 240)/16);
+                vertexMesh.push_back(topVertices[i + 4] + (blockType.top & 15));
             }
         }
-        if (!count) {
-            continue;
+
+        if( (!boolVector[1]) && pos.z != 0)
+        {
+            indexMesh.push_back( vertexMesh.size() / 5 + 3);
+            indexMesh.push_back( (vertexMesh.size() / 5));
+            indexMesh.push_back( (vertexMesh.size() / 5) + 1);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 2);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 3);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 1);
+            for (size_t i = 0; i < 20; i+=5)
+            {
+                vertexMesh.push_back(backVertices[i]     + pos.x + chunkPos.x);
+                vertexMesh.push_back(backVertices[i + 1] + pos.y + chunkPos.y);
+                vertexMesh.push_back(backVertices[i + 2] + pos.z + chunkPos.z);
+                vertexMesh.push_back(backVertices[i + 3] + (blockType.side & 240)/16);
+                vertexMesh.push_back(backVertices[i + 4] + (blockType.side & 15) );
+            }
         }
-
-        // NOTE: Everything below this point is not finalized.
-        // TODO: Implement the rest of the function
-
-        if (count == 1) {
-            indexMesh.push_back((vertexMesh.size() / 5) + 0);
-            indexMesh.push_back((vertexMesh.size() / 5) + 3);
-            indexMesh.push_back((vertexMesh.size() / 5) + 1);
-            indexMesh.push_back((vertexMesh.size() / 5) + 2);
-            indexMesh.push_back((vertexMesh.size() / 5) + 1);
-            indexMesh.push_back((vertexMesh.size() / 5) + 3);
-
-            vertexMesh.push_back(blockVertices[12] + pos.x + chunkPos.x);
-            vertexMesh.push_back(blockVertices[13] + pos.y);
-            vertexMesh.push_back(blockVertices[14] + pos.z + chunkPos.z);
-            vertexMesh.push_back(blockTexCoords[0] + (blockType.top & 240)/16);
-            vertexMesh.push_back(blockTexCoords[1] + (blockType.top & 15));
-
-            vertexMesh.push_back(blockVertices[0] + pos.x + chunkPos.x);
-            vertexMesh.push_back(blockVertices[1] + pos.y);
-            vertexMesh.push_back(blockVertices[2] + pos.z + chunkPos.z);
-            vertexMesh.push_back(blockTexCoords[2] + (blockType.top & 240)/16);
-            vertexMesh.push_back(blockTexCoords[3] + (blockType.top & 15));
-
-            vertexMesh.push_back(blockVertices[9] + pos.x + chunkPos.x);
-            vertexMesh.push_back(blockVertices[11] + pos.y);
-            vertexMesh.push_back(blockVertices[12] + pos.z + chunkPos.z);
-            vertexMesh.push_back(blockTexCoords[4] + (blockType.top & 240)/16);
-            vertexMesh.push_back(blockTexCoords[5] + (blockType.top & 15));
-
-            vertexMesh.push_back(blockVertices[21] + pos.x + chunkPos.x);
-            vertexMesh.push_back(blockVertices[22] + pos.y);
-            vertexMesh.push_back(blockVertices[23] + pos.z + chunkPos.z);
-            vertexMesh.push_back(blockTexCoords[6] + (blockType.top & 240)/16);
-            vertexMesh.push_back(blockTexCoords[7] + (blockType.top & 15));
-            continue;
+        if( (!boolVector[2]) && pos.z != 15)
+        {
+            indexMesh.push_back( vertexMesh.size() / 5);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 3);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 1);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 2);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 1);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 3);
+            for (size_t i = 0; i < 20; i+=5)
+            {
+                vertexMesh.push_back(frontVertices[i]     + pos.x + chunkPos.x);
+                vertexMesh.push_back(frontVertices[i + 1] + pos.y + chunkPos.y);
+                vertexMesh.push_back(frontVertices[i + 2] + pos.z + chunkPos.z);
+                vertexMesh.push_back(frontVertices[i + 3] + (blockType.side & 240)/16);
+                vertexMesh.push_back(frontVertices[i + 4] + (blockType.side & 15));
+            }
         }
-        continue;
-
-        for (int i = 0; i < 40; i+=5) {
-            vertexMesh.push_back(blockVertices[i + 0] + pos.x);
-            vertexMesh.push_back(blockVertices[i + 1] + pos.y);
-            vertexMesh.push_back(blockVertices[i + 2] + pos.z);
-            vertexMesh.push_back(blockVertices[i + 3] + (blockType.side & 240)/16);
-            vertexMesh.push_back(blockVertices[i + 4] + (blockType.side & 15));
+        if((!boolVector[3]) && pos.x != 0)
+        {
+            indexMesh.push_back( vertexMesh.size() / 5);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 3);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 1);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 2);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 1);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 3);
+            for (size_t i = 0; i < 20; i+=5)
+            {
+                vertexMesh.push_back(leftVertices[i]     + pos.x + chunkPos.x);
+                vertexMesh.push_back(leftVertices[i + 1] + pos.y + chunkPos.y);
+                vertexMesh.push_back(leftVertices[i + 2] + pos.z + chunkPos.z);
+                vertexMesh.push_back(leftVertices[i + 3] + (blockType.side & 240)/16);
+                vertexMesh.push_back(leftVertices[i + 4] + (blockType.side & 15));
+            }
         }
-
-        switch (count) {
-            case 0b000010: // Only back side
-                if (pos.z != 0) {
-                indexMesh.push_back( 7 );
-                indexMesh.push_back( 4 );
-                indexMesh.push_back( 5 );
-                indexMesh.push_back( 6 );
-                indexMesh.push_back( 7 );
-                indexMesh.push_back( 5 );
-                }
-                continue;
-            case 0b000100: // Only front side
-                if (pos.z != 15) {
-                indexMesh.push_back( 0 );
-                indexMesh.push_back( 3 );
-                indexMesh.push_back( 1 );
-                indexMesh.push_back( 2 );
-                indexMesh.push_back( 1 );
-                indexMesh.push_back( 3 );
-                }
-                continue;
-            case 0b001000: // Only left side
-                if (pos.x != 0) {
-                indexMesh.push_back( 3 );
-                indexMesh.push_back( 7 );
-                indexMesh.push_back( 2 );
-                indexMesh.push_back( 6 );
-                indexMesh.push_back( 2 );
-                indexMesh.push_back( 7 );
-                }
-                continue;
-            case 0b010000: // Only right side
-                if (pos.x != 15) {
-                indexMesh.push_back( 4 );
-                indexMesh.push_back( 0 );
-                indexMesh.push_back( 5 );
-                indexMesh.push_back( 1 );
-                indexMesh.push_back( 5 );
-                indexMesh.push_back( 0 );
-                }
-                continue; 
-            case 0b100000: // Only bottom side
-                if (pos.y != 0) {
-                indexMesh.push_back( 6 );
-                indexMesh.push_back( 5 );
-                indexMesh.push_back( 2 );
-                indexMesh.push_back( 1 );
-                indexMesh.push_back( 2 );
-                indexMesh.push_back( 5 );
-                }
-                continue;
+        if( (!boolVector[4]) && pos.x != 15)
+        {
+            indexMesh.push_back( vertexMesh.size() / 5);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 3);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 1);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 2);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 1);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 3);
+            for (size_t i = 0; i < 20; i+=5)
+            {
+                vertexMesh.push_back(rightVertices[i]     + pos.x + chunkPos.x);
+                vertexMesh.push_back(rightVertices[i + 1] + pos.y + chunkPos.y);
+                vertexMesh.push_back(rightVertices[i + 2] + pos.z + chunkPos.z);
+                vertexMesh.push_back(rightVertices[i + 3] + (blockType.side & 240)/16);
+                vertexMesh.push_back(rightVertices[i + 4] + (blockType.side & 15));
+            }
+        }
+        if( (!boolVector[5]) && pos.y != 0)
+        {
+            indexMesh.push_back( vertexMesh.size() / 5);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 3);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 1);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 2);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 1);
+            indexMesh.push_back( (vertexMesh.size() / 5) + 3);
+            for (size_t i = 0; i < 20; i+=5)
+            {
+                vertexMesh.push_back(bottomVertices[i]     + pos.x + chunkPos.x);
+                vertexMesh.push_back(bottomVertices[i + 1] + pos.y + chunkPos.y);
+                vertexMesh.push_back(bottomVertices[i + 2] + pos.z + chunkPos.z);
+                vertexMesh.push_back(bottomVertices[i + 3] + (blockType.bottom & 240)/16);
+                vertexMesh.push_back(bottomVertices[i + 4] + (blockType.bottom & 15));
+            }
         }
     }
     return std::make_pair(indexMesh, vertexMesh);
@@ -196,8 +194,8 @@ bool Chunk::obsBack(unsigned int thisBlock) {
     }
     int temp = thisBlock - 1;
     while ((blockArray[temp]           & 0b11110000)
-            >= ((blockArray[thisBlock] & 0b11110000) - 16)
-            && temp != -1) {
+        >= ((blockArray[thisBlock] & 0b11110000) - 16)
+        && temp != -1) {
         if ((blockArray[temp]         & 0b111100001111)
             == (blockArray[thisBlock] & 0b111100001111)) {
             return true;
@@ -214,8 +212,8 @@ bool Chunk::obsFront(unsigned int thisBlock) {
     }
     int temp = thisBlock + 1;
     while ((blockArray[temp]           & 0b11110000)
-            <= ((blockArray[thisBlock] & 0b11110000) + 16)
-            && blockArray[temp - 1] != blockArray.back()) {
+        <= ((blockArray[thisBlock] & 0b11110000) + 16)
+        && blockArray[temp - 1] != blockArray.back()) {
         if ((blockArray[temp]         & 0b111100001111)
             == (blockArray[thisBlock] & 0b111100001111)) {
             return true;
@@ -232,8 +230,8 @@ bool Chunk::obsLeft(unsigned int thisBlock) {
     }
     int temp = thisBlock - 1;
     while ((blockArray[temp]           & 0b1111)
-            >= ((blockArray[thisBlock] & 0b1111) - 1)
-            && temp != - 1) {
+        >= ((blockArray[thisBlock] & 0b1111) - 1)
+        && temp != - 1) {
         if ((blockArray[temp]         & 0b111111110000)
             == (blockArray[thisBlock] & 0b111111110000)) {
             return true;
@@ -251,8 +249,8 @@ bool Chunk::obsRight(unsigned int thisBlock) {
     }
     int temp = thisBlock + 1;
     while ((blockArray[temp]          & 0b1111)
-            <=((blockArray[thisBlock] & 0b1111) + 1)
-            && blockArray[temp - 1] != blockArray.back()) {
+        <=((blockArray[thisBlock] & 0b1111) + 1)
+        && blockArray[temp - 1] != blockArray.back()) {
         if ((blockArray[temp]         & 0b111111110000)
             == (blockArray[thisBlock] & 0b111111110000)) {
             return true;
@@ -268,7 +266,7 @@ bool Chunk::obsTop(unsigned int thisBlock) {
         return false;
     }
     return( ((blockArray[thisBlock + 1] & 0b111100000000))
-             == ((blockArray[thisBlock] & 0b111100000000) + 256));
+    == ((blockArray[thisBlock] & 0b111100000000) + 256));
 }
 
 // y
@@ -277,6 +275,6 @@ bool Chunk::obsBottom(unsigned int thisBlock){
         return false;
     }
     return( ((blockArray[thisBlock - 1] & 0b111100000000))
-             == ((blockArray[thisBlock] & 0b111100000000) - 256));
+    == ((blockArray[thisBlock] & 0b111100000000) - 256));
 }
 
