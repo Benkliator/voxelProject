@@ -85,39 +85,39 @@ class Chunk
 // NOTE: Might want to put these in a proper data structure.
 //
 inline float backVertices[]{
-        0.5f,  0.5f, -0.5f, 1.0f, 0.0f,// top-right
-        0.5f, -0.5f, -0.5f, 1.0f, 1.0f,// bottom-right
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // bottom-left
-        -0.5f,  0.5f, -0.5f, 0.0f, 0.0f,// top-left
+        0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,// top-right
+        0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f,// bottom-right
+        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f,// bottom-left
+        -0.5f,  0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f// top-left
 };
 
 inline float frontVertices[]{
-        0.5f,  0.5f,  0.5f, 1.0f, 0.0f,// top-right
-        0.5f, -0.5f,  0.5f, 1.0f, 1.0f,// bottom-right
-        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, // bottom-left
-        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f,// top-left
+        0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,// top-right
+        0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,// bottom-right
+        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // bottom-left
+        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,// top-left
 };
 inline float leftVertices[]{
-        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f,// top-right
-        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f,// bottom-right
-        -0.5f, -0.5f, -0.5f, 1.0f, 1.0f,// bottom-left
-        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f,// top-left
+        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,// top-right
+        -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f,// bottom-right
+        -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f,// bottom-left
+        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f,// top-left
 };
 inline float rightVertices[]{
-        0.5f,  0.5f, -0.5f, 1.0f, 0.0f,// top-right
-        0.5f, -0.5f, -0.5f, 1.0f, 1.0f,// bottom-right
-        0.5f, -0.5f,  0.5f, 0.0f, 1.0f,// bottom-left
-        0.5f,  0.5f,  0.5f, 0.0f, 0.0f,// top-left
+        0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,// top-right
+        0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,// bottom-right
+        0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,// bottom-left
+        0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,// top-left
 };
 inline float bottomVertices[]{
-        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f,// top-right
-        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,// bottom-right
-        0.5f, -0.5f,  0.5f, 0.0f, 1.0f,// bottom-left
-        0.5f, -0.5f, -0.5f, 1.0f, 1.0f,// top-left
+        -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f,// top-right
+        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,// bottom-right
+        0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f,// bottom-left
+        0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, -1.0f, 0.0f,// top-left
 };
 inline float topVertices[]{
-        0.5f,  0.5f, -0.5f, 1.0f, 1.0f,// top-right
-        0.5f,  0.5f,  0.5f, 0.0f, 1.0f,// bottom-right
-        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f,// bottom-left
-        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f,// top-left
+        0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,// top-right
+        0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,// bottom-right
+        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,// bottom-left
+        -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,// top-left
 }; 
