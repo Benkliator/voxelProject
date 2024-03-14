@@ -13,10 +13,10 @@ out vec3 color;
 
 void main(void)
 {
-    const vec3 light = normalize(vec3(0.7, -0.7, 0.7));
+    vec3 light = normalize(vec3(2.0, 0.1, 1.0));
     float shade;
     shade = dot(normalize( aNormal ), light);
-    shade = max(shade, 0.0);
+    shade = max(shade, 0.1);
     color = vec3(shade);
 
     gl_Position = projection * view  * model * vec4(aPos, 1.0); 
