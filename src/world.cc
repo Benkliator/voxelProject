@@ -12,15 +12,15 @@ World::World(unsigned int size)
     {
         for (int z = 1; z < size; z++)
         {
-            visibleChunks.push_back(Chunk{glm::vec3( x          , 0,  z          )});
-            visibleChunks.push_back(Chunk{glm::vec3(-x          , 0, -z          )});
-            visibleChunks.push_back(Chunk{glm::vec3(-x          , 0,  z          )});
-            visibleChunks.push_back(Chunk{glm::vec3( x          , 0, -z          )});
+            visibleChunks.push_back(Chunk{glm::vec3( x, 0,  z)});
+            visibleChunks.push_back(Chunk{glm::vec3(-x, 0, -z)});
+            visibleChunks.push_back(Chunk{glm::vec3(-x, 0,  z)});
+            visibleChunks.push_back(Chunk{glm::vec3( x, 0, -z)});
 
-            visibleChunks.push_back(Chunk{glm::vec3( x          , 0,  z - 1      )});
-            visibleChunks.push_back(Chunk{glm::vec3( x - 1      , 0, -z          )});
-            visibleChunks.push_back(Chunk{glm::vec3(-x          , 0,  z - 1      )});
-            visibleChunks.push_back(Chunk{glm::vec3( x - 1      , 0,  z          )});
+            visibleChunks.push_back(Chunk{glm::vec3( x    , 0,  z - 1)});
+            visibleChunks.push_back(Chunk{glm::vec3( x - 1, 0, -z    )});
+            visibleChunks.push_back(Chunk{glm::vec3(-x    , 0,  z - 1)});
+            visibleChunks.push_back(Chunk{glm::vec3( x - 1, 0,  z    )});
         }
     }
     std::cout << "Creating meshes..." << std::endl;
@@ -54,16 +54,6 @@ World::Chunk::Chunk(glm::vec3 offset) {
 // NOTE: Might need to actually impelent this function for memory safety (lol)
 World::Chunk::~Chunk() {
     std::vector<unsigned long>().swap(blockArray);
-}
-
-// NOTE: This function works but is the absolute
-// worst function in the entire system, it currently just
-// exists as a lazy proof of concept. Instead, store adjacent chunks
-// efficiently in the world class, and please dont make n^3 functions
-// like these.
-//
-// NOTE of NOTE: I have made the function better by removing its contents.
-void World::Chunk::cornerCheck(std::vector<Chunk>& otherChunk) {
 }
 
 bool World::Chunk::findBlock(glm::vec3 blockPos) {

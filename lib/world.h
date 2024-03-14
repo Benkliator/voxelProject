@@ -8,6 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <vector>
+#include <unordered_map>
 #include <algorithm>
 #include <iostream>
 #include <cstdlib>
@@ -37,6 +38,10 @@ class World
 
         Renderer renderer{};
         std::vector<Chunk> visibleChunks;
+        //std::vector< std::vector<Chunk> > visibleChunks;
+
+        // Unsure if this is a good idea.
+        //std::unordered_map<glm::vec3, Chunk> visibleChunks;
 };
 
 class World::Chunk
@@ -46,10 +51,6 @@ class World::Chunk
         Chunk(glm::vec3 offset);
 
         ~Chunk();
-
-        // Check if blocks are obscured by the other chunk
-        // TODO: Implement.
-        void cornerCheck(std::vector<Chunk>& otherChunk);
 
         bool findBlock(glm::vec3 blockPos);
 
@@ -101,42 +102,39 @@ class World::Chunk
 
 };
 
-// TODO: Add normals and modify the contents
-// of the functions using them accordingly.
 // NOTE: Might want to put these in a proper data structure.
-//
-inline float backVertices[]{
+inline const float backVertices[]{
         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,// top-right
         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f,// bottom-right
         -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f,// bottom-left
         -0.5f,  0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f// top-left
 };
 
-inline float frontVertices[]{
+inline const float frontVertices[]{
         0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,// top-right
         0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,// bottom-right
         -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // bottom-left
         -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,// top-left
 };
-inline float leftVertices[]{
+inline const float leftVertices[]{
         -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,// top-right
         -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f,// bottom-right
         -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f,// bottom-left
         -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f,// top-left
 };
-inline float rightVertices[]{
+inline const float rightVertices[]{
         0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,// top-right
         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,// bottom-right
         0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,// bottom-left
         0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,// top-left
 };
-inline float bottomVertices[]{
+inline const float bottomVertices[]{
         -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f,// top-right
         -0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,// bottom-right
         0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f,// bottom-left
         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, -1.0f, 0.0f,// top-left
 };
-inline float topVertices[]{
+inline const float topVertices[]{
         0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,// top-right
         0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,// bottom-right
         -0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,// bottom-left
