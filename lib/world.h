@@ -15,7 +15,7 @@
 #include <utility>
 #include <cmath>
 
-#include "../lib/BensGLUtilities.h"
+#include "../lib/utility.h"
 #include "../lib/perlin.h"
 #include "../lib/block.h"
 #include "../lib/renderer.h"
@@ -41,7 +41,7 @@ class World
         //std::vector< std::vector<Chunk> > visibleChunks;
 
         // Unsure if this is a good idea.
-        //std::unordered_map<glm::vec3, Chunk> visibleChunks;
+        //std::unordered_map<Chunk, int> visibleChunks;
 };
 
 class World::Chunk
@@ -54,7 +54,7 @@ class World::Chunk
 
         bool findBlock(glm::vec3 blockPos);
 
-        glm::vec3 returnPos();
+        glm::vec3 returnPos() const;
 
         std::pair< std::vector<unsigned int>, std::vector<float> > generateMesh();
     private:

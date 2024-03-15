@@ -68,32 +68,9 @@ bool World::Chunk::findBlock(glm::vec3 blockPos) {
     return false;
 }
 
-glm::vec3 World::Chunk::returnPos() {
+glm::vec3 World::Chunk::returnPos() const {
     return chunkPos;
 }
-
-void World::Chunk::generateTerrain() {
-    float freq = 0.76323343; // Frequency
-    float amp = 0.75;        // Amplifier
-    for (int x = 0; x < 16; x++) {
-        for (int z = 0; z < 16; z++) {
-            // Uses perlin function to calculate height for xz position
-            float height = perlin(((x + chunkPos.x) * freq) / 16,
-                                 ((z + chunkPos.z) * freq)/ 16) * amp + 1;
-            for (int y = 0; y < height; y++) {
-                unsigned long val = ( ( ( 0 | x)
-                                    | z *                 0b10000)
-                                    | y *             0b100000000);
-                // Using the following line in an if or switch case
-                // can let us dynamically decide block generates at
-                // different (x, y, z) values.
-                val = (val | 0 * 0b100000000000000000000);
-                blockArray.push_back( val );
-            }
-        }
-    }
-}
-
 
 std::pair< std::vector<unsigned int>, std::vector<float> > World::Chunk::generateMesh() {
     // NOTE: This implementation is quite slow, but very consitent.
@@ -238,6 +215,28 @@ std::pair< std::vector<unsigned int>, std::vector<float> > World::Chunk::generat
         }
     }
     return std::make_pair(indexMesh, vertexMesh);
+}
+
+void World::Chunk::generateTerrain() {
+    float freq = 0.76323343; // Frequency
+    float amp = 0.75;        // Amplifier
+    for (int x = 0; x < 16; x++) {
+        for (int z = 0; z < 16; z++) {
+            // Uses perlin function to calculate height for xz position
+            float height = perlin(((x + chunkPos.x) * freq) / 16,
+                                 ((z + chunkPos.z) * freq)/ 16) * amp + 1;
+            for (int y = 0; y < height; y++) {
+                unsigned long val = ( ( ( 0 | x)
+                                    | z *                 0b10000)
+                                    | y *             0b100000000);
+                // Using the following line in an if or switch case
+                // can let us dynamically decide block generates at
+                // different (x, y, z) values.
+                val = (val | 0 * 0b100000000000000000000);
+                blockArray.push_back( val );
+            }
+        }
+    }
 }
 
 // z

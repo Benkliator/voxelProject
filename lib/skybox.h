@@ -8,7 +8,7 @@
 #include <cmath>
 #include <vector>
 
-#include "../lib/BensGLUtilities.h"
+#include "../lib/utility.h"
 
 class Skybox{
     public:

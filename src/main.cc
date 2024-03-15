@@ -10,9 +10,8 @@
 #include <cmath>
 #include <vector>
 #include <iostream>
-#include "../lib/BensGLUtilities.h"
+#include "../lib/utility.h"
 #include "../lib/input.h"
-#include "../lib/chunk.h"
 #include "../lib/skybox.h"
 #include "../lib/world.h"
 

@@ -1,7 +1,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
-#include"../lib/BensGLUtilities.h"
+#include"../lib/utility.h"
 
 // Loads shaderfile, takes shadertype and filepath, returns shader
 unsigned int loadShader(GLenum type, const char* filePath) {
