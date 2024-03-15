@@ -48,13 +48,11 @@ class World::Chunk
 {
     public:
         // Generates buffers and VAO, creates terrain for chunk.
-        Chunk(glm::vec3 offset);
+        Chunk(int x, int y, int z);
 
         ~Chunk();
 
-        bool findBlock(glm::vec3 blockPos);
-
-        glm::vec3 returnPos() const;
+        bool findBlock(unsigned int thisBlock);
 
         std::pair< std::vector<unsigned int>, std::vector<float> > generateMesh();
     private:
@@ -98,7 +96,9 @@ class World::Chunk
         //
         std::vector<unsigned long> blockArray;
 
-        glm::vec3 chunkPos;
+        int xPos;
+        int yPos;
+        int zPos;
 
 };
 
