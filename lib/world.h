@@ -37,7 +37,7 @@ class World
         void shaderInit();
 
         Renderer renderer{};
-        std::vector<Chunk> visibleChunks;
+        std::vector<std::vector<Chunk>> visibleChunks;
         //std::vector< std::vector<Chunk> > visibleChunks;
 
         // Unsure if this is a good idea.
@@ -52,9 +52,9 @@ class World::Chunk
 
         ~Chunk();
 
-        bool findBlock(unsigned int thisBlock);
+        bool findBlock(unsigned int thisBlock) const;
 
-        std::pair< std::vector<unsigned int>, std::vector<float> > generateMesh();
+        std::pair<std::vector<unsigned int>, std::vector<float>> generateMesh();
     private:
         // Helper functions for the constructor so it's easier to read.
         void generateTerrain();
@@ -94,7 +94,7 @@ class World::Chunk
         //
         // ????: Will be used for additional block data, ex. transparency. To be added.
         //
-        std::vector<unsigned long> blockArray;
+        std::vector<unsigned int> blockArray;
 
         int xPos;
         int yPos;

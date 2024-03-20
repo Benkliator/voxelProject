@@ -3,27 +3,21 @@
 
 World::World(unsigned int size) {
     std::cout << "Creating chunks..." << std::endl;
-    if (size == 0) return;
-    visibleChunks.push_back(Chunk{0, 0, 0});
-    if (size == 1) return;
 
-    for (int x = 1; x < size; x++) {
-        for (int z = 1; z < size; z++) {
-            visibleChunks.push_back(Chunk{ x, 0, z});
-            visibleChunks.push_back(Chunk{-x, 0,-z});
-            visibleChunks.push_back(Chunk{-x, 0, z});
-            visibleChunks.push_back(Chunk{ x, 0,-z});
-
-            visibleChunks.push_back(Chunk{ x    , 0, z - 1});
-            visibleChunks.push_back(Chunk{ x - 1, 0,-z    });
-            visibleChunks.push_back(Chunk{-x    , 0, z - 1});
-            visibleChunks.push_back(Chunk{ x - 1, 0, z    });
+    for (int x = 0; x < size; x++) {
+        std::vector<Chunk> temp;
+        for (int z = 0; z < size; z++){
+            temp.push_back(Chunk{x, 0, z});
         }
+        visibleChunks.push_back(temp);
     }
+
     std::cout << "Creating meshes..." << std::endl;
-    for (auto& chunk : visibleChunks) {
-        auto [indices, vertices] = chunk.generateMesh();
-        renderer.addRendering(vertices, indices);
+    for (int x = 0; x < size; x++) {
+        for (auto& chunk : visibleChunks[x]) {
+            auto [indices, vertices] = chunk.generateMesh();
+            renderer.addRendering(vertices, indices);
+        }
     }
     std::cout << "Initiating rendering..." << std::endl;
     renderer.renderInit();
@@ -31,7 +25,7 @@ World::World(unsigned int size) {
 }
 
 World::~World() {
-    std::vector<Chunk>().swap(visibleChunks);
+    std::vector<std::vector<Chunk>>().swap(visibleChunks);
 }
 
 void World::draw(glm::mat4 view) {
@@ -48,10 +42,10 @@ World::Chunk::Chunk(int x, int y, int z) {
 
 // NOTE: Might need to actually impelent this function for memory safety (lol)
 World::Chunk::~Chunk() {
-    std::vector<unsigned long>().swap(blockArray);
+    std::vector<unsigned int>().swap(blockArray);
 }
 
-bool World::Chunk::findBlock(unsigned int thisBlock) {
+bool World::Chunk::findBlock(unsigned int thisBlock) const {
     for (auto& it : blockArray) {
         if ((thisBlock & 0b11111111111111111111) 
             ==     (it & 0b11111111111111111111)) {
@@ -64,7 +58,8 @@ bool World::Chunk::findBlock(unsigned int thisBlock) {
 std::pair< std::vector<unsigned int>, std::vector<float> > World::Chunk::generateMesh() {
     // NOTE: This implementation is quite slow, but very consitent.
     // It will also be easy to modify whenever normals are to be added, however
-    // it can 100% be cleaned up and become even better.
+    // it can 100% be cleaned up and become even better 
+    // (with less if statements, if possible here).
     std::vector<unsigned int> indexMesh;
     std::vector<float>        vertexMesh;
     for (unsigned int it = 0; it < blockArray.size(); it++) {
@@ -80,7 +75,7 @@ std::pair< std::vector<unsigned int>, std::vector<float> > World::Chunk::generat
             obsFront(it), obsLeft(it),
             obsRight(it), obsBottom(it)};
 
-        if(!boolVector[0]) {
+        if (!boolVector[0]) {
             indexMesh.push_back(  vertexMesh.size() / 8);
             indexMesh.push_back( (vertexMesh.size() / 8) + 3);
             indexMesh.push_back( (vertexMesh.size() / 8) + 1);
@@ -202,11 +197,11 @@ void World::Chunk::generateTerrain() {
             float height = perlin(((x + xPos) * freq) / 16,
                                  ((z + zPos) * freq)/ 16) * amp + 1;
             for (int y = 0; y < height; y++) {
-                unsigned long val = ( ( ( 0 | x)
+                unsigned int val = ( ( ( 0 | x)
                                     | z *                 0b10000)
                                     | y *             0b100000000);
                 // Using the following line in an if or switch case
-                // can let us dynamically decide block generates at
+                // can let you dynamically decide block generations at
                 // different (x, y, z) values.
                 val = (val | 0 * 0b100000000000000000000);
                 blockArray.push_back( val );
