@@ -5,7 +5,7 @@ Renderer::Renderer() {
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
-    textureMap = loadTexture("./res/textures/Blockmap.png", GL_RGBA);
+    textureMap = loadTexture("./res/textures/Blockmap2.png", GL_RGBA);
     shaderInit();
     renderInit();
 }
@@ -16,7 +16,7 @@ Renderer::Renderer( std::vector<float>        vertices,
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
-    textureMap = loadTexture("./res/textures/Blockmap.png", GL_RGBA);
+    textureMap = loadTexture("./res/textures/Blockmap2.png", GL_RGBA);
     vertexMesh  = vertices;
     indexMesh   = indices;
 
@@ -65,8 +65,8 @@ void Renderer::render(glm::mat4 view) {
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
 
-    glm::mat4 model = glm::mat4(1.0f);
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
+    //glm::mat4 model = glm::mat4(1.0f);
+    //glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);

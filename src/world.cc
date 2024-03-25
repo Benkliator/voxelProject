@@ -55,7 +55,7 @@ bool World::Chunk::findBlock(unsigned int thisBlock) const {
     return false;
 }
 
-std::pair< std::vector<unsigned int>, std::vector<float> > World::Chunk::generateMesh() {
+std::pair<std::vector<unsigned int>, std::vector<float>> World::Chunk::generateMesh() {
     // NOTE: This implementation is quite slow, but very consitent.
     // It will also be easy to modify whenever normals are to be added, however
     // it can 100% be cleaned up and become even better 
