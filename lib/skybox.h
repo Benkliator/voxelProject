@@ -1,28 +1,22 @@
 #pragma once
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <cmath>
+#include <glm/fwd.hpp>
 #include <vector>
 
-#include "../lib/utility.h"
+class Skybox {
+public:
+    Skybox(std::vector<const char*> texturePath);
 
-class Skybox{
-    public:
-        Skybox(std::vector<const char*> texturePath);
+    ~Skybox();
 
-         ~Skybox();
+    // Does what you think it does.
+    void draw(glm::mat4 view);
 
-        // Does what you think it does.
-        void draw(glm::mat4 view);
-    private:
-        unsigned int VAO;
-        unsigned int VBO;
-        unsigned int EBO;
+private:
+    unsigned int VAO;
+    unsigned int VBO;
+    unsigned int EBO;
 
-        unsigned int shaderProgram;
-        unsigned int texture;
+    unsigned int shaderProgram;
+    unsigned int texture;
 };

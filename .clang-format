@@ -1,0 +1,21 @@
+# My standard c++ clang-formatting options
+# Vim: set filetype=yaml :
+AccessModifierOffset : -4
+AlignAfterOpenBracket : Align
+AllowShortFunctionsOnASingleLine : Empty
+AllowShortIfStatementsOnASingleLine : false
+AllowShortLoopsOnASingleLine : false
+AlwaysBreakTemplateDeclarations : Yes
+BasedOnStyle : llvm
+BinPackArguments : false
+BinPackParameters : false
+BreakBeforeBraces : Attach
+ColumnLimit : 80
+Cpp11BracedListStyle : false
+IndentCaseLabels : false
+IndentWidth : 4
+PointerAlignment: Left
+SpaceBeforeParens : ControlStatements
+Standard : Auto
+TabWidth : 4
+UseTab: Never

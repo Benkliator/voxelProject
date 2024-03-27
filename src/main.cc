@@ -1,19 +1,13 @@
 #define MAIN
 
-#include <glad/glad.h>
+#include "glad/glad.h"
 #include <GLFW/glfw3.h>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include <cmath>
-#include <vector>
+#include "input.h"
+#include "skybox.h"
+#include "world.h"
 #include <iostream>
-#include "../lib/utility.h"
-#include "../lib/input.h"
-#include "../lib/skybox.h"
-#include "../lib/world.h"
+#include <vector>
 
 unsigned int blockTexture;
 unsigned int skyTexture;
@@ -26,9 +20,9 @@ float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow *window);
+void processInput(GLFWwindow* window);
 
-float deltaTime = 0.0f;	// Time between current frame and last frame
+float deltaTime = 0.0f; // Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 float frameCount = 1.0f;
 
@@ -70,7 +64,8 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
     }
 
     float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+    float yoffset =
+        lastY - ypos; // reversed since y-coordinates go from bottom to top
 
     lastX = xpos;
     lastY = ypos;
@@ -79,22 +74,19 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
 }
 
 void display(GLFWwindow* window) {
-    std::vector<const char*> skyFaces {
-        "./res/textures/monotoneSky.png",
-        "./res/textures/monotoneSky.png",
-        "./res/textures/monotoneSky.png",
-        "./res/textures/monotoneSky.png",
-        "./res/textures/monotoneSky.png",
-        "./res/textures/monotoneSky.png",
+    std::vector<const char*> skyFaces{
+        "./res/textures/monotoneSky.png", "./res/textures/monotoneSky.png",
+        "./res/textures/monotoneSky.png", "./res/textures/monotoneSky.png",
+        "./res/textures/monotoneSky.png", "./res/textures/monotoneSky.png",
     };
-    Skybox skybox{skyFaces};
-    World world{10};
+    Skybox skybox{ skyFaces };
+    World world{ 10 };
     float currentFrame = 0.0f;
-    while(!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window)) {
         currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;  
-        //std::cout << "FPS: " << 1 / deltaTime << std::endl;
+        lastFrame = currentFrame;
+        // std::cout << "FPS: " << 1 / deltaTime << std::endl;
         processInput(window);
 
         glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
@@ -116,7 +108,8 @@ int main(void) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "voxelGame", NULL, NULL);
+    GLFWwindow* window =
+        glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "voxelGame", NULL, NULL);
 
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -134,10 +127,10 @@ int main(void) {
 
     init();
 
-    //FIXME: These dont work on virtual machines.
-    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // FIXME: These dont work on virtual machines.
+    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    //display gamelop
+    // display gamelop
     display(window);
 
     // Cleanup

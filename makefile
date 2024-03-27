@@ -1,18 +1,39 @@
-CFLAGS=
-CXXCFLGS=$(CFLAGS)
-LIB=-L/usr/include/GLFW -lglfw -lGL -lGLU -lX11 -lpthread -lXrandr -lXi -ldl
-INC=-I/usr/include/GLFW -I./include/
-OBJ=obj/main.o obj/world.o obj/skybox.o obj/block.o obj/utility.o obj/perlin.o obj/renderer.o obj/input.o obj/glad.o
-all: voxelEngine
+EXECUTABLE := voxelEngine
+CC := g++
 
-obj/%.o: include/glad/%.c
-	$(CC) $(INC) -c -o $@ $< $(CFLAGS)
+SRCDIR := src
+OBJDIR := obj
+INCDIR := include
 
-obj/%.o: src/%.cc
-	$(CXX) $(INC) -c -o $@ $< $(CXXFLAGS) -std=c++17
+CXXFLAGS := -std=c++17
+CXXFLAGS += -I./lib
+CXXFLAGS += -I./$(INCDIR)
 
-voxelEngine: $(OBJ)
-	$(CXX) -o voxelEngine $^ $(LIB)
+LDFLAGS := $(shell pkg-config --libs glfw3)
 
+SOURCES := $(wildcard $(SRCDIR)/*.cc)
+OBJECTS := $(patsubst $(SRCDIR)/%.cc,$(OBJDIR)/%.o,$(SOURCES))
+OBJECTS += $(OBJDIR)/glad.o
+
+all: $(EXECUTABLE)
+
+# Main program
+$(EXECUTABLE): $(OBJECTS)
+	$(CC) $(CXXFLAGS) $^ -o $@ $(LDFLAGS)
+
+# Standard object files
+$(OBJDIR)/%.o: $(SRCDIR)/%.cc | $(OBJDIR)
+	$(CC) $(CXXFLAGS) -c $< -o $@
+
+# GLAD include
+$(OBJDIR)/glad.o: $(INCDIR)/glad/glad.c | $(OBJDIR)
+	$(CC) $(CXXFLAGS) -c $< -o $@
+
+# Create the OBJDIR
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
+
+.PHONY: clean
+# Remove object files and executable
 clean:
-	rm voxelEngine $(OBJ)
+	rm -f $(OBJECTS) $(EXECUTABLE)
