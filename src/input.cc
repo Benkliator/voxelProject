@@ -34,11 +34,15 @@ void Camera::processKeyboardInput(GLFWwindow* window, float deltaTime)
 {
     const float cameraSpeed = 12.0f * deltaTime;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        cameraPos += cameraSpeed * cameraFront;
+        cameraPos += cameraSpeed * glm::vec3(cameraFront.x, 0, cameraFront.z);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        cameraPos -= cameraSpeed * cameraFront;
+        cameraPos -= cameraSpeed * glm::vec3(cameraFront.x, 0, cameraFront.z);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        cameraPos.y += cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        cameraPos.y -= cameraSpeed;
 }
