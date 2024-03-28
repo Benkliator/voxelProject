@@ -80,7 +80,7 @@ void display(GLFWwindow* window) {
         "./res/textures/monotoneSky.png", "./res/textures/monotoneSky.png",
     };
     Skybox skybox{ skyFaces };
-    World world{ 20 };
+    World world{ 3 };
     float currentFrame = 0.0f;
     while (!glfwWindowShouldClose(window)) {
         currentFrame = glfwGetTime();
@@ -135,4 +135,5 @@ int main(void) {
 
     // Cleanup
     glfwTerminate();
+    glfwDestroyWindow(window);
 }

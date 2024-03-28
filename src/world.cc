@@ -53,8 +53,8 @@ World::Chunk::~Chunk() {
 
 bool World::Chunk::findBlock(unsigned int thisBlock) const {
     for (auto& it : blockArray) {
-        if ((thisBlock & 0b11111111111111111111) ==
-            (it & 0b11111111111111111111)) {
+        if ((thisBlock & ~blockTypeBits) ==
+            (it & ~blockTypeBits)) {
             return true;
         }
     }
@@ -72,17 +72,12 @@ World::Chunk::generateMesh() {
     for (unsigned int it = 0; it < blockArray.size(); it++) {
         unsigned int block = blockArray[it];
 
-        unsigned int x = (block & 0b1111);
-        unsigned int y = (block & 0b11111111111100000000) / 256;
-        unsigned int z = (block & 0b11110000) / 16;
-        Block blockType((block & 0b111100000000000000000000) / 1048576);
+        unsigned int x = (block & xBits) / xDivision;
+        unsigned int y = (block & yBits) / yDivision;
+        unsigned int z = (block & zBits) / zDivision;
+        Block blockType((block & blockTypeBits) / blockTypeDivision);
 
-        std::vector<bool> boolVector{
-            obsTop(it),  obsBack(it),  obsFront(it),
-            obsLeft(it), obsRight(it), obsBottom(it)
-        };
-
-        if (!boolVector[0]) {
+        if (!obsTop(it)) {
             indexMesh.push_back(vertexMesh.size() / 8);
             indexMesh.push_back((vertexMesh.size() / 8) + 3);
             indexMesh.push_back((vertexMesh.size() / 8) + 1);
@@ -94,16 +89,16 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(topVertices[i + 1] + y + yPos);
                 vertexMesh.push_back(topVertices[i + 2] + z + zPos);
                 vertexMesh.push_back(topVertices[i + 3] +
-                                     static_cast<float>(blockType.top & 240) /
-                                         16);
-                vertexMesh.push_back(topVertices[i + 4] + (blockType.top & 15));
+                                     static_cast<float>(blockType.top & zBits) /
+                                         zDivision);
+                vertexMesh.push_back(topVertices[i + 4] + (blockType.top & xBits));
                 vertexMesh.push_back(bottomVertices[i + 5] + x + xPos);
                 vertexMesh.push_back(bottomVertices[i + 6] + y + yPos);
                 vertexMesh.push_back(bottomVertices[i + 7] + z + zPos);
             }
         }
 
-        if (!boolVector[1] && z != 0) {
+        if (!obsBack(it) && z != 0) {
             indexMesh.push_back((vertexMesh.size() / 8) + 3);
             indexMesh.push_back(vertexMesh.size() / 8);
             indexMesh.push_back((vertexMesh.size() / 8) + 1);
@@ -115,16 +110,16 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(backVertices[i + 1] + y + yPos);
                 vertexMesh.push_back(backVertices[i + 2] + z + zPos);
                 vertexMesh.push_back(backVertices[i + 3] +
-                                     static_cast<float>(blockType.side & 240) /
-                                         16);
+                                     static_cast<float>(blockType.side & zBits) /
+                                         zDivision);
                 vertexMesh.push_back(backVertices[i + 4] +
-                                     (blockType.side & 15));
+                                     (blockType.side & xBits));
                 vertexMesh.push_back(bottomVertices[i + 5] + x + xPos);
                 vertexMesh.push_back(bottomVertices[i + 6] + y + yPos);
                 vertexMesh.push_back(bottomVertices[i + 7] + z + zPos);
             }
         }
-        if (!boolVector[2] && z != 15) {
+        if (!obsFront(it) && z != 15) {
             indexMesh.push_back(vertexMesh.size() / 8);
             indexMesh.push_back((vertexMesh.size() / 8) + 3);
             indexMesh.push_back((vertexMesh.size() / 8) + 1);
@@ -136,8 +131,8 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(frontVertices[i + 1] + y + yPos);
                 vertexMesh.push_back(frontVertices[i + 2] + z + zPos);
                 vertexMesh.push_back(frontVertices[i + 3] +
-                                     static_cast<float>(blockType.side & 240) /
-                                         16);
+                                     static_cast<float>(blockType.side & zBits) /
+                                         zDivision);
                 vertexMesh.push_back(frontVertices[i + 4] +
                                      (blockType.side & 15));
                 vertexMesh.push_back(bottomVertices[i + 5] + x + xPos);
@@ -145,7 +140,7 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(bottomVertices[i + 7] + z + zPos);
             }
         }
-        if (!boolVector[3] && x != 0) {
+        if (!obsLeft(it) && x != 0) {
             indexMesh.push_back(vertexMesh.size() / 8);
             indexMesh.push_back((vertexMesh.size() / 8) + 3);
             indexMesh.push_back((vertexMesh.size() / 8) + 1);
@@ -157,16 +152,16 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(leftVertices[i + 1] + y + yPos);
                 vertexMesh.push_back(leftVertices[i + 2] + z + zPos);
                 vertexMesh.push_back(leftVertices[i + 3] +
-                                     static_cast<float>(blockType.side & 240) /
-                                         16);
+                                     static_cast<float>(blockType.side & zBits) /
+                                         zDivision);
                 vertexMesh.push_back(leftVertices[i + 4] +
-                                     (blockType.side & 15));
+                                     (blockType.side & xBits));
                 vertexMesh.push_back(bottomVertices[i + 5] + x + xPos);
                 vertexMesh.push_back(bottomVertices[i + 6] + y + yPos);
                 vertexMesh.push_back(bottomVertices[i + 7] + z + zPos);
             }
         }
-        if (!boolVector[4] && x != 15) {
+        if (!obsRight(it) && x != 15) {
             indexMesh.push_back(vertexMesh.size() / 8);
             indexMesh.push_back((vertexMesh.size() / 8) + 3);
             indexMesh.push_back((vertexMesh.size() / 8) + 1);
@@ -178,16 +173,16 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(rightVertices[i + 1] + y + yPos);
                 vertexMesh.push_back(rightVertices[i + 2] + z + zPos);
                 vertexMesh.push_back(rightVertices[i + 3] +
-                                     static_cast<float>(blockType.side & 240) /
-                                         16);
+                                     static_cast<float>(blockType.side & zBits) /
+                                         zDivision);
                 vertexMesh.push_back(rightVertices[i + 4] +
-                                     (blockType.side & 15));
+                                     (blockType.side & xBits));
                 vertexMesh.push_back(bottomVertices[i + 5] + x + xPos);
                 vertexMesh.push_back(bottomVertices[i + 6] + y + yPos);
                 vertexMesh.push_back(bottomVertices[i + 7] + z + zPos);
             }
         }
-        if (!boolVector[5] && y != 0) {
+        if (!obsBottom(it) && y != 0) {
             indexMesh.push_back(vertexMesh.size() / 8);
             indexMesh.push_back((vertexMesh.size() / 8) + 3);
             indexMesh.push_back((vertexMesh.size() / 8) + 1);
@@ -200,9 +195,9 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(bottomVertices[i + 2] + z + zPos);
                 vertexMesh.push_back(
                     bottomVertices[i + 3] +
-                    static_cast<float>(blockType.bottom & 240) / 16);
+                    static_cast<float>(blockType.bottom & zBits) / zDivision);
                 vertexMesh.push_back(bottomVertices[i + 4] +
-                                     (blockType.bottom & 15));
+                                     (blockType.bottom & xBits));
                 vertexMesh.push_back(bottomVertices[i + 5] + x + xPos);
                 vertexMesh.push_back(bottomVertices[i + 6] + y + yPos);
                 vertexMesh.push_back(bottomVertices[i + 7] + z + zPos);
@@ -222,11 +217,11 @@ void World::Chunk::generateTerrain() {
                 perlin(((x + xPos) * freq) / 16, ((z + zPos) * freq) / 16);
             float height = noise * amp + 1;
             for (int y = 0; y < height; y++) {
-                unsigned int val = (((0 | x) | z * 0b10000) | y * 0b100000000);
+                unsigned int val = (((0 | x) | z * zDivision) | y * yDivision);
                 // Using the following line in an if or switch case
                 // can let you dynamically decide block generations at
                 // different (x, y, z) values.
-                val = (val | 0 * 0b100000000000000000000);
+                val = (val | 0 * blockTypeDivision);
                 blockArray.push_back(val);
             }
         }
@@ -239,11 +234,11 @@ bool World::Chunk::obsBack(unsigned int thisBlock) {
         return false;
     }
     int temp = thisBlock - 1;
-    while ((blockArray[temp] & 0b11110000) >=
-               ((blockArray[thisBlock] & 0b11110000) - 16) &&
+    while ((blockArray[temp] & zBits) >=
+               ((blockArray[thisBlock] & zBits) - zDivision) &&
            temp != -1) {
-        if ((blockArray[temp] & 0b111100001111) ==
-            (blockArray[thisBlock] & 0b111100001111)) {
+        if ((blockArray[temp] & ~zBits) ==
+            (blockArray[thisBlock] & ~zBits)) {
             return true;
         }
         temp--;
@@ -257,11 +252,11 @@ bool World::Chunk::obsFront(unsigned int thisBlock) {
         return false;
     }
     int temp = thisBlock + 1;
-    while ((blockArray[temp] & 0b11110000) <=
-               ((blockArray[thisBlock] & 0b11110000) + 16) &&
+    while ((blockArray[temp] & zBits) <=
+               ((blockArray[thisBlock] & zBits) + zDivision) &&
            blockArray[temp - 1] != blockArray.back()) {
-        if ((blockArray[temp] & 0b111100001111) ==
-            (blockArray[thisBlock] & 0b111100001111)) {
+        if ((blockArray[temp] & ~zBits) ==
+            (blockArray[thisBlock] & ~zBits)) {
             return true;
         }
         temp++;
@@ -275,11 +270,11 @@ bool World::Chunk::obsLeft(unsigned int thisBlock) {
         return false;
     }
     int temp = thisBlock - 1;
-    while ((blockArray[temp] & 0b1111) >=
-               ((blockArray[thisBlock] & 0b1111) - 1) &&
+    while ((blockArray[temp] & xBits) >=
+               ((blockArray[thisBlock] & xBits) - xDivision) &&
            temp != -1) {
-        if ((blockArray[temp] & 0b111111110000) ==
-            (blockArray[thisBlock] & 0b111111110000)) {
+        if ((blockArray[temp] & ~xBits) ==
+            (blockArray[thisBlock] & ~xBits)) {
             return true;
         }
         temp--;
@@ -293,11 +288,11 @@ bool World::Chunk::obsRight(unsigned int thisBlock) {
         return false;
     }
     int temp = thisBlock + 1;
-    while ((blockArray[temp] & 0b1111) <=
-               ((blockArray[thisBlock] & 0b1111) + 1) &&
+    while ((blockArray[temp] & xBits) <=
+               ((blockArray[thisBlock] & xBits) + xDivision) &&
            blockArray[temp - 1] != blockArray.back()) {
-        if ((blockArray[temp] & 0b111111110000) ==
-            (blockArray[thisBlock] & 0b111111110000)) {
+        if ((blockArray[temp] & ~xBits) ==
+            (blockArray[thisBlock] & ~xBits)) {
             return true;
         }
         temp++;
@@ -310,8 +305,8 @@ bool World::Chunk::obsTop(unsigned int thisBlock) {
     if (blockArray[thisBlock] == blockArray.back()) {
         return false;
     }
-    return (((blockArray[thisBlock + 1] & 0b111100000000)) ==
-            ((blockArray[thisBlock] & 0b111100000000) + 256));
+    return (((blockArray[thisBlock + 1] & yBits)) ==
+            ((blockArray[thisBlock] & yBits) + yDivision));
 }
 
 // y
@@ -319,6 +314,6 @@ bool World::Chunk::obsBottom(unsigned int thisBlock) {
     if (thisBlock == 0) {
         return false;
     }
-    return (((blockArray[thisBlock - 1] & 0b111100000000)) ==
-            ((blockArray[thisBlock] & 0b111100000000) - 256));
+    return (((blockArray[thisBlock - 1] & yBits)) ==
+            ((blockArray[thisBlock] & yBits) - yDivision));
 }

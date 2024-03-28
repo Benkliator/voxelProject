@@ -2,6 +2,22 @@
 
 #include "renderer.h"
 
+
+////////////Important values when it comes to bitwise operations//
+#define xBits 0b1111
+#define xDivision 1
+
+#define yBits 0b11111111111100000000
+#define yDivision 256
+
+#define zBits 0b11110000
+#define zDivision 16
+
+#define blockTypeBits 0b11110000000000000000000
+#define blockTypeDivision 1048576
+//////////////////////////////////////////////////////////////////
+
+
 // TODO: Modify visible chunks and adjust what is being rendered
 // based on camera/player position.
 class World {
