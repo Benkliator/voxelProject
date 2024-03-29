@@ -49,7 +49,7 @@ void Renderer::changeRendering(std::vector<float> newVertices,
 void Renderer::addRendering(std::vector<float> addVertices,
                             std::vector<unsigned int> addIndices) {
     for (size_t i = 0; i < addIndices.size(); i += 6) {
-        int size = vertexMesh.size() / 8;
+        int size = vertexMesh.size() / 9;
         indexMesh.push_back(addIndices[i] + size);
         indexMesh.push_back(addIndices[i + 1] + size);
         indexMesh.push_back(addIndices[i + 2] + size);
@@ -101,14 +101,14 @@ void Renderer::renderInit() {
                  GL_STATIC_DRAW);
 
     glVertexAttribPointer(
-        0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(0));
+        0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(0));
     glEnableVertexAttribArray(0);
 
     glVertexAttribPointer(1,
                           2,
                           GL_FLOAT,
                           GL_FALSE,
-                          8 * sizeof(float),
+                          9 * sizeof(float),
                           (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
@@ -116,9 +116,17 @@ void Renderer::renderInit() {
                           3,
                           GL_FLOAT,
                           GL_FALSE,
-                          8 * sizeof(float),
+                          9 * sizeof(float),
                           (void*)(5 * sizeof(float)));
     glEnableVertexAttribArray(2);
+
+    glVertexAttribPointer(3,
+                          1,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          9 * sizeof(float),
+                          (void*)(8 * sizeof(float)));
+    glEnableVertexAttribArray(3);
 }
 
 void Renderer::shaderInit() {

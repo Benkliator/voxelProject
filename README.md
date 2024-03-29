@@ -12,3 +12,9 @@ Make lighting actually work.
 Store blocks in an actual structure to make visibility checks faster.
 
 Create chunk mesh in a smarter way.
+
+CHUNK UPDATE NOTES:
+
+Update chunks whenever player moves from one chunk to another using glBufferSubData
+
+Store an index into the batch buffer used in the rendering class for each loaded chunk.

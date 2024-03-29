@@ -78,12 +78,12 @@ World::Chunk::generateMesh() {
         Block blockType((block & blockTypeBits) / blockTypeDivision);
 
         if (!obsTop(it)) {
-            indexMesh.push_back(vertexMesh.size() / 8);
-            indexMesh.push_back((vertexMesh.size() / 8) + 3);
-            indexMesh.push_back((vertexMesh.size() / 8) + 1);
-            indexMesh.push_back((vertexMesh.size() / 8) + 2);
-            indexMesh.push_back((vertexMesh.size() / 8) + 1);
-            indexMesh.push_back((vertexMesh.size() / 8) + 3);
+            indexMesh.push_back(vertexMesh.size() / 9);
+            indexMesh.push_back((vertexMesh.size() / 9) + 3);
+            indexMesh.push_back((vertexMesh.size() / 9) + 1);
+            indexMesh.push_back((vertexMesh.size() / 9) + 2);
+            indexMesh.push_back((vertexMesh.size() / 9) + 1);
+            indexMesh.push_back((vertexMesh.size() / 9) + 3);
             for (size_t i = 0; i < 32; i += 8) {
                 vertexMesh.push_back(topVertices[i] + x + xPos);
                 vertexMesh.push_back(topVertices[i + 1] + y + yPos);
@@ -92,19 +92,20 @@ World::Chunk::generateMesh() {
                                      static_cast<float>(blockType.top & zBits) /
                                          zDivision);
                 vertexMesh.push_back(topVertices[i + 4] + (blockType.top & xBits));
-                vertexMesh.push_back(bottomVertices[i + 5] + x + xPos);
-                vertexMesh.push_back(bottomVertices[i + 6] + y + yPos);
-                vertexMesh.push_back(bottomVertices[i + 7] + z + zPos);
+                vertexMesh.push_back(bottomVertices[i + 5]);
+                vertexMesh.push_back(bottomVertices[i + 6]);
+                vertexMesh.push_back(bottomVertices[i + 7]);
+                vertexMesh.push_back(0.0);// Occlusion value, make function for this.
             }
         }
 
-        if (!obsBack(it) && z != 0) {
-            indexMesh.push_back((vertexMesh.size() / 8) + 3);
-            indexMesh.push_back(vertexMesh.size() / 8);
-            indexMesh.push_back((vertexMesh.size() / 8) + 1);
-            indexMesh.push_back((vertexMesh.size() / 8) + 2);
-            indexMesh.push_back((vertexMesh.size() / 8) + 3);
-            indexMesh.push_back((vertexMesh.size() / 8) + 1);
+        if (!obsBack(it) || z != 0) {
+            indexMesh.push_back((vertexMesh.size() / 9) + 3);
+            indexMesh.push_back(vertexMesh.size() / 9);
+            indexMesh.push_back((vertexMesh.size() / 9) + 1);
+            indexMesh.push_back((vertexMesh.size() / 9) + 2);
+            indexMesh.push_back((vertexMesh.size() / 9) + 3);
+            indexMesh.push_back((vertexMesh.size() / 9) + 1);
             for (size_t i = 0; i < 32; i += 8) {
                 vertexMesh.push_back(backVertices[i] + x + xPos);
                 vertexMesh.push_back(backVertices[i + 1] + y + yPos);
@@ -114,18 +115,19 @@ World::Chunk::generateMesh() {
                                          zDivision);
                 vertexMesh.push_back(backVertices[i + 4] +
                                      (blockType.side & xBits));
-                vertexMesh.push_back(bottomVertices[i + 5] + x + xPos);
-                vertexMesh.push_back(bottomVertices[i + 6] + y + yPos);
-                vertexMesh.push_back(bottomVertices[i + 7] + z + zPos);
+                vertexMesh.push_back(bottomVertices[i + 5]);
+                vertexMesh.push_back(bottomVertices[i + 6]);
+                vertexMesh.push_back(bottomVertices[i + 7]);
+                vertexMesh.push_back(0.0);// Occlusion value, make function for this.
             }
         }
-        if (!obsFront(it) && z != 15) {
-            indexMesh.push_back(vertexMesh.size() / 8);
-            indexMesh.push_back((vertexMesh.size() / 8) + 3);
-            indexMesh.push_back((vertexMesh.size() / 8) + 1);
-            indexMesh.push_back((vertexMesh.size() / 8) + 2);
-            indexMesh.push_back((vertexMesh.size() / 8) + 1);
-            indexMesh.push_back((vertexMesh.size() / 8) + 3);
+        if (!obsFront(it) || z != 15) {
+            indexMesh.push_back(vertexMesh.size() / 9);
+            indexMesh.push_back((vertexMesh.size() / 9) + 3);
+            indexMesh.push_back((vertexMesh.size() / 9) + 1);
+            indexMesh.push_back((vertexMesh.size() / 9) + 2);
+            indexMesh.push_back((vertexMesh.size() / 9) + 1);
+            indexMesh.push_back((vertexMesh.size() / 9) + 3);
             for (size_t i = 0; i < 32; i += 8) {
                 vertexMesh.push_back(frontVertices[i] + x + xPos);
                 vertexMesh.push_back(frontVertices[i + 1] + y + yPos);
@@ -135,18 +137,19 @@ World::Chunk::generateMesh() {
                                          zDivision);
                 vertexMesh.push_back(frontVertices[i + 4] +
                                      (blockType.side & 15));
-                vertexMesh.push_back(bottomVertices[i + 5] + x + xPos);
-                vertexMesh.push_back(bottomVertices[i + 6] + y + yPos);
-                vertexMesh.push_back(bottomVertices[i + 7] + z + zPos);
+                vertexMesh.push_back(bottomVertices[i + 5]);
+                vertexMesh.push_back(bottomVertices[i + 6]);
+                vertexMesh.push_back(bottomVertices[i + 7]);
+                vertexMesh.push_back(1.0);// Occlusion value, make function for this.
             }
         }
-        if (!obsLeft(it) && x != 0) {
-            indexMesh.push_back(vertexMesh.size() / 8);
-            indexMesh.push_back((vertexMesh.size() / 8) + 3);
-            indexMesh.push_back((vertexMesh.size() / 8) + 1);
-            indexMesh.push_back((vertexMesh.size() / 8) + 2);
-            indexMesh.push_back((vertexMesh.size() / 8) + 1);
-            indexMesh.push_back((vertexMesh.size() / 8) + 3);
+        if (!obsLeft(it) || x != 0) {
+            indexMesh.push_back(vertexMesh.size() / 9);
+            indexMesh.push_back((vertexMesh.size() / 9) + 3);
+            indexMesh.push_back((vertexMesh.size() / 9) + 1);
+            indexMesh.push_back((vertexMesh.size() / 9) + 2);
+            indexMesh.push_back((vertexMesh.size() / 9) + 1);
+            indexMesh.push_back((vertexMesh.size() / 9) + 3);
             for (size_t i = 0; i < 32; i += 8) {
                 vertexMesh.push_back(leftVertices[i] + x + xPos);
                 vertexMesh.push_back(leftVertices[i + 1] + y + yPos);
@@ -156,18 +159,19 @@ World::Chunk::generateMesh() {
                                          zDivision);
                 vertexMesh.push_back(leftVertices[i + 4] +
                                      (blockType.side & xBits));
-                vertexMesh.push_back(bottomVertices[i + 5] + x + xPos);
-                vertexMesh.push_back(bottomVertices[i + 6] + y + yPos);
-                vertexMesh.push_back(bottomVertices[i + 7] + z + zPos);
+                vertexMesh.push_back(bottomVertices[i + 5]);
+                vertexMesh.push_back(bottomVertices[i + 6]);
+                vertexMesh.push_back(bottomVertices[i + 7]);
+                vertexMesh.push_back(0.0);// Occlusion value, make function for this.
             }
         }
-        if (!obsRight(it) && x != 15) {
-            indexMesh.push_back(vertexMesh.size() / 8);
-            indexMesh.push_back((vertexMesh.size() / 8) + 3);
-            indexMesh.push_back((vertexMesh.size() / 8) + 1);
-            indexMesh.push_back((vertexMesh.size() / 8) + 2);
-            indexMesh.push_back((vertexMesh.size() / 8) + 1);
-            indexMesh.push_back((vertexMesh.size() / 8) + 3);
+        if (!obsRight(it) || x != 15) {
+            indexMesh.push_back(vertexMesh.size() / 9);
+            indexMesh.push_back((vertexMesh.size() / 9) + 3);
+            indexMesh.push_back((vertexMesh.size() / 9) + 1);
+            indexMesh.push_back((vertexMesh.size() / 9) + 2);
+            indexMesh.push_back((vertexMesh.size() / 9) + 1);
+            indexMesh.push_back((vertexMesh.size() / 9) + 3);
             for (size_t i = 0; i < 32; i += 8) {
                 vertexMesh.push_back(rightVertices[i] + x + xPos);
                 vertexMesh.push_back(rightVertices[i + 1] + y + yPos);
@@ -177,18 +181,19 @@ World::Chunk::generateMesh() {
                                          zDivision);
                 vertexMesh.push_back(rightVertices[i + 4] +
                                      (blockType.side & xBits));
-                vertexMesh.push_back(bottomVertices[i + 5] + x + xPos);
-                vertexMesh.push_back(bottomVertices[i + 6] + y + yPos);
-                vertexMesh.push_back(bottomVertices[i + 7] + z + zPos);
+                vertexMesh.push_back(bottomVertices[i + 5]);
+                vertexMesh.push_back(bottomVertices[i + 6]);
+                vertexMesh.push_back(bottomVertices[i + 7]);
+                vertexMesh.push_back(1.0);// Occlusion value, make function for this.
             }
         }
-        if (!obsBottom(it) && y != 0) {
-            indexMesh.push_back(vertexMesh.size() / 8);
-            indexMesh.push_back((vertexMesh.size() / 8) + 3);
-            indexMesh.push_back((vertexMesh.size() / 8) + 1);
-            indexMesh.push_back((vertexMesh.size() / 8) + 2);
-            indexMesh.push_back((vertexMesh.size() / 8) + 1);
-            indexMesh.push_back((vertexMesh.size() / 8) + 3);
+        if (!obsBottom(it) || y != 0) {
+            indexMesh.push_back(vertexMesh.size() / 9);
+            indexMesh.push_back((vertexMesh.size() / 9) + 3);
+            indexMesh.push_back((vertexMesh.size() / 9) + 1);
+            indexMesh.push_back((vertexMesh.size() / 9) + 2);
+            indexMesh.push_back((vertexMesh.size() / 9) + 1);
+            indexMesh.push_back((vertexMesh.size() / 9) + 3);
             for (size_t i = 0; i < 32; i += 8) {
                 vertexMesh.push_back(bottomVertices[i] + x + xPos);
                 vertexMesh.push_back(bottomVertices[i + 1] + y + yPos);
@@ -198,9 +203,10 @@ World::Chunk::generateMesh() {
                     static_cast<float>(blockType.bottom & zBits) / zDivision);
                 vertexMesh.push_back(bottomVertices[i + 4] +
                                      (blockType.bottom & xBits));
-                vertexMesh.push_back(bottomVertices[i + 5] + x + xPos);
-                vertexMesh.push_back(bottomVertices[i + 6] + y + yPos);
-                vertexMesh.push_back(bottomVertices[i + 7] + z + zPos);
+                vertexMesh.push_back(bottomVertices[i + 5]);
+                vertexMesh.push_back(bottomVertices[i + 6]);
+                vertexMesh.push_back(bottomVertices[i + 7]);
+                vertexMesh.push_back(1.0);// Occlusion value, make function for this.
             }
         }
     }
