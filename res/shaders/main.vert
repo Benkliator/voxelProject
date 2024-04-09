@@ -21,7 +21,7 @@ void main(void)
             color = vec3(1.0, 1.0, 1.0);
             break;
         case 1: 
-            color = vec3(0.5, 0.5, 0.5);
+            color = vec3(0.45, 0.45, 0.45);
             break;
     }
     normal = normalize(aNormal);

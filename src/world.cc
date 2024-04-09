@@ -95,11 +95,11 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(bottomVertices[i + 5]);
                 vertexMesh.push_back(bottomVertices[i + 6]);
                 vertexMesh.push_back(bottomVertices[i + 7]);
-                vertexMesh.push_back(0.0);// Occlusion value, make function for this.
+                vertexMesh.push_back(0.0);
             }
         }
 
-        if (!obsBack(it) || z != 0) {
+        if (!obsBack(it) && z != 0) {
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             indexMesh.push_back(vertexMesh.size() / 9);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
@@ -118,10 +118,14 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(bottomVertices[i + 5]);
                 vertexMesh.push_back(bottomVertices[i + 6]);
                 vertexMesh.push_back(bottomVertices[i + 7]);
-                vertexMesh.push_back(0.0);// Occlusion value, make function for this.
+                if (i == 16 || i == 8) {
+                    vertexMesh.push_back(1.0);// Occlusion value, make function for this.
+                } else {
+                    vertexMesh.push_back(0.0);
+                }
             }
         }
-        if (!obsFront(it) || z != 15) {
+        if (!obsFront(it) && z != 15) {
             indexMesh.push_back(vertexMesh.size() / 9);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
@@ -140,10 +144,14 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(bottomVertices[i + 5]);
                 vertexMesh.push_back(bottomVertices[i + 6]);
                 vertexMesh.push_back(bottomVertices[i + 7]);
-                vertexMesh.push_back(1.0);// Occlusion value, make function for this.
+                if (i == 16 || i == 8) {
+                    vertexMesh.push_back(1.0);// Occlusion value, make function for this.
+                } else {
+                    vertexMesh.push_back(0.0);
+                }
             }
         }
-        if (!obsLeft(it) || x != 0) {
+        if (!obsLeft(it) && x != 0) {
             indexMesh.push_back(vertexMesh.size() / 9);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
@@ -162,10 +170,14 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(bottomVertices[i + 5]);
                 vertexMesh.push_back(bottomVertices[i + 6]);
                 vertexMesh.push_back(bottomVertices[i + 7]);
-                vertexMesh.push_back(0.0);// Occlusion value, make function for this.
+                if (i == 16 || i == 8) {
+                    vertexMesh.push_back(1.0);// Occlusion value, make function for this.
+                } else {
+                    vertexMesh.push_back(0.0);
+                }
             }
         }
-        if (!obsRight(it) || x != 15) {
+        if (!obsRight(it) && x != 15) {
             indexMesh.push_back(vertexMesh.size() / 9);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
@@ -184,10 +196,14 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(bottomVertices[i + 5]);
                 vertexMesh.push_back(bottomVertices[i + 6]);
                 vertexMesh.push_back(bottomVertices[i + 7]);
-                vertexMesh.push_back(1.0);// Occlusion value, make function for this.
+                if (i == 16 || i == 8) {
+                    vertexMesh.push_back(1.0);// Occlusion value, make function for this.
+                } else {
+                    vertexMesh.push_back(0.0);
+                }
             }
         }
-        if (!obsBottom(it) || y != 0) {
+        if (!obsBottom(it) && y != 0) {
             indexMesh.push_back(vertexMesh.size() / 9);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
