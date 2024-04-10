@@ -23,13 +23,13 @@ public:
 private:
     void processInput();
 
-    Camera* playerCam{};
-    Camera* skyboxCam{};
+    Camera* playerCam = nullptr;
+    Camera* skyboxCam = nullptr;
 
-    Skybox* skybox{};
-    World* world{};
+    Skybox* skybox = nullptr;
+    World* world = nullptr;
 
-    GLFWwindow* window{};
+    GLFWwindow* window = nullptr;
 
     float lastX = SCR_WIDTH / 2.0f;
     float lastY = SCR_HEIGHT / 2.0f;

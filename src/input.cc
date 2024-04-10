@@ -33,9 +33,9 @@ void Camera::processMouseMovement(GLFWwindow* window,
 void Camera::processKeyboardInput(GLFWwindow* window, float deltaTime) {
     const float cameraSpeed = 12.0f * deltaTime;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        cameraPos += cameraSpeed * glm::vec3(cameraFront.x, 0, cameraFront.z);
+        cameraPos += cameraSpeed * glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        cameraPos -= cameraSpeed * glm::vec3(cameraFront.x, 0, cameraFront.z);
+        cameraPos -= cameraSpeed * glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         cameraPos -=
             glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;

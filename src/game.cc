@@ -43,19 +43,19 @@ Game::Game() {
         "./res/textures/monotoneSky.png", "./res/textures/monotoneSky.png",
         "./res/textures/monotoneSky.png", "./res/textures/monotoneSky.png",
     };
-    skybox = new Skybox{skyFaces};
-    world  = new World {20};
+    skybox = new Skybox {skyFaces};
+    world  = new World {1};
 
     playerCam = new Camera{};
     skyboxCam = new Camera{};
 }
 
 Game::~Game() {
-    glfwTerminate();
     delete world;
     delete skybox;
     delete playerCam;
     delete skyboxCam;
+    glfwTerminate();
 }
 
 void Game::gameLoop() {
