@@ -17,6 +17,12 @@ const long int zDivision =         0b00000000000000000010000;
 const long int blockTypeDivision = 0b00100000000000000000000;
 //////////////////////////////////////////////////////////////////
 
+struct chunkPos {
+    float x;
+    float y;
+    float z;
+};
+
 // TODO: Modify visible chunks and adjust what is being rendered
 // based on camera/player position.
 class World {
@@ -28,13 +34,15 @@ public:
     // Draws out every chunk in visibleChunks
     void draw(glm::mat4 view);
 
+    bool findChunk(chunkPos pos);
+
 private:
     class Chunk;
 
     void shaderInit();
 
     Renderer renderer{};
-    std::vector<std::vector<Chunk>> visibleChunks;
+    std::vector<Chunk> visibleChunks;
     // std::vector< std::vector<Chunk> > visibleChunks;
 
     // Unsure if this is a good idea.
@@ -49,36 +57,13 @@ public:
     ~Chunk();
     unsigned int getBlock(unsigned x, unsigned y, unsigned z);
 
-    bool findBlock(unsigned int thisBlock) const;
-
     std::pair<std::vector<unsigned int>, std::vector<float>> generateMesh();
+
+    chunkPos getPos();
 
 private:
     // Helper functions for the constructor so it's easier to read.
     void generateTerrain();
-
-    // NOTE: These following functions check if a side of a block
-    // is obscured, and only work due to the way the world is
-    // generated. Whenever blocks outside of normal worldgen
-    // are to be added into the world, they will need to be sorted
-    // in the same way as these.
-    //
-    // Sort method:
-    // Blocks above another in the same xz column should be sorted from
-    // bottom to top, i.e find the first occurence of the xz coordinate
-    // in the blockArray and then place it right after the last occurence.
-    //
-    // NOTE: Problem with this: Chunk borders are always assumed to be obscured,
-    // implement some check/fix for this after at least a second chunk has been
-    // made, this will need to happen in chunk, but the function check will
-    // likely need to happen in this class and used by the world class.
-    bool obsBack(unsigned int thisBlock);
-    bool obsFront(unsigned int thisBlock);
-    bool obsTop(unsigned int thisBlock);
-    bool obsBottom(unsigned int thisBlock);
-    bool obsLeft(unsigned int thisBlock);
-    bool obsRight(unsigned int thisBlock);
-
     // Bit values for each element in the blockArray vector:
     //
     // 0000   0000 0000   0000 0000 0000   0000 0000
@@ -95,9 +80,7 @@ private:
     //
     std::vector<unsigned int> blockArray;
 
-    int xPos;
-    int yPos;
-    int zPos;
+    chunkPos pos;
 };
 
 // NOTE: Might want to put these in a proper data structure.

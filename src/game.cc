@@ -44,7 +44,7 @@ Game::Game() {
         "./res/textures/monotoneSky.png", "./res/textures/monotoneSky.png",
     };
     skybox = new Skybox {skyFaces};
-    world  = new World {1};
+    world  = new World {10};
 
     playerCam = new Camera{};
     skyboxCam = new Camera{};

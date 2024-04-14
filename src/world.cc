@@ -13,17 +13,14 @@ World::World(unsigned int size) {
     for (int x = 0; x < size; x++) {
         std::vector<Chunk> temp;
         for (int z = 0; z < size; z++) {
-            temp.push_back(Chunk{ x, 0, z });
+            visibleChunks.push_back(Chunk{ x, 0, z });
         }
-        visibleChunks.push_back(temp);
     }
 
     std::cout << "Creating meshes..." << std::endl;
-    for (int x = 0; x < size; x++) {
-        for (auto& chunk : visibleChunks[x]) {
-            auto [indices, vertices] = chunk.generateMesh();
-            renderer.addRendering(vertices, indices);
-        }
+    for (auto& chunk : visibleChunks) {
+        auto [indices, vertices] = chunk.generateMesh();
+        renderer.addRendering(vertices, indices);
     }
     std::cout << "Initiating rendering..." << std::endl;
     renderer.renderInit();
@@ -31,7 +28,7 @@ World::World(unsigned int size) {
 }
 
 World::~World() {
-    std::vector<std::vector<Chunk>>().swap(visibleChunks);
+    std::vector<Chunk>().swap(visibleChunks);
 }
 
 void World::draw(glm::mat4 view) {
@@ -40,9 +37,9 @@ void World::draw(glm::mat4 view) {
 
 World::Chunk::Chunk(int x, int y, int z) {
     // Chunk offset
-    xPos = x * 16;
-    yPos = y * 16;
-    zPos = z * 16;
+    pos.x = x * 16;
+    pos.y = y * 16;
+    pos.z = z * 16;
     generateTerrain();
 }
 
@@ -78,9 +75,9 @@ World::Chunk::generateMesh() {
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             for (size_t i = 0; i < 32; i += 8) {
-                vertexMesh.push_back(topVertices[i] + x + xPos);
-                vertexMesh.push_back(topVertices[i + 1] + y + yPos);
-                vertexMesh.push_back(topVertices[i + 2] + z + zPos);
+                vertexMesh.push_back(topVertices[i] + x + pos.x);
+                vertexMesh.push_back(topVertices[i + 1] + y + pos.y);
+                vertexMesh.push_back(topVertices[i + 2] + z + pos.z);
                 vertexMesh.push_back(topVertices[i + 3] +
                                      static_cast<float>(blockType.top & zBits) /
                                          zDivision);
@@ -94,7 +91,7 @@ World::Chunk::generateMesh() {
         }
 
         // (!obsBack(it) && z != 0)
-        if (z > 0 && ((getBlock(x, y, z - 1) & blockTypeBits) == Block::Air)) {
+        if ((z > 0 && ((getBlock(x, y, z - 1) & blockTypeBits) == Block::Air))) {
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             indexMesh.push_back(vertexMesh.size() / 9);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
@@ -102,9 +99,9 @@ World::Chunk::generateMesh() {
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
             for (size_t i = 0; i < 32; i += 8) {
-                vertexMesh.push_back(backVertices[i] + x + xPos);
-                vertexMesh.push_back(backVertices[i + 1] + y + yPos);
-                vertexMesh.push_back(backVertices[i + 2] + z + zPos);
+                vertexMesh.push_back(backVertices[i] + x + pos.x);
+                vertexMesh.push_back(backVertices[i + 1] + y + pos.y);
+                vertexMesh.push_back(backVertices[i + 2] + z + pos.z);
                 vertexMesh.push_back(
                     backVertices[i + 3] +
                     static_cast<float>(blockType.side & zBits) / zDivision);
@@ -131,9 +128,9 @@ World::Chunk::generateMesh() {
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             for (size_t i = 0; i < 32; i += 8) {
-                vertexMesh.push_back(frontVertices[i] + x + xPos);
-                vertexMesh.push_back(frontVertices[i + 1] + y + yPos);
-                vertexMesh.push_back(frontVertices[i + 2] + z + zPos);
+                vertexMesh.push_back(frontVertices[i] + x + pos.x);
+                vertexMesh.push_back(frontVertices[i + 1] + y + pos.y);
+                vertexMesh.push_back(frontVertices[i + 2] + z + pos.z);
                 vertexMesh.push_back(
                     frontVertices[i + 3] +
                     static_cast<float>(blockType.side & zBits) / zDivision);
@@ -160,9 +157,9 @@ World::Chunk::generateMesh() {
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             for (size_t i = 0; i < 32; i += 8) {
-                vertexMesh.push_back(leftVertices[i] + x + xPos);
-                vertexMesh.push_back(leftVertices[i + 1] + y + yPos);
-                vertexMesh.push_back(leftVertices[i + 2] + z + zPos);
+                vertexMesh.push_back(leftVertices[i] + x + pos.x);
+                vertexMesh.push_back(leftVertices[i + 1] + y + pos.y);
+                vertexMesh.push_back(leftVertices[i + 2] + z + pos.z);
                 vertexMesh.push_back(
                     leftVertices[i + 3] +
                     static_cast<float>(blockType.side & zBits) / zDivision);
@@ -189,9 +186,9 @@ World::Chunk::generateMesh() {
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             for (size_t i = 0; i < 32; i += 8) {
-                vertexMesh.push_back(rightVertices[i] + x + xPos);
-                vertexMesh.push_back(rightVertices[i + 1] + y + yPos);
-                vertexMesh.push_back(rightVertices[i + 2] + z + zPos);
+                vertexMesh.push_back(rightVertices[i] + x + pos.x);
+                vertexMesh.push_back(rightVertices[i + 1] + y + pos.y);
+                vertexMesh.push_back(rightVertices[i + 2] + z + pos.z);
                 vertexMesh.push_back(
                     rightVertices[i + 3] +
                     static_cast<float>(blockType.side & zBits) / zDivision);
@@ -218,9 +215,9 @@ World::Chunk::generateMesh() {
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             for (size_t i = 0; i < 32; i += 8) {
-                vertexMesh.push_back(bottomVertices[i] + x + xPos);
-                vertexMesh.push_back(bottomVertices[i + 1] + y + yPos);
-                vertexMesh.push_back(bottomVertices[i + 2] + z + zPos);
+                vertexMesh.push_back(bottomVertices[i] + x + pos.x);
+                vertexMesh.push_back(bottomVertices[i + 1] + y + pos.y);
+                vertexMesh.push_back(bottomVertices[i + 2] + z + pos.z);
                 vertexMesh.push_back(
                     bottomVertices[i + 3] +
                     static_cast<float>(blockType.bottom & zBits) / zDivision);
@@ -245,6 +242,10 @@ World::Chunk::getBlock(unsigned int x, unsigned int y, unsigned int z) {
     return blockArray[ix];
 }
 
+chunkPos World::Chunk::getPos() {
+    return pos;
+}
+
 void World::Chunk::generateTerrain() {
     float freq = 0.76323343; // Frequency
     float amp = 0.75;        // Amplifier
@@ -252,7 +253,7 @@ void World::Chunk::generateTerrain() {
         for (int z = 0; z < 16; z++) {
             // Uses perlin function to calculate height for xz position
             float noise =
-                perlin(((x + xPos) * freq) / 16, ((z + zPos) * freq) / 16);
+                perlin(((x + pos.x) * freq) / 16, ((z + pos.z) * freq) / 16);
             float height = noise * amp + 1;
             for (int y = 0; y < worldHeight; y++) {
                 unsigned int val = (((0 | x) | z * zDivision) | y * yDivision);
