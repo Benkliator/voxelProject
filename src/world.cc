@@ -51,16 +51,6 @@ World::Chunk::~Chunk() {
     std::vector<unsigned int>().swap(blockArray);
 }
 
-bool World::Chunk::findBlock(unsigned int thisBlock) const {
-    for (auto& it : blockArray) {
-        if ((thisBlock & ~blockTypeBits) ==
-            (it & ~blockTypeBits)) {
-            return true;
-        }
-    }
-    return false;
-}
-
 std::pair<std::vector<unsigned int>, std::vector<float>>
 World::Chunk::generateMesh() {
     // NOTE: This implementation is quite slow, but very consitent.
@@ -74,8 +64,13 @@ World::Chunk::generateMesh() {
         unsigned int y = (block & yBits) / yDivision;
         unsigned int z = (block & zBits) / zDivision;
         Block blockType((block & blockTypeBits) / blockTypeDivision);
+        if ((block & blockTypeBits) == Block::Air) {
+            continue;
+        }
 
-        if (!obsTop(it)) {
+        // (!obsTop(it))
+        if (y < worldHeight &&
+            ((getBlock(x, y + 1, z) & blockTypeBits) == Block::Air)) {
             indexMesh.push_back(vertexMesh.size() / 9);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
@@ -89,7 +84,8 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(topVertices[i + 3] +
                                      static_cast<float>(blockType.top & zBits) /
                                          zDivision);
-                vertexMesh.push_back(topVertices[i + 4] + (blockType.top & xBits));
+                vertexMesh.push_back(topVertices[i + 4] +
+                                     (blockType.top & xBits));
                 vertexMesh.push_back(bottomVertices[i + 5]);
                 vertexMesh.push_back(bottomVertices[i + 6]);
                 vertexMesh.push_back(bottomVertices[i + 7]);
@@ -97,7 +93,8 @@ World::Chunk::generateMesh() {
             }
         }
 
-        if (!obsBack(it) && z != 0) {
+        // (!obsBack(it) && z != 0)
+        if (z > 0 && ((getBlock(x, y, z - 1) & blockTypeBits) == Block::Air)) {
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             indexMesh.push_back(vertexMesh.size() / 9);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
@@ -108,22 +105,25 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(backVertices[i] + x + xPos);
                 vertexMesh.push_back(backVertices[i + 1] + y + yPos);
                 vertexMesh.push_back(backVertices[i + 2] + z + zPos);
-                vertexMesh.push_back(backVertices[i + 3] +
-                                     static_cast<float>(blockType.side & zBits) /
-                                         zDivision);
+                vertexMesh.push_back(
+                    backVertices[i + 3] +
+                    static_cast<float>(blockType.side & zBits) / zDivision);
                 vertexMesh.push_back(backVertices[i + 4] +
                                      (blockType.side & xBits));
                 vertexMesh.push_back(bottomVertices[i + 5]);
                 vertexMesh.push_back(bottomVertices[i + 6]);
                 vertexMesh.push_back(bottomVertices[i + 7]);
                 if (i == 16 || i == 8) {
-                    vertexMesh.push_back(1.0);// Occlusion value, make function for this.
+                    vertexMesh.push_back(
+                        1.0); // Occlusion value, make function for this.
                 } else {
                     vertexMesh.push_back(0.0);
                 }
             }
         }
-        if (!obsFront(it) && z != 15) {
+
+        // (!obsFront(it) && z != 15)
+        if (z < 15 && ((getBlock(x, y, z + 1) & blockTypeBits) == Block::Air)) {
             indexMesh.push_back(vertexMesh.size() / 9);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
@@ -134,22 +134,25 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(frontVertices[i] + x + xPos);
                 vertexMesh.push_back(frontVertices[i + 1] + y + yPos);
                 vertexMesh.push_back(frontVertices[i + 2] + z + zPos);
-                vertexMesh.push_back(frontVertices[i + 3] +
-                                     static_cast<float>(blockType.side & zBits) /
-                                         zDivision);
+                vertexMesh.push_back(
+                    frontVertices[i + 3] +
+                    static_cast<float>(blockType.side & zBits) / zDivision);
                 vertexMesh.push_back(frontVertices[i + 4] +
                                      (blockType.side & 15));
                 vertexMesh.push_back(bottomVertices[i + 5]);
                 vertexMesh.push_back(bottomVertices[i + 6]);
                 vertexMesh.push_back(bottomVertices[i + 7]);
                 if (i == 16 || i == 8) {
-                    vertexMesh.push_back(1.0);// Occlusion value, make function for this.
+                    vertexMesh.push_back(
+                        1.0); // Occlusion value, make function for this.
                 } else {
                     vertexMesh.push_back(0.0);
                 }
             }
         }
-        if (!obsLeft(it) && x != 0) {
+
+        // (!obsLeft(it) && x != 0)
+        if (x > 0 && ((getBlock(x - 1, y, z) & blockTypeBits) == Block::Air)) {
             indexMesh.push_back(vertexMesh.size() / 9);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
@@ -160,22 +163,25 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(leftVertices[i] + x + xPos);
                 vertexMesh.push_back(leftVertices[i + 1] + y + yPos);
                 vertexMesh.push_back(leftVertices[i + 2] + z + zPos);
-                vertexMesh.push_back(leftVertices[i + 3] +
-                                     static_cast<float>(blockType.side & zBits) /
-                                         zDivision);
+                vertexMesh.push_back(
+                    leftVertices[i + 3] +
+                    static_cast<float>(blockType.side & zBits) / zDivision);
                 vertexMesh.push_back(leftVertices[i + 4] +
                                      (blockType.side & xBits));
                 vertexMesh.push_back(bottomVertices[i + 5]);
                 vertexMesh.push_back(bottomVertices[i + 6]);
                 vertexMesh.push_back(bottomVertices[i + 7]);
                 if (i == 16 || i == 8) {
-                    vertexMesh.push_back(1.0);// Occlusion value, make function for this.
+                    vertexMesh.push_back(
+                        1.0); // Occlusion value, make function for this.
                 } else {
                     vertexMesh.push_back(0.0);
                 }
             }
         }
-        if (!obsRight(it) && x != 15) {
+
+        // (!obsRight(it) && x != 15)
+        if (x < 15 && ((getBlock(x + 1, y, z) & blockTypeBits) == Block::Air)) {
             indexMesh.push_back(vertexMesh.size() / 9);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
@@ -186,22 +192,25 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(rightVertices[i] + x + xPos);
                 vertexMesh.push_back(rightVertices[i + 1] + y + yPos);
                 vertexMesh.push_back(rightVertices[i + 2] + z + zPos);
-                vertexMesh.push_back(rightVertices[i + 3] +
-                                     static_cast<float>(blockType.side & zBits) /
-                                         zDivision);
+                vertexMesh.push_back(
+                    rightVertices[i + 3] +
+                    static_cast<float>(blockType.side & zBits) / zDivision);
                 vertexMesh.push_back(rightVertices[i + 4] +
                                      (blockType.side & xBits));
                 vertexMesh.push_back(bottomVertices[i + 5]);
                 vertexMesh.push_back(bottomVertices[i + 6]);
                 vertexMesh.push_back(bottomVertices[i + 7]);
                 if (i == 16 || i == 8) {
-                    vertexMesh.push_back(1.0);// Occlusion value, make function for this.
+                    vertexMesh.push_back(
+                        1.0); // Occlusion value, make function for this.
                 } else {
                     vertexMesh.push_back(0.0);
                 }
             }
         }
-        if (!obsBottom(it) && y != 0) {
+
+        // (!obsBottom(it) && y != 0)
+        if (y > 0 && ((getBlock(x, y - 1, z) & blockTypeBits) == Block::Air)) {
             indexMesh.push_back(vertexMesh.size() / 9);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
@@ -220,11 +229,20 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(bottomVertices[i + 5]);
                 vertexMesh.push_back(bottomVertices[i + 6]);
                 vertexMesh.push_back(bottomVertices[i + 7]);
-                vertexMesh.push_back(1.0);// Occlusion value, make function for this.
+                vertexMesh.push_back(
+                    1.0); // Occlusion value, make function for this.
             }
         }
     }
     return std::make_pair(indexMesh, vertexMesh);
+}
+
+// TODO(Christoffer): This function should create a World::getBlock and use with
+//                    the chunk's world pointer instead
+unsigned int
+World::Chunk::getBlock(unsigned int x, unsigned int y, unsigned int z) {
+    size_t ix = y + (z * worldHeight) + (x * 16 * worldHeight);
+    return blockArray[ix];
 }
 
 void World::Chunk::generateTerrain() {
@@ -236,104 +254,20 @@ void World::Chunk::generateTerrain() {
             float noise =
                 perlin(((x + xPos) * freq) / 16, ((z + zPos) * freq) / 16);
             float height = noise * amp + 1;
-            for (int y = 0; y < height; y++) {
+            for (int y = 0; y < worldHeight; y++) {
                 unsigned int val = (((0 | x) | z * zDivision) | y * yDivision);
                 // Using the following line in an if or switch case
                 // can let you dynamically decide block generations at
                 // different (x, y, z) values.
-                val = (val | 0 * blockTypeDivision);
+                enum Block::BlockType bt;
+                if (y < height) {
+                    bt = Block::Grass;
+                } else {
+                    bt = Block::Air;
+                }
+                val = (val | bt * blockTypeDivision);
                 blockArray.push_back(val);
             }
         }
     }
-}
-
-// z
-bool World::Chunk::obsBack(unsigned int thisBlock) {
-    if (thisBlock == 0) {
-        return false;
-    }
-    int temp = thisBlock - 1;
-    while ((blockArray[temp] & zBits) >=
-               ((blockArray[thisBlock] & zBits) - zDivision) &&
-           temp != -1) {
-        if ((blockArray[temp] & ~zBits) ==
-            (blockArray[thisBlock] & ~zBits)) {
-            return true;
-        }
-        temp--;
-    }
-    return false;
-}
-
-// z
-bool World::Chunk::obsFront(unsigned int thisBlock) {
-    if (blockArray[thisBlock] == blockArray.back()) {
-        return false;
-    }
-    int temp = thisBlock + 1;
-    while ((blockArray[temp] & zBits) <=
-               ((blockArray[thisBlock] & zBits) + zDivision) &&
-           blockArray[temp - 1] != blockArray.back()) {
-        if ((blockArray[temp] & ~zBits) ==
-            (blockArray[thisBlock] & ~zBits)) {
-            return true;
-        }
-        temp++;
-    }
-    return false;
-}
-
-// x
-bool World::Chunk::obsLeft(unsigned int thisBlock) {
-    if (thisBlock == 0) {
-        return false;
-    }
-    int temp = thisBlock - 1;
-    while ((blockArray[temp] & xBits) >=
-               ((blockArray[thisBlock] & xBits) - xDivision) &&
-           temp != -1) {
-        if ((blockArray[temp] & ~xBits) ==
-            (blockArray[thisBlock] & ~xBits)) {
-            return true;
-        }
-        temp--;
-    }
-    return false;
-}
-
-// x
-bool World::Chunk::obsRight(unsigned int thisBlock) {
-    if (blockArray[thisBlock] == blockArray.back()) {
-        return false;
-    }
-    int temp = thisBlock + 1;
-    while ((blockArray[temp] & xBits) <=
-               ((blockArray[thisBlock] & xBits) + xDivision) &&
-           blockArray[temp - 1] != blockArray.back()) {
-        if ((blockArray[temp] & ~xBits) ==
-            (blockArray[thisBlock] & ~xBits)) {
-            return true;
-        }
-        temp++;
-    }
-    return false;
-}
-
-// y
-bool World::Chunk::obsTop(unsigned int thisBlock) {
-    if (blockArray[thisBlock] == blockArray.back()) {
-        return false;
-    }
-    return (((blockArray[thisBlock + 1] & yBits)) ==
-            ((blockArray[thisBlock] & yBits) + yDivision));
-}
-
-// y
-bool World::Chunk::obsBottom(unsigned int thisBlock) {
-    if (thisBlock == 0) {
-        return false;
-    }
-    return (((blockArray[thisBlock - 1] & yBits)) ==
-            ((blockArray[thisBlock] & yBits) - yDivision));
 }

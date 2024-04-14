@@ -6,38 +6,28 @@
 Block::Block(unsigned short blockType) {
     switch (blockType) {
     // Grass
-    case 0:
+    case Block::Air:
+        // Skipped in drawing
+        break;
+
+    case Block::Grass:
         top = 0;
         bottom = 0b00100000;
         side = 0b00010000;
         break;
 
     // Dirt
-    case 1:
+    case Block::Dirt:
         top = 0b00100000;
         bottom = 0b00100000;
         side = 0b00100000;
         break;
 
     // Stone
-    case 2:
+    case Block::Stone:
         top = 0b00110000;
         bottom = 0b00110000;
         side = 0b00110000;
-        break;
-
-    // Purple
-    case 3:
-        top = 0b01000010;
-        bottom = 0b01000010;
-        side = 0b01000010;
-        break;
-
-    // Red
-    case 4:
-        top = 0b00100010;
-        bottom = 0b00100010;
-        side = 0b00100010;
         break;
     }
 }

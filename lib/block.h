@@ -4,6 +4,13 @@
 // might be better.
 class Block {
 public:
+    enum BlockType : int {
+        Air = 0,
+        Dirt,
+        Grass,
+        Stone,
+    };
+
     Block(unsigned short blockType);
 
     ~Block() = default;

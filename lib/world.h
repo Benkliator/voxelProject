@@ -3,17 +3,18 @@
 #include "renderer.h"
 
 ////////////Important values when it comes to bitwise operations//
-#define xBits 0b1111
-#define xDivision 1
+const long int xBits =             0b00000000000000000001111;
+const long int yBits =             0b00000001111111100000000;
+const long int zBits =             0b00000000000000011110000;
+const long int blockTypeBits =     0b11110000000000000000000;
 
-#define yBits 0b11111111111100000000
-#define yDivision 256
+const long int worldHeight =       256;
 
-#define zBits 0b11110000
-#define zDivision 16
+const long int xDivision =         0b00000000000000000000001;
+const long int yDivision =         0b00000000000000100000000;
+const long int zDivision =         0b00000000000000000010000;
 
-#define blockTypeBits 0b11110000000000000000000
-#define blockTypeDivision 1048576
+const long int blockTypeDivision = 0b00100000000000000000000;
 //////////////////////////////////////////////////////////////////
 
 // TODO: Modify visible chunks and adjust what is being rendered
@@ -46,6 +47,7 @@ public:
     Chunk(int x, int y, int z);
 
     ~Chunk();
+    unsigned int getBlock(unsigned x, unsigned y, unsigned z);
 
     bool findBlock(unsigned int thisBlock) const;
 
