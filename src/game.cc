@@ -41,7 +41,7 @@ Game::Game() {
     std::vector<const char*> skyFaces{
         "./res/textures/monotoneSky.png", "./res/textures/monotoneSky.png",
         "./res/textures/monotoneSky.png", "./res/textures/monotoneSky.png",
-        "./res/textures/monotoneSky.png", "./res/textures/monotoneSky.png",
+        "./res/textures/monotoneSky.png", "./res/textures/monotoneSkyMoon.png",
     };
     skybox = new Skybox {skyFaces};
     world  = new World {10};
