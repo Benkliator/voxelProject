@@ -233,8 +233,6 @@ chunkPos World::Chunk::getPos() {
 
 std::array<float, 4> World::Chunk::getOcclusion(unsigned int x, unsigned int y, unsigned int z, unsigned short int face) {
     std::array<float, 4> vertexOcclusion{0, 0, 0, 0};
-    //if (x == 0 || z == 0)
-    //    return vertexOcclusion;
     switch (face) {
         case Block::Top: {
             if ((getBlock(x, y + 1, z + 1) & blockTypeBits) != Block::Air) {
@@ -250,37 +248,47 @@ std::array<float, 4> World::Chunk::getOcclusion(unsigned int x, unsigned int y, 
                 vertexOcclusion[2] += 1;
                 vertexOcclusion[3] += 1;
             }
+
+            if ((getBlock(x + 1, y + 1, z + 1) & blockTypeBits) != Block::Air) {
+                vertexOcclusion[1] += 1;
+            } if ((x > 0) && (getBlock(x - 1, y + 1, z + 1) & blockTypeBits) != Block::Air) {
+                vertexOcclusion[2] += 1;
+            } if ((z > 0) && (getBlock(x + 1, y + 1, z - 1) & blockTypeBits) != Block::Air) {
+                vertexOcclusion[0] += 1;
+            } if ((x > 0) && (z > 0) && (getBlock(x - 1, y + 1, z - 1) & blockTypeBits) != Block::Air) {
+                vertexOcclusion[3] += 1;
+            }
         } break;
         case Block::Back: {
             if (y == 0)
                 break;
             if ((z > 0) && (getBlock(x, y - 1, z - 1) & blockTypeBits) != Block::Air) {
-                vertexOcclusion[1] += 2;
-                vertexOcclusion[2] += 2;
+                vertexOcclusion[1] = 3;
+                vertexOcclusion[2] = 3;
             }
         } break;
         case Block::Front: {
             if (y == 0)
                 break;
             if ((getBlock(x, y - 1, z + 1) & blockTypeBits) != Block::Air) {
-                vertexOcclusion[1] += 2;
-                vertexOcclusion[2] += 2;
+                vertexOcclusion[1] = 3;
+                vertexOcclusion[2] = 3;
             }
         } break;
         case Block::Right: {
             if (y == 0)
                 break;
             if ((getBlock(x + 1, y - 1, z) & blockTypeBits) != Block::Air) {
-                vertexOcclusion[1] += 2;
-                vertexOcclusion[2] += 2;
+                vertexOcclusion[1] = 3;
+                vertexOcclusion[2] = 3;
             }
         } break;
         case Block::Left: {
             if (y == 0)
                 break;
             if ((getBlock(x - 1, y - 1, z) & blockTypeBits) != Block::Air) {
-                vertexOcclusion[2] += 2;
-                vertexOcclusion[1] += 2;
+                vertexOcclusion[2] = 3;
+                vertexOcclusion[1] = 3;
             }
         } break;
     }
