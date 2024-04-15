@@ -3,18 +3,17 @@
 #include "renderer.h"
 
 ////////////Important values when it comes to bitwise operations//
-const long int xBits =             0b00000000000000000001111;
-const long int yBits =             0b00000001111111100000000;
-const long int zBits =             0b00000000000000011110000;
-const long int blockTypeBits =     0b11110000000000000000000;
+const long int xBits =              0b00000000000000000001111;
+const long int yBits =              0b00000001111111100000000;
+const long int zBits =              0b00000000000000011110000;
+const long int blockTypeBits =      0b11110000000000000000000;
 
-const long int worldHeight =       256;
+const long int xBitOffset =         __builtin_ctzl(xBits);
+const long int yBitOffset =         __builtin_ctzl(yBits);
+const long int zBitOffset =         __builtin_ctzl(zBits);
+const long int blockTypeBitOffset = __builtin_ctzl(blockTypeBits);
 
-const long int xDivision =         0b00000000000000000000001;
-const long int yDivision =         0b00000000000000100000000;
-const long int zDivision =         0b00000000000000000010000;
-
-const long int blockTypeDivision = 0b00100000000000000000000;
+const long int worldHeight =        256;
 //////////////////////////////////////////////////////////////////
 
 struct chunkPos {
@@ -90,7 +89,6 @@ inline const float backVertices[]{
     -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, // bottom-left
     -0.5f, 0.5f,  -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f  // top-left
 };
-
 inline const float frontVertices[]{
     0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // top-right
     0.5f,  -0.5f, 0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, // bottom-right

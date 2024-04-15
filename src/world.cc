@@ -56,14 +56,14 @@ World::Chunk::generateMesh() {
     std::vector<float> vertexMesh;
     for (unsigned int it = 0; it < blockArray.size(); it++) {
         unsigned int block = blockArray[it];
-
-        unsigned int x = (block & xBits) / xDivision;
-        unsigned int y = (block & yBits) / yDivision;
-        unsigned int z = (block & zBits) / zDivision;
-        Block blockType((block & blockTypeBits) / blockTypeDivision);
         if ((block & blockTypeBits) == Block::Air) {
             continue;
         }
+
+        unsigned int x = (block & xBits) >> xBitOffset;
+        unsigned int y = (block & yBits) >> yBitOffset;
+        unsigned int z = (block & zBits) >> zBitOffset;
+        Block blockType((block & blockTypeBits) >> blockTypeBitOffset);
 
         // (!obsTop(it))
         if (y < worldHeight &&
@@ -78,9 +78,9 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(topVertices[i] + x + pos.x);
                 vertexMesh.push_back(topVertices[i + 1] + y + pos.y);
                 vertexMesh.push_back(topVertices[i + 2] + z + pos.z);
-                vertexMesh.push_back(topVertices[i + 3] +
-                                     static_cast<float>(blockType.top & zBits) /
-                                         zDivision);
+                vertexMesh.push_back(
+                    topVertices[i + 3] +
+                    static_cast<float>((blockType.top & zBits) >> zBitOffset));
                 vertexMesh.push_back(topVertices[i + 4] +
                                      (blockType.top & xBits));
                 vertexMesh.push_back(bottomVertices[i + 5]);
@@ -91,7 +91,8 @@ World::Chunk::generateMesh() {
         }
 
         // (!obsBack(it) && z != 0)
-        if ((z > 0 && ((getBlock(x, y, z - 1) & blockTypeBits) == Block::Air))) {
+        if ((z > 0 &&
+             ((getBlock(x, y, z - 1) & blockTypeBits) == Block::Air))) {
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             indexMesh.push_back(vertexMesh.size() / 9);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
@@ -104,7 +105,7 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(backVertices[i + 2] + z + pos.z);
                 vertexMesh.push_back(
                     backVertices[i + 3] +
-                    static_cast<float>(blockType.side & zBits) / zDivision);
+                    static_cast<float>((blockType.side & zBits) >> zBitOffset));
                 vertexMesh.push_back(backVertices[i + 4] +
                                      (blockType.side & xBits));
                 vertexMesh.push_back(bottomVertices[i + 5]);
@@ -133,7 +134,7 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(frontVertices[i + 2] + z + pos.z);
                 vertexMesh.push_back(
                     frontVertices[i + 3] +
-                    static_cast<float>(blockType.side & zBits) / zDivision);
+                    static_cast<float>((blockType.side & zBits) >> zBitOffset));
                 vertexMesh.push_back(frontVertices[i + 4] +
                                      (blockType.side & 15));
                 vertexMesh.push_back(bottomVertices[i + 5]);
@@ -162,7 +163,7 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(leftVertices[i + 2] + z + pos.z);
                 vertexMesh.push_back(
                     leftVertices[i + 3] +
-                    static_cast<float>(blockType.side & zBits) / zDivision);
+                    static_cast<float>((blockType.side & zBits) >> zBitOffset));
                 vertexMesh.push_back(leftVertices[i + 4] +
                                      (blockType.side & xBits));
                 vertexMesh.push_back(bottomVertices[i + 5]);
@@ -191,7 +192,7 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(rightVertices[i + 2] + z + pos.z);
                 vertexMesh.push_back(
                     rightVertices[i + 3] +
-                    static_cast<float>(blockType.side & zBits) / zDivision);
+                    static_cast<float>((blockType.side & zBits) >> zBitOffset));
                 vertexMesh.push_back(rightVertices[i + 4] +
                                      (blockType.side & xBits));
                 vertexMesh.push_back(bottomVertices[i + 5]);
@@ -220,7 +221,8 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(bottomVertices[i + 2] + z + pos.z);
                 vertexMesh.push_back(
                     bottomVertices[i + 3] +
-                    static_cast<float>(blockType.bottom & zBits) / zDivision);
+                    static_cast<float>((blockType.bottom & zBits) >>
+                                       zBitOffset));
                 vertexMesh.push_back(bottomVertices[i + 4] +
                                      (blockType.bottom & xBits));
                 vertexMesh.push_back(bottomVertices[i + 5]);
@@ -234,8 +236,8 @@ World::Chunk::generateMesh() {
     return std::make_pair(indexMesh, vertexMesh);
 }
 
-// TODO(Christoffer): This function should create a World::getBlock and use with
-//                    the chunk's world pointer instead
+// TODO(Christoffer): Should create a World::getBlock and use with the chunk's
+//                    world pointer instead
 unsigned int
 World::Chunk::getBlock(unsigned int x, unsigned int y, unsigned int z) {
     size_t ix = y + (z * worldHeight) + (x * 16 * worldHeight);
@@ -256,7 +258,6 @@ void World::Chunk::generateTerrain() {
                 perlin(((x + pos.x) * freq) / 16, ((z + pos.z) * freq) / 16);
             float height = noise * amp + 1;
             for (int y = 0; y < worldHeight; y++) {
-                unsigned int val = (((0 | x) | z * zDivision) | y * yDivision);
                 // Using the following line in an if or switch case
                 // can let you dynamically decide block generations at
                 // different (x, y, z) values.
@@ -266,7 +267,8 @@ void World::Chunk::generateTerrain() {
                 } else {
                     bt = Block::Air;
                 }
-                val = (val | bt * blockTypeDivision);
+                unsigned int val = x << xBitOffset | y << yBitOffset |
+                                   z << zBitOffset | bt << blockTypeBitOffset;
                 blockArray.push_back(val);
             }
         }
