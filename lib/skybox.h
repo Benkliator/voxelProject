@@ -10,7 +10,7 @@ public:
     ~Skybox();
 
     // Does what you think it does.
-    void draw(glm::mat4 view);
+    void draw(glm::mat4 view, float time);
 
 private:
     unsigned int VAO;

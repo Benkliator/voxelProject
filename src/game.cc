@@ -72,7 +72,7 @@ void Game::gameLoop() {
         world->draw(view);
 
         view = skyboxCam->lookAt();
-        skybox->draw(view);
+        skybox->draw(view, currentFrame);
 
         glfwPollEvents();
         glfwSwapBuffers(window);

@@ -57,7 +57,7 @@ Skybox::~Skybox() {
     glDeleteShader(shaderProgram);
 }
 
-void Skybox::draw(glm::mat4 view) {
+void Skybox::draw(glm::mat4 view, float time) {
     glUseProgram(shaderProgram);
     glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
     glBindVertexArray(VAO);
@@ -79,7 +79,7 @@ void Skybox::draw(glm::mat4 view) {
                                   0.0f,
                                   0.0f,
                                   0.0f,
-                                  0.001f);
+                                  0.0009f);
     glm::mat4 projection =
         glm::perspective(glm::radians(45.0f), 1.8f, 0.1f, 1000.0f);
 
@@ -94,6 +94,15 @@ void Skybox::draw(glm::mat4 view) {
                        GL_FALSE,
                        glm::value_ptr(scaling));
 
+    glm::mat4 model{1.0};
+    model = glm::rotate(model, glm::radians(time * 2) , glm::vec3(1, 0, 0)); 
+    // where x, y, z is axis of rotation (e.g. 0 1 0)
+    glUniformMatrix4fv(
+        glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"),
+                       1,
+                       GL_FALSE,
+                       glm::value_ptr(model));
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
