@@ -1,4 +1,8 @@
 #include "game.h"
+#include <GLFW/glfw3.h>
+
+#include <glm/fwd.hpp>
+#include <iostream>
 
 Game::Game() {
     glfwInit();
@@ -15,8 +19,7 @@ Game::Game() {
     glfwMakeContextCurrent(window);
     glfwSetWindowUserPointer(window, this);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-    auto mouseCallback = [](GLFWwindow* w, double x, double y)
-    {
+    auto mouseCallback = [](GLFWwindow* w, double x, double y) {
         static_cast<Game*>(glfwGetWindowUserPointer(w))->mouseCallback(x, y);
     };
     glfwSetCursorPosCallback(window, mouseCallback);
@@ -26,8 +29,7 @@ Game::Game() {
         std::cerr << "Failed to initialize GLAD" << std::endl;
     }
 
-    // NOTE: DOES NOT WORK ON VMS
-    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -43,6 +45,7 @@ Game::Game() {
 
     playerCam = new Camera{};
     skyboxCam = new Camera{};
+    hud = new Hud{};
 }
 
 Game::~Game() {
@@ -50,6 +53,7 @@ Game::~Game() {
     delete skybox;
     delete playerCam;
     delete skyboxCam;
+    delete hud;
     glfwTerminate();
 }
 
@@ -69,11 +73,16 @@ void Game::gameLoop() {
         view = skyboxCam->lookAt();
         skybox->draw(view, currentFrame);
 
+        hud->renderText("voxelGame V. FINAL_final.final.mov",
+                        5.0f,
+                        5.0f,
+                        1.0f,
+                        glm::vec3{ 0.5, 0.8f, 0.2f });
+
         glfwPollEvents();
         glfwSwapBuffers(window);
     }
 }
-
 
 void Game::processInput() {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
@@ -94,7 +103,7 @@ void Game::mouseCallback(double xposIn, double yposIn) {
     }
 
     float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; 
+    float yoffset = lastY - ypos;
     // reversed since y-coordinates go from bottom to top
 
     lastX = xpos;

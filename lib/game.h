@@ -6,8 +6,7 @@
 #include "input.h"
 #include "skybox.h"
 #include "world.h"
-#include <iostream>
-#include <vector>
+#include "hud.h"
 
 const unsigned int SCR_WIDTH = 1620;
 const unsigned int SCR_HEIGHT = 900;
@@ -20,8 +19,11 @@ public:
     void gameLoop();
 
     void mouseCallback(double xposIn, double yposIn);
+
 private:
     void processInput();
+
+    Hud* hud = nullptr;;
 
     Camera* playerCam = nullptr;
     Camera* skyboxCam = nullptr;

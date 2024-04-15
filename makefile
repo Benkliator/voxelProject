@@ -8,14 +8,18 @@ INCDIR := include
 CXXFLAGS := -std=c++17
 CXXFLAGS += -I./lib
 CXXFLAGS += -I./$(INCDIR)
+CXXFLAGS += $(shell pkg-config --cflags freetype2)
 
-LDFLAGS := $(shell pkg-config --libs glfw3)
+LDFLAGS := $(shell pkg-config --libs glfw3 freetype2)
 
 SOURCES := $(wildcard $(SRCDIR)/*.cc)
 OBJECTS := $(patsubst $(SRCDIR)/%.cc,$(OBJDIR)/%.o,$(SOURCES))
 OBJECTS += $(OBJDIR)/glad.o
 
 all: $(EXECUTABLE)
+
+run: $(EXECUTABLE)
+	./$(EXECUTABLE)
 
 # Main program
 $(EXECUTABLE): $(OBJECTS)

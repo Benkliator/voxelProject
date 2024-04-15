@@ -17,20 +17,20 @@ void main(void)
 {
     int occlusionInt = int(occlusion);
     switch (occlusionInt) {
-        case 0: 
+        case 0:
             color = vec3(1.0, 1.0, 1.0);
             break;
-        case 1: 
+        case 1:
             color = vec3(0.68, 0.68, 0.68);
             break;
-        case 2: 
+        case 2:
             color = vec3(0.55, 0.55, 0.55);
             break;
-        case 3: 
+        case 3:
             color = vec3(0.45, 0.45, 0.45);
             break;
     }
     normal = normalize(aNormal);
-    gl_Position = projection * view * vec4(aPos, 1.0); 
+    gl_Position = projection * view * vec4(aPos, 1.0);
     texCoord = aTexCoord / 16;
 }

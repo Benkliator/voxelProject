@@ -13,7 +13,7 @@ World::World(unsigned int size) {
     for (int x = 0; x < size; x++) {
         std::vector<Chunk> temp;
         for (int z = 0; z < size; z++) {
-            visibleChunks.push_back(Chunk{ x, 0, z });
+            visibleChunks.emplace_back(x, 0, z);
         }
     }
 
@@ -28,7 +28,7 @@ World::World(unsigned int size) {
 }
 
 World::~World() {
-    std::vector<Chunk>().swap(visibleChunks);
+    // std::vector<Chunk>().swap(visibleChunks);
 }
 
 void World::draw(glm::mat4 view) {
@@ -45,7 +45,7 @@ World::Chunk::Chunk(int x, int y, int z) {
 
 // NOTE: Might need to actually impelent this function for memory safety (lol)
 World::Chunk::~Chunk() {
-    std::vector<unsigned int>().swap(blockArray);
+    // std::vector<unsigned int>().swap(blockArray);
 }
 
 std::pair<std::vector<unsigned int>, std::vector<float>>
@@ -74,7 +74,8 @@ World::Chunk::generateMesh() {
             indexMesh.push_back((vertexMesh.size() / 9) + 2);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
-            std::array<float, 4> occlusionArray = getOcclusion(x, y, z, Block::Top);
+            std::array<float, 4> occlusionArray =
+                getOcclusion(x, y, z, Block::Top);
             for (size_t i = 0; i < 32; i += 8) {
                 vertexMesh.push_back(topVertices[i] + x + pos.x);
                 vertexMesh.push_back(topVertices[i + 1] + y + pos.y);
@@ -99,7 +100,8 @@ World::Chunk::generateMesh() {
             indexMesh.push_back((vertexMesh.size() / 9) + 2);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
-            std::array<float, 4> occlusionArray = getOcclusion(x, y, z, Block::Back);
+            std::array<float, 4> occlusionArray =
+                getOcclusion(x, y, z, Block::Back);
             for (size_t i = 0; i < 32; i += 8) {
                 vertexMesh.push_back(backVertices[i] + x + pos.x);
                 vertexMesh.push_back(backVertices[i + 1] + y + pos.y);
@@ -124,7 +126,8 @@ World::Chunk::generateMesh() {
             indexMesh.push_back((vertexMesh.size() / 9) + 2);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
-            std::array<float, 4> occlusionArray = getOcclusion(x, y, z, Block::Front);
+            std::array<float, 4> occlusionArray =
+                getOcclusion(x, y, z, Block::Front);
             for (size_t i = 0; i < 32; i += 8) {
                 vertexMesh.push_back(frontVertices[i] + x + pos.x);
                 vertexMesh.push_back(frontVertices[i + 1] + y + pos.y);
@@ -149,7 +152,8 @@ World::Chunk::generateMesh() {
             indexMesh.push_back((vertexMesh.size() / 9) + 2);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
-            std::array<float, 4> occlusionArray = getOcclusion(x, y, z, Block::Left);
+            std::array<float, 4> occlusionArray =
+                getOcclusion(x, y, z, Block::Left);
             for (size_t i = 0; i < 32; i += 8) {
                 vertexMesh.push_back(leftVertices[i] + x + pos.x);
                 vertexMesh.push_back(leftVertices[i + 1] + y + pos.y);
@@ -174,7 +178,8 @@ World::Chunk::generateMesh() {
             indexMesh.push_back((vertexMesh.size() / 9) + 2);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
-            std::array<float, 4> occlusionArray = getOcclusion(x, y, z, Block::Right);
+            std::array<float, 4> occlusionArray =
+                getOcclusion(x, y, z, Block::Right);
             for (size_t i = 0; i < 32; i += 8) {
                 vertexMesh.push_back(rightVertices[i] + x + pos.x);
                 vertexMesh.push_back(rightVertices[i + 1] + y + pos.y);
