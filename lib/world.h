@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include "renderer.h"
 
 ////////////Important values when it comes to bitwise operations//
@@ -54,15 +55,17 @@ public:
     Chunk(int x, int y, int z);
 
     ~Chunk();
+
     unsigned int getBlock(unsigned x, unsigned y, unsigned z);
 
     std::pair<std::vector<unsigned int>, std::vector<float>> generateMesh();
 
     chunkPos getPos();
-
 private:
     // Helper functions for the constructor so it's easier to read.
     void generateTerrain();
+
+    std::array<float, 4> getOcclusion(unsigned int x, unsigned int y, unsigned int z, unsigned short int face);
     // Bit values for each element in the blockArray vector:
     //
     // 0000   0000 0000   0000 0000 0000   0000 0000

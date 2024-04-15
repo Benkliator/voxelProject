@@ -74,6 +74,7 @@ World::Chunk::generateMesh() {
             indexMesh.push_back((vertexMesh.size() / 9) + 2);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
+            std::array<float, 4> occlusionArray = getOcclusion(x, y, z, Block::Top);
             for (size_t i = 0; i < 32; i += 8) {
                 vertexMesh.push_back(topVertices[i] + x + pos.x);
                 vertexMesh.push_back(topVertices[i + 1] + y + pos.y);
@@ -86,19 +87,19 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(bottomVertices[i + 5]);
                 vertexMesh.push_back(bottomVertices[i + 6]);
                 vertexMesh.push_back(bottomVertices[i + 7]);
-                vertexMesh.push_back(0.0);
+                vertexMesh.push_back(occlusionArray[i / 8]);
             }
         }
 
         // (!obsBack(it) && z != 0)
-        if ((z > 0 &&
-             ((getBlock(x, y, z - 1) & blockTypeBits) == Block::Air))) {
+        if (z > 0 && ((getBlock(x, y, z - 1) & blockTypeBits) == Block::Air)) {
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             indexMesh.push_back(vertexMesh.size() / 9);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
             indexMesh.push_back((vertexMesh.size() / 9) + 2);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
+            std::array<float, 4> occlusionArray = getOcclusion(x, y, z, Block::Back);
             for (size_t i = 0; i < 32; i += 8) {
                 vertexMesh.push_back(backVertices[i] + x + pos.x);
                 vertexMesh.push_back(backVertices[i + 1] + y + pos.y);
@@ -111,12 +112,7 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(bottomVertices[i + 5]);
                 vertexMesh.push_back(bottomVertices[i + 6]);
                 vertexMesh.push_back(bottomVertices[i + 7]);
-                if (i == 16 || i == 8) {
-                    vertexMesh.push_back(
-                        1.0); // Occlusion value, make function for this.
-                } else {
-                    vertexMesh.push_back(0.0);
-                }
+                vertexMesh.push_back(occlusionArray[i / 8]);
             }
         }
 
@@ -128,6 +124,7 @@ World::Chunk::generateMesh() {
             indexMesh.push_back((vertexMesh.size() / 9) + 2);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
+            std::array<float, 4> occlusionArray = getOcclusion(x, y, z, Block::Front);
             for (size_t i = 0; i < 32; i += 8) {
                 vertexMesh.push_back(frontVertices[i] + x + pos.x);
                 vertexMesh.push_back(frontVertices[i + 1] + y + pos.y);
@@ -140,12 +137,7 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(bottomVertices[i + 5]);
                 vertexMesh.push_back(bottomVertices[i + 6]);
                 vertexMesh.push_back(bottomVertices[i + 7]);
-                if (i == 16 || i == 8) {
-                    vertexMesh.push_back(
-                        1.0); // Occlusion value, make function for this.
-                } else {
-                    vertexMesh.push_back(0.0);
-                }
+                vertexMesh.push_back(occlusionArray[i / 8]);
             }
         }
 
@@ -157,6 +149,7 @@ World::Chunk::generateMesh() {
             indexMesh.push_back((vertexMesh.size() / 9) + 2);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
+            std::array<float, 4> occlusionArray = getOcclusion(x, y, z, Block::Left);
             for (size_t i = 0; i < 32; i += 8) {
                 vertexMesh.push_back(leftVertices[i] + x + pos.x);
                 vertexMesh.push_back(leftVertices[i + 1] + y + pos.y);
@@ -169,12 +162,7 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(bottomVertices[i + 5]);
                 vertexMesh.push_back(bottomVertices[i + 6]);
                 vertexMesh.push_back(bottomVertices[i + 7]);
-                if (i == 16 || i == 8) {
-                    vertexMesh.push_back(
-                        1.0); // Occlusion value, make function for this.
-                } else {
-                    vertexMesh.push_back(0.0);
-                }
+                vertexMesh.push_back(occlusionArray[i / 8]);
             }
         }
 
@@ -186,6 +174,7 @@ World::Chunk::generateMesh() {
             indexMesh.push_back((vertexMesh.size() / 9) + 2);
             indexMesh.push_back((vertexMesh.size() / 9) + 1);
             indexMesh.push_back((vertexMesh.size() / 9) + 3);
+            std::array<float, 4> occlusionArray = getOcclusion(x, y, z, Block::Right);
             for (size_t i = 0; i < 32; i += 8) {
                 vertexMesh.push_back(rightVertices[i] + x + pos.x);
                 vertexMesh.push_back(rightVertices[i + 1] + y + pos.y);
@@ -198,12 +187,7 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(bottomVertices[i + 5]);
                 vertexMesh.push_back(bottomVertices[i + 6]);
                 vertexMesh.push_back(bottomVertices[i + 7]);
-                if (i == 16 || i == 8) {
-                    vertexMesh.push_back(
-                        1.0); // Occlusion value, make function for this.
-                } else {
-                    vertexMesh.push_back(0.0);
-                }
+                vertexMesh.push_back(occlusionArray[i / 8]);
             }
         }
 
@@ -228,8 +212,7 @@ World::Chunk::generateMesh() {
                 vertexMesh.push_back(bottomVertices[i + 5]);
                 vertexMesh.push_back(bottomVertices[i + 6]);
                 vertexMesh.push_back(bottomVertices[i + 7]);
-                vertexMesh.push_back(
-                    1.0); // Occlusion value, make function for this.
+                vertexMesh.push_back(3);
             }
         }
     }
@@ -246,6 +229,62 @@ World::Chunk::getBlock(unsigned int x, unsigned int y, unsigned int z) {
 
 chunkPos World::Chunk::getPos() {
     return pos;
+}
+
+std::array<float, 4> World::Chunk::getOcclusion(unsigned int x, unsigned int y, unsigned int z, unsigned short int face) {
+    std::array<float, 4> vertexOcclusion{0, 0, 0, 0};
+    //if (x == 0 || z == 0)
+    //    return vertexOcclusion;
+    switch (face) {
+        case Block::Top: {
+            if ((getBlock(x, y + 1, z + 1) & blockTypeBits) != Block::Air) {
+                vertexOcclusion[1] += 1;
+                vertexOcclusion[2] += 1;
+            } if ((z > 0) && (getBlock(x, y + 1, z - 1) & blockTypeBits) != Block::Air) {
+                vertexOcclusion[0] += 1;
+                vertexOcclusion[3] += 1;
+            } if ((getBlock(x + 1, y + 1, z) & blockTypeBits) != Block::Air) {
+                vertexOcclusion[0] += 1;
+                vertexOcclusion[1] += 1;
+            } if ((x > 0) && (getBlock(x - 1, y + 1, z) & blockTypeBits) != Block::Air) {
+                vertexOcclusion[2] += 1;
+                vertexOcclusion[3] += 1;
+            }
+        } break;
+        case Block::Back: {
+            if (y == 0)
+                break;
+            if ((z > 0) && (getBlock(x, y - 1, z - 1) & blockTypeBits) != Block::Air) {
+                vertexOcclusion[1] += 2;
+                vertexOcclusion[2] += 2;
+            }
+        } break;
+        case Block::Front: {
+            if (y == 0)
+                break;
+            if ((getBlock(x, y - 1, z + 1) & blockTypeBits) != Block::Air) {
+                vertexOcclusion[1] += 2;
+                vertexOcclusion[2] += 2;
+            }
+        } break;
+        case Block::Right: {
+            if (y == 0)
+                break;
+            if ((getBlock(x + 1, y - 1, z) & blockTypeBits) != Block::Air) {
+                vertexOcclusion[1] += 2;
+                vertexOcclusion[2] += 2;
+            }
+        } break;
+        case Block::Left: {
+            if (y == 0)
+                break;
+            if ((getBlock(x - 1, y - 1, z) & blockTypeBits) != Block::Air) {
+                vertexOcclusion[2] += 2;
+                vertexOcclusion[1] += 2;
+            }
+        } break;
+    }
+    return vertexOcclusion;
 }
 
 void World::Chunk::generateTerrain() {
