@@ -37,49 +37,38 @@ struct chunkPos {
 class World {
 public:
     World(unsigned int size);
-
     ~World();
 
     // Draws out every chunk in visibleChunks
     void draw(glm::mat4& view);
 
+    // TODO: impelent?
     bool findChunk(chunkPos pos);
-
 private:
     class Chunk;
-
     void shaderInit();
 
     std::vector<Chunk> visibleChunks;
-
     unsigned int textureMap;
     unsigned int shaderProgram;
-    glm::mat4 projection{1.0f};
-    // std::vector< std::vector<Chunk> > visibleChunks;
-
-    // Unsure if this is a good idea.
-    // std::unordered_map<Chunk, int> visibleChunks;
+    glm::mat4 projection;
 };
 
 class World::Chunk {
 public:
     // Generates buffers and VAO, creates terrain for chunk.
     Chunk(int x, int y, int z);
-
     ~Chunk();
 
-    unsigned int getBlock(unsigned x, unsigned y, unsigned z);
-
     void generateMesh();
-
     void draw();
 
-    void renderInit();
-
+    unsigned int getBlock(unsigned x, unsigned y, unsigned z);
     chunkPos getPos();
 private:
     // Helper functions for the constructor so it's easier to read.
     void generateTerrain();
+    void renderInit(std::vector<float> vertexMesh, std::vector<unsigned int>indexMesh);
 
     std::array<float, 4> getOcclusion(unsigned int x, unsigned int y, unsigned int z, unsigned short int face);
     // Bit values for each element in the blockArray vector:
@@ -96,15 +85,12 @@ private:
     // ????: Will be used for additional block data, ex. transparency. To be
     // added.
     std::vector<unsigned int> blockArray;
+    chunkPos pos;
 
     unsigned int VAO;
     unsigned int VBO;
     unsigned int EBO;
-
-    std::vector<float> vertexMesh;
-    std::vector<unsigned int> indexMesh;
-
-    chunkPos pos;
+    unsigned int indexSize;
 };
 
 // NOTE: Might want to put these in a proper data structure.

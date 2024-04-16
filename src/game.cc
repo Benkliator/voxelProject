@@ -41,7 +41,7 @@ Game::Game() {
     }
 
     skybox = new Skybox {};
-    world  = new World {30};
+    world  = new World {50};
 
     playerCam = new Camera{};
     skyboxCam = new Camera{};

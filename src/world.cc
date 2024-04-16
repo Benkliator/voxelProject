@@ -1,11 +1,11 @@
 #include "world.h"
 
 World::World(unsigned int size) {
-    std::cout << "Creating chunks..." << std::endl;
-
     textureMap = loadTexture("./res/textures/Blockmap2.png", GL_RGBA);
     shaderInit();
     projection = glm::perspective(glm::radians(45.0f), 1.8f, 0.1f, 1000.0f);
+
+    std::cout << "Creating chunks..." << std::endl;
 
     for (int x = 0; x < size; x++) {
         std::vector<Chunk> temp;
@@ -15,9 +15,9 @@ World::World(unsigned int size) {
     }
 
     std::cout << "Creating meshes..." << std::endl;
+
     for (auto& chunk : visibleChunks) {
         chunk.generateMesh();
-        chunk.renderInit();
     }
     std::cout << "Done!" << std::endl;
 }
@@ -57,64 +57,12 @@ void World::shaderInit() {
     glDeleteShader(fragmentShader);
 }
 
-void World::Chunk::renderInit() {
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER,
-                 vertexMesh.size() * sizeof(float),
-                 vertexMesh.data(),
-                 GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 indexMesh.size() * sizeof(unsigned int),
-                 indexMesh.data(),
-                 GL_STATIC_DRAW);
-
-    glVertexAttribPointer(
-        0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(0));
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1,
-                          2,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          9 * sizeof(float),
-                          (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glVertexAttribPointer(2,
-                          3,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          9 * sizeof(float),
-                          (void*)(5 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
-    glVertexAttribPointer(3,
-                          1,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          9 * sizeof(float),
-                          (void*)(8 * sizeof(float)));
-    glEnableVertexAttribArray(3);
-}
-
-void World::Chunk::draw() {
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-
-    glDrawElements(GL_TRIANGLES, indexMesh.size(), GL_UNSIGNED_INT, 0);
-}
-
 World::Chunk::Chunk(int x, int y, int z) {
     // Chunk offset
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
-    renderInit();
     pos.x = x * 16;
     pos.y = y * 16;
     pos.z = z * 16;
@@ -129,6 +77,8 @@ World::Chunk::~Chunk() {
 void World::Chunk::generateMesh() {
     // NOTE: This implementation is quite slow, but very consitent.
     // it can 100% be cleaned up and become even better
+    std::vector<float> vertexMesh;
+    std::vector<unsigned int> indexMesh;
     for (unsigned int it = 0; it < blockArray.size(); it++) {
         unsigned int block = blockArray[it];
         if ((block & blockTypeBits) == Block::Air) {
@@ -296,6 +246,14 @@ void World::Chunk::generateMesh() {
             }
         }
     }
+    renderInit(vertexMesh, indexMesh);
+}
+
+void World::Chunk::draw() {
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
+    glDrawElements(GL_TRIANGLES, indexSize, GL_UNSIGNED_INT, 0);
 }
 
 // TODO(Christoffer): Should create a World::getBlock and use with the chunk's
@@ -309,6 +267,79 @@ World::Chunk::getBlock(unsigned int x, unsigned int y, unsigned int z) {
 chunkPos World::Chunk::getPos() {
     return pos;
 }
+
+void World::Chunk::generateTerrain() {
+    float freq = 0.76323343; // Frequency
+    float amp = 0.75;        // Amplifier
+    for (int x = 0; x < 16; x++) {
+        for (int z = 0; z < 16; z++) {
+            // Uses perlin function to calculate height for xz position
+            float noise =
+                perlin(((x + pos.x) * freq) / 16, ((z + pos.z) * freq) / 16);
+            float height = noise * amp + 1;
+            for (int y = 0; y < worldHeight; y++) {
+                // Using the following line in an if or switch case
+                // can let you dynamically decide block generations at
+                // different (x, y, z) values.
+                enum Block::BlockType bt;
+                if (y < height) {
+                    bt = Block::Grass;
+                } else {
+                    bt = Block::Air;
+                }
+                unsigned int val = x << xBitOffset | y << yBitOffset |
+                                   z << zBitOffset | bt << blockTypeBitOffset;
+                blockArray.push_back(val);
+            }
+        }
+    }
+}
+
+void World::Chunk::renderInit(std::vector<float> vertexMesh, std::vector<unsigned int>indexMesh) {
+    indexSize = indexMesh.size();
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER,
+                 vertexMesh.size() * sizeof(float),
+                 vertexMesh.data(),
+                 GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 indexMesh.size() * sizeof(unsigned int),
+                 indexMesh.data(),
+                 GL_STATIC_DRAW);
+
+    glVertexAttribPointer(
+        0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(0));
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1,
+                          2,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          9 * sizeof(float),
+                          (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2,
+                          3,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          9 * sizeof(float),
+                          (void*)(5 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    glVertexAttribPointer(3,
+                          1,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          9 * sizeof(float),
+                          (void*)(8 * sizeof(float)));
+    glEnableVertexAttribArray(3);
+}
+
 
 std::array<float, 4> World::Chunk::getOcclusion(unsigned int x, unsigned int y, unsigned int z, unsigned short int face) {
     std::array<float, 4> vertexOcclusion{0, 0, 0, 0};
@@ -374,29 +405,3 @@ std::array<float, 4> World::Chunk::getOcclusion(unsigned int x, unsigned int y, 
     return vertexOcclusion;
 }
 
-void World::Chunk::generateTerrain() {
-    float freq = 0.76323343; // Frequency
-    float amp = 0.75;        // Amplifier
-    for (int x = 0; x < 16; x++) {
-        for (int z = 0; z < 16; z++) {
-            // Uses perlin function to calculate height for xz position
-            float noise =
-                perlin(((x + pos.x) * freq) / 16, ((z + pos.z) * freq) / 16);
-            float height = noise * amp + 1;
-            for (int y = 0; y < worldHeight; y++) {
-                // Using the following line in an if or switch case
-                // can let you dynamically decide block generations at
-                // different (x, y, z) values.
-                enum Block::BlockType bt;
-                if (y < height) {
-                    bt = Block::Grass;
-                } else {
-                    bt = Block::Air;
-                }
-                unsigned int val = x << xBitOffset | y << yBitOffset |
-                                   z << zBitOffset | bt << blockTypeBitOffset;
-                blockArray.push_back(val);
-            }
-        }
-    }
-}
