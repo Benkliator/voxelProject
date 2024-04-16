@@ -1,14 +1,11 @@
 #include "world.h"
-#include "block.h"
-#include "perlin.h"
-
-#include <glm/fwd.hpp>
-#include <glm/mat4x4.hpp>
-
-#include <iostream>
 
 World::World(unsigned int size) {
     std::cout << "Creating chunks..." << std::endl;
+
+    textureMap = loadTexture("./res/textures/Blockmap2.png", GL_RGBA);
+    shaderInit();
+    projection = glm::perspective(glm::radians(45.0f), 1.8f, 0.1f, 1000.0f);
 
     for (int x = 0; x < size; x++) {
         std::vector<Chunk> temp;
@@ -19,11 +16,9 @@ World::World(unsigned int size) {
 
     std::cout << "Creating meshes..." << std::endl;
     for (auto& chunk : visibleChunks) {
-        auto [indices, vertices] = chunk.generateMesh();
-        renderer.addRendering(vertices, indices);
+        chunk.generateMesh();
+        chunk.renderInit();
     }
-    std::cout << "Initiating rendering..." << std::endl;
-    renderer.renderInit();
     std::cout << "Done!" << std::endl;
 }
 
@@ -31,12 +26,95 @@ World::~World() {
     // std::vector<Chunk>().swap(visibleChunks);
 }
 
-void World::draw(glm::mat4 view) {
-    renderer.render(view);
+void World::draw(glm::mat4& view) {
+    glUseProgram(shaderProgram);
+    glBindTexture(GL_TEXTURE_2D, textureMap);
+
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"),
+                       1,
+                       GL_FALSE,
+                       &projection[0][0]);
+    glUniformMatrix4fv(
+        glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
+
+    for (auto& chunk : visibleChunks) {
+        chunk.draw();
+    }
+}
+
+void World::shaderInit() {
+    unsigned int vertexShader =
+        loadShader(GL_VERTEX_SHADER, "./res/shaders/main.vert");
+    unsigned int fragmentShader =
+        loadShader(GL_FRAGMENT_SHADER, "./res/shaders/main.frag");
+
+    shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+}
+
+void World::Chunk::renderInit() {
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER,
+                 vertexMesh.size() * sizeof(float),
+                 vertexMesh.data(),
+                 GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 indexMesh.size() * sizeof(unsigned int),
+                 indexMesh.data(),
+                 GL_STATIC_DRAW);
+
+    glVertexAttribPointer(
+        0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(0));
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1,
+                          2,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          9 * sizeof(float),
+                          (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2,
+                          3,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          9 * sizeof(float),
+                          (void*)(5 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    glVertexAttribPointer(3,
+                          1,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          9 * sizeof(float),
+                          (void*)(8 * sizeof(float)));
+    glEnableVertexAttribArray(3);
+}
+
+void World::Chunk::draw() {
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
+    glDrawElements(GL_TRIANGLES, indexMesh.size(), GL_UNSIGNED_INT, 0);
 }
 
 World::Chunk::Chunk(int x, int y, int z) {
     // Chunk offset
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    renderInit();
     pos.x = x * 16;
     pos.y = y * 16;
     pos.z = z * 16;
@@ -48,12 +126,9 @@ World::Chunk::~Chunk() {
     // std::vector<unsigned int>().swap(blockArray);
 }
 
-std::pair<std::vector<unsigned int>, std::vector<float>>
-World::Chunk::generateMesh() {
+void World::Chunk::generateMesh() {
     // NOTE: This implementation is quite slow, but very consitent.
     // it can 100% be cleaned up and become even better
-    std::vector<unsigned int> indexMesh;
-    std::vector<float> vertexMesh;
     for (unsigned int it = 0; it < blockArray.size(); it++) {
         unsigned int block = blockArray[it];
         if ((block & blockTypeBits) == Block::Air) {
@@ -221,7 +296,6 @@ World::Chunk::generateMesh() {
             }
         }
     }
-    return std::make_pair(indexMesh, vertexMesh);
 }
 
 // TODO(Christoffer): Should create a World::getBlock and use with the chunk's

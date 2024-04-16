@@ -1,7 +1,16 @@
 #pragma once
+#include "glad/glad.h"
 
 #include <array>
-#include "renderer.h"
+#include <vector>
+#include <iostream>
+#include <glm/fwd.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include "block.h"
+#include "perlin.h"
+#include "utility.h"
 
 ////////////Important values when it comes to bitwise operations//
 const long int xBits =              0b00000000000000000001111;
@@ -32,7 +41,7 @@ public:
     ~World();
 
     // Draws out every chunk in visibleChunks
-    void draw(glm::mat4 view);
+    void draw(glm::mat4& view);
 
     bool findChunk(chunkPos pos);
 
@@ -41,8 +50,11 @@ private:
 
     void shaderInit();
 
-    Renderer renderer{};
     std::vector<Chunk> visibleChunks;
+
+    unsigned int textureMap;
+    unsigned int shaderProgram;
+    glm::mat4 projection{1.0f};
     // std::vector< std::vector<Chunk> > visibleChunks;
 
     // Unsure if this is a good idea.
@@ -58,7 +70,11 @@ public:
 
     unsigned int getBlock(unsigned x, unsigned y, unsigned z);
 
-    std::pair<std::vector<unsigned int>, std::vector<float>> generateMesh();
+    void generateMesh();
+
+    void draw();
+
+    void renderInit();
 
     chunkPos getPos();
 private:
@@ -79,8 +95,14 @@ private:
     //
     // ????: Will be used for additional block data, ex. transparency. To be
     // added.
-    //
     std::vector<unsigned int> blockArray;
+
+    unsigned int VAO;
+    unsigned int VBO;
+    unsigned int EBO;
+
+    std::vector<float> vertexMesh;
+    std::vector<unsigned int> indexMesh;
 
     chunkPos pos;
 };
