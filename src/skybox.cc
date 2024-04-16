@@ -5,7 +5,7 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-Skybox::Skybox(std::vector<const char*> texturePath) {
+Skybox::Skybox() {
     float vertices[]{ -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f, 0.5f,
                       -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f, 0.5f, 0.5f,
                       -0.5f, 0.5f,  0.5f,  0.5f,  0.5f,  -0.5f, 0.5f, 0.5f };
@@ -27,7 +27,26 @@ Skybox::Skybox(std::vector<const char*> texturePath) {
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
-    texture = loadTextureCube(texturePath, GL_RGB);
+    std::vector<const char*> skyNight{
+        "./res/textures/monotoneSky.png", "./res/textures/monotoneSky.png",
+        "./res/textures/monotoneSky.png", "./res/textures/monotoneSky.png",
+        "./res/textures/monotoneSky.png", "./res/textures/monotoneSkyMoon.png",
+    };
+    nightTexture = loadTextureCube(skyNight, GL_RGB);
+
+    std::vector<const char*> skyDay{
+        "./res/textures/daySky.png", "./res/textures/daySky.png",
+        "./res/textures/daySky.png", "./res/textures/daySky.png",
+        "./res/textures/daySkyMoon.png", "./res/textures/daySky.png",
+    };
+    dayTexture = loadTextureCube(skyDay, GL_RGB);
+
+    std::vector<const char*> skyDusk{
+        "./res/textures/duskSky.png", "./res/textures/duskSky.png",
+        "./res/textures/duskSky.png", "./res/textures/duskSky.png",
+        "./res/textures/duskSkySun.png", "./res/textures/duskSkySun.png",
+    };
+    duskTexture = loadTextureCube(skyDusk, GL_RGB);
 
     // Generate buffers
     glGenVertexArrays(1, &VAO);
@@ -59,7 +78,14 @@ Skybox::~Skybox() {
 
 void Skybox::draw(glm::mat4 view, float time) {
     glUseProgram(shaderProgram);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+    float angle = glm::radians(time * 2);
+    if (sin(angle) < -0.1) {
+        glBindTexture(GL_TEXTURE_CUBE_MAP, dayTexture);
+    } else if (0.1 < sin(angle)) {
+        glBindTexture(GL_TEXTURE_CUBE_MAP, nightTexture);
+    } else {
+        glBindTexture(GL_TEXTURE_CUBE_MAP, duskTexture);
+    }
     glBindVertexArray(VAO);
 
     glDepthMask(false);
@@ -95,8 +121,9 @@ void Skybox::draw(glm::mat4 view, float time) {
                        glm::value_ptr(scaling));
 
     glm::mat4 model{1.0};
-    model = glm::rotate(model, glm::radians(time * 2) , glm::vec3(1, 0, 0)); 
-    // where x, y, z is axis of rotation (e.g. 0 1 0)
+    model = glm::rotate(model, angle, glm::vec3(1, 0, 0)); 
+    // where x, y, z is axis of rotation
+
     glUniformMatrix4fv(
         glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"),

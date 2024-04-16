@@ -5,7 +5,7 @@
 
 class Skybox {
 public:
-    Skybox(std::vector<const char*> texturePath);
+    Skybox();
 
     ~Skybox();
 
@@ -18,5 +18,8 @@ private:
     unsigned int EBO;
 
     unsigned int shaderProgram;
-    unsigned int texture;
+
+    unsigned int dayTexture;
+    unsigned int nightTexture;
+    unsigned int duskTexture;
 };

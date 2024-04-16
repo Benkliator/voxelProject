@@ -38,12 +38,7 @@ Game::Game() {
         std::cerr << "OpenGL error: " << error << std::endl;
     }
 
-    std::vector<const char*> skyFaces{
-        "./res/textures/monotoneSky.png", "./res/textures/monotoneSky.png",
-        "./res/textures/monotoneSky.png", "./res/textures/monotoneSky.png",
-        "./res/textures/monotoneSky.png", "./res/textures/monotoneSkyMoon.png",
-    };
-    skybox = new Skybox {skyFaces};
+    skybox = new Skybox {};
     world  = new World {10};
 
     playerCam = new Camera{};
