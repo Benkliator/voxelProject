@@ -11,6 +11,8 @@
 const unsigned int SCR_WIDTH = 1620;
 const unsigned int SCR_HEIGHT = 900;
 
+#define RENDER_DISTANCE 50
+
 class Game {
 public:
     Game();

@@ -41,7 +41,7 @@ Game::Game() {
     }
 
     skybox = new Skybox {};
-    world  = new World {50};
+    world  = new World {RENDER_DISTANCE};
 
     playerCam = new Camera{};
     skyboxCam = new Camera{};
