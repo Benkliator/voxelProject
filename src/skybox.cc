@@ -27,6 +27,7 @@ Skybox::Skybox() {
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
+
     std::vector<const char*> skyNight{
         "./res/textures/monotoneSky.png", "./res/textures/monotoneSky.png",
         "./res/textures/monotoneSky.png", "./res/textures/monotoneSky.png",
@@ -123,7 +124,6 @@ void Skybox::draw(glm::mat4 view, float time) {
     glm::mat4 model{1.0};
     model = glm::rotate(model, angle, glm::vec3(1, 0, 0)); 
     // where x, y, z is axis of rotation
-
     glUniformMatrix4fv(
         glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"),

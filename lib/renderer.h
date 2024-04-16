@@ -22,9 +22,9 @@ public:
 private:
     void shaderInit();
 
-    unsigned int VAO;
-    unsigned int VBO;
-    unsigned int EBO;
+    unsigned long int VAO;
+    unsigned long int VBO;
+    unsigned long int EBO;
 
     unsigned int shaderProgram;
 
