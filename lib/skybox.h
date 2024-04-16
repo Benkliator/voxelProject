@@ -21,5 +21,5 @@ private:
 
     unsigned int dayTexture;
     unsigned int nightTexture;
-    unsigned int duskTexture;
+    unsigned int duskTextur;
 };
