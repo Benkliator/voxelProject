@@ -23,6 +23,16 @@ void Player::movePlayer(GLFWwindow* window, float dt) {
     pos = worldCam->processKeyboardInput(window, speed);
 }
 
+void Player::breakBlock() {
+    std::cout << "Breaking block!" << std::endl;
+    auto [from, to] = worldCam->rayCast(2.0f);
+    std::cout << from.x << ' ' << to.x << std::endl;
+}
+
+void Player::placeBlock() {
+    std::cout << "Placing block!" << std::endl;
+}
+
 glm::mat4 Player::worldLook() {
     return worldCam->lookAt();
 }

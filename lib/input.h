@@ -3,6 +3,8 @@
 #include <GLFW/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <utility>
+
 #include "position.h"
 
 // TODO: Put functions functionality in a sepparate cc file, I am too lazy.
@@ -20,6 +22,8 @@ public:
                               GLboolean constrainPitch = true);
 
     floatPos processKeyboardInput(GLFWwindow* window, float deltaTime);
+
+    std::pair<glm::vec3, glm::vec3> rayCast(float length);
 
 private:
     glm::vec3 cameraPos = glm::vec3(0.0f, 5.0f, 0.0f);

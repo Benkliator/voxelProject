@@ -50,5 +50,10 @@ floatPos Camera::processKeyboardInput(GLFWwindow* window, float cameraSpeed) {
     pos.x = cameraPos.x;
     pos.y = cameraPos.y;
     pos.z = cameraPos.z;
+
     return pos;
+}
+
+std::pair<glm::vec3, glm::vec3> Camera::rayCast(float length) {
+    return std::make_pair(cameraPos, cameraPos + (cameraFront * length));
 }

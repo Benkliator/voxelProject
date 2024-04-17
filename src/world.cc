@@ -19,6 +19,7 @@ World::World(unsigned size) {
     for (auto& chunk : visibleChunks) {
         chunk.generateMesh();
     }
+
     std::cout << "Done!" << std::endl;
     std::cout << "Created " << visibleChunks.size() << " chunks!" << std::endl;
 }

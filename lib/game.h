@@ -13,7 +13,7 @@
 const unsigned SCR_WIDTH  = 1620;
 const unsigned SCR_HEIGHT = 900;
 
-#define RENDER_DISTANCE 50
+#define RENDER_DISTANCE 10
 
 class Game {
 public:
@@ -22,7 +22,9 @@ public:
 
     void gameLoop();
 
-    void mouseCallback(double xposIn, double yposIn);
+    void mouseMotionCallback(double xposIn, double yposIn);
+
+    void mouseClickCallback(int button, int action, int mods);
 
 private:
     void processInput();

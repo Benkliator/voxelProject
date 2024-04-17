@@ -14,11 +14,18 @@ Game::Game() {
 
     glfwMakeContextCurrent(window);
     glfwSetWindowUserPointer(window, this);
+
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-    auto mouseCallback = [](GLFWwindow* w, double x, double y) {
-        static_cast<Game*>(glfwGetWindowUserPointer(w))->mouseCallback(x, y);
+
+    auto mouseMotionCallback = [](GLFWwindow* w, double x, double y) {
+        static_cast<Game*>(glfwGetWindowUserPointer(w))->mouseMotionCallback(x, y);
     };
-    glfwSetCursorPosCallback(window, mouseCallback);
+    glfwSetCursorPosCallback(window, mouseMotionCallback);
+
+    auto mouseClickCallback = [](GLFWwindow* w, int button, int action, int mods) {
+        static_cast<Game*>(glfwGetWindowUserPointer(w))->mouseClickCallback(button, action, mods);
+    };
+    glfwSetMouseButtonCallback(window, mouseClickCallback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         glfwTerminate();
@@ -40,7 +47,7 @@ Game::Game() {
     skybox = new Skybox {};
     world  = new World {RENDER_DISTANCE};
     player = new Player{};
-    hud = new Hud{};
+    hud    = new Hud{};
 }
 
 Game::~Game() {
@@ -87,7 +94,7 @@ void Game::processInput() {
     player->movePlayer(window, deltaTime);
 }
 
-void Game::mouseCallback(double xposIn, double yposIn) {
+void Game::mouseMotionCallback(double xposIn, double yposIn) {
     float xpos = static_cast<float>(xposIn);
     float ypos = static_cast<float>(yposIn);
 
@@ -105,6 +112,14 @@ void Game::mouseCallback(double xposIn, double yposIn) {
     lastY = ypos;
 
     player->moveMouse(window, xoffset, yoffset);
+}
+
+void Game::mouseClickCallback(int button, int action, int mods) {
+    (void)mods;
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+        player->breakBlock();
+    else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+        player->placeBlock();
 }
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height) {

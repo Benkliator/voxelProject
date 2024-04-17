@@ -2,6 +2,7 @@
 
 #include "input.h"
 #include "position.h"
+#include <iostream>
 
 class Player {
 public:
@@ -10,6 +11,8 @@ public:
 
     void moveMouse(GLFWwindow* window, float xi, float yi);
     void movePlayer(GLFWwindow* window, float dt);
+    void breakBlock();
+    void placeBlock();
 
     glm::mat4 worldLook();
     glm::mat4 skyLook();
