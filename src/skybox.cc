@@ -77,7 +77,7 @@ Skybox::~Skybox() {
     glDeleteShader(shaderProgram);
 }
 
-void Skybox::draw(glm::mat4 view, float time) {
+void Skybox::draw(glm::mat4& view, float time) {
     glUseProgram(shaderProgram);
     float angle = glm::radians(time * 2);
     if (sin(angle) < -0.1) {

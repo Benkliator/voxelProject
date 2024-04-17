@@ -296,7 +296,7 @@ void World::Chunk::generateTerrain() {
     }
 }
 
-void World::Chunk::renderInit(std::vector<float> vertexMesh, std::vector<unsigned>indexMesh) {
+void World::Chunk::renderInit(std::vector<float>& vertexMesh, std::vector<unsigned>& indexMesh) {
     indexSize = indexMesh.size();
     glBindVertexArray(VAO);
 

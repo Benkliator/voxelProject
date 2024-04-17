@@ -63,7 +63,7 @@ public:
 private:
     // Helper functions for the constructor so it's easier to read.
     void generateTerrain();
-    void renderInit(std::vector<float> vertexMesh, std::vector<unsigned>indexMesh);
+    void renderInit(std::vector<float>& vertexMesh, std::vector<unsigned>& indexMesh);
 
     std::array<float, 4> getOcclusion(unsigned x, unsigned y, unsigned z, unsigned short face);
     // Bit values for each element in the blockArray vector:
