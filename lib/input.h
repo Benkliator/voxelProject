@@ -1,17 +1,14 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
+#include <glm/fwd.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <utility>
 
-#include "position.h"
-
-// TODO: Put functions functionality in a sepparate cc file, I am too lazy.
 class Camera {
 public:
     Camera();
-
     ~Camera() = default;
 
     glm::mat4 lookAt();
@@ -21,7 +18,7 @@ public:
                               double yoffset,
                               GLboolean constrainPitch = true);
 
-    floatPos processKeyboardInput(GLFWwindow* window, float deltaTime);
+    glm::vec3 processKeyboardInput(GLFWwindow* window, float deltaTime);
 
     std::pair<glm::vec3, glm::vec3> rayCast(float length);
 

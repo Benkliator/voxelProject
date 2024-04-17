@@ -1,4 +1,9 @@
+#include "glad/glad.h"
+
 #include "game.h"
+#include "world.h"
+
+#include <iostream>
 
 Game::Game() {
     glfwInit();
@@ -18,13 +23,16 @@ Game::Game() {
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
     auto mouseMotionCallback = [](GLFWwindow* w, double x, double y) {
-        static_cast<Game*>(glfwGetWindowUserPointer(w))->mouseMotionCallback(x, y);
+        static_cast<Game*>(glfwGetWindowUserPointer(w))
+            ->mouseMotionCallback(x, y);
     };
     glfwSetCursorPosCallback(window, mouseMotionCallback);
 
-    auto mouseClickCallback = [](GLFWwindow* w, int button, int action, int mods) {
-        static_cast<Game*>(glfwGetWindowUserPointer(w))->mouseClickCallback(button, action, mods);
-    };
+    auto mouseClickCallback =
+        [](GLFWwindow* w, int button, int action, int mods) {
+            static_cast<Game*>(glfwGetWindowUserPointer(w))
+                ->mouseClickCallback(button, action, mods);
+        };
     glfwSetMouseButtonCallback(window, mouseClickCallback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -43,11 +51,10 @@ Game::Game() {
         std::cerr << "OpenGL error: " << error << std::endl;
     }
 
-
-    skybox = new Skybox {};
-    world  = new World {RENDER_DISTANCE};
+    skybox = new Skybox{};
+    world = new World{ RENDER_DISTANCE };
     player = new Player{};
-    hud    = new Hud{};
+    hud = new Hud{};
 }
 
 Game::~Game() {
@@ -75,11 +82,7 @@ void Game::gameLoop() {
         skybox->draw(view, currentFrame);
 
         std::string fps = std::to_string((int)(1 / deltaTime));
-        hud->renderText(fps,
-                        5.0f,
-                        5.0f,
-                        1.0f,
-                        glm::vec3{ 1.0f, 1.0f, 1.0f });
+        hud->renderText(fps, 5.0f, 5.0f, 1.0f, glm::vec3{ 1.0f, 1.0f, 1.0f });
 
         glfwPollEvents();
         glfwSwapBuffers(window);
@@ -123,5 +126,6 @@ void Game::mouseClickCallback(int button, int action, int mods) {
 }
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+    (void)window; // Unused
     glViewport(0, 0, width, height);
 }

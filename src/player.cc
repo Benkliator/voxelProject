@@ -1,5 +1,7 @@
 #include "player.h"
 
+#include <iostream>
+
 Player::Player() {
     worldCam = new Camera{};
     skyCam = new Camera{};

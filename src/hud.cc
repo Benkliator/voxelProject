@@ -1,11 +1,10 @@
-#include "hud.h"
-#include "game.h"
 #include "glad/glad.h"
+
+#include "game.h"
+#include "hud.h"
 #include "utility.h"
 
-#include <GL/gl.h>
-#include <glm/ext/matrix_clip_space.hpp>
-#include <glm/ext/matrix_float4x4.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
 Hud::Hud() {
@@ -79,7 +78,7 @@ Hud::Hud() {
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"),
                        1,
                        GL_FALSE,
-                       &projection[0][0]);
+                       glm::value_ptr(projection));
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);

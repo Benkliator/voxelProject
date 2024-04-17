@@ -1,4 +1,9 @@
+#include "glad/glad.h"
+
 #include "utility.h"
+
+#include <fstream>
+#include <iostream>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -42,19 +47,28 @@ unsigned loadShader(GLenum type, const char* filePath) {
 unsigned loadTexture(const char* filepath, unsigned format) {
     unsigned texture;
     int width, height, nrChannels;
-    unsigned char *data = stbi_load(filepath, &width, &height, &nrChannels, 0);
+    unsigned char* data = stbi_load(filepath, &width, &height, &nrChannels, 0);
 
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+    glTexParameteri(
+        GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 2);
     // load and generate the texture
     if (data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D,
+                     0,
+                     format,
+                     width,
+                     height,
+                     0,
+                     format,
+                     GL_UNSIGNED_BYTE,
+                     data);
         glTexImage2D(GL_TEXTURE_2D,
                      0,
                      format,
@@ -65,8 +79,7 @@ unsigned loadTexture(const char* filepath, unsigned format) {
                      GL_UNSIGNED_BYTE,
                      data);
         glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else {
+    } else {
         std::cout << "bad texture" << std::endl;
     }
     stbi_image_free(data);
@@ -74,8 +87,7 @@ unsigned loadTexture(const char* filepath, unsigned format) {
     return texture;
 }
 
-unsigned loadTextureCube(std::vector<const char*> filepath,
-                             unsigned format) {
+unsigned loadTextureCube(std::vector<const char*> filepath, unsigned format) {
     unsigned texture;
     int width, height, nrChannels;
     glGenTextures(1, &texture);

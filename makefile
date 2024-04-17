@@ -6,6 +6,9 @@ OBJDIR := obj
 INCDIR := include
 
 CXXFLAGS := -std=c++17
+# CXXFLAGS += -Wall
+# CXXFLAGS += -Wextra
+# CXXFLAGS += -Wpedantic
 CXXFLAGS += -I./lib
 CXXFLAGS += -I./$(INCDIR)
 CXXFLAGS += $(shell pkg-config --cflags freetype2)

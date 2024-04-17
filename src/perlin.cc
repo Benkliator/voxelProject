@@ -1,5 +1,7 @@
 #include "perlin.h"
 
+#include <cmath>
+#include <glm/vec2.hpp>
 
 glm::vec2 gradient(int ix, int iy) {
     // No precomputed gradients mean this works for any number of grid

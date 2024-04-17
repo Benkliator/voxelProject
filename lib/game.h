@@ -1,19 +1,14 @@
 #pragma once
 
-#include "glad/glad.h"
-#include <GLFW/glfw3.h>
-#include <glm/fwd.hpp>
-#include <iostream>
-
-#include "skybox.h"
-#include "world.h"
 #include "hud.h"
 #include "player.h"
+#include "skybox.h"
+#include "world.h"
 
-const unsigned SCR_WIDTH  = 1620;
+const unsigned SCR_WIDTH = 1620;
 const unsigned SCR_HEIGHT = 900;
 
-#define RENDER_DISTANCE 10
+const unsigned RENDER_DISTANCE = 10;
 
 class Game {
 public:
@@ -21,18 +16,14 @@ public:
     ~Game();
 
     void gameLoop();
-
-    void mouseMotionCallback(double xposIn, double yposIn);
-
-    void mouseClickCallback(int button, int action, int mods);
+    void mouseMotionCallback(double, double);
+    void mouseClickCallback(int, int, int);
 
 private:
     void processInput();
 
     Player* player = nullptr;
-
-    Hud* hud = nullptr;;
-
+    Hud* hud = nullptr;
     Skybox* skybox = nullptr;
     World* world = nullptr;
 
@@ -46,4 +37,4 @@ private:
     float lastFrame = 0.0f;
 };
 
-void framebufferSizeCallback(GLFWwindow* window, int width, int height);
+void framebufferSizeCallback(GLFWwindow*, int, int);

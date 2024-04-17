@@ -1,10 +1,18 @@
-#include "skybox.h"
+#include "glad/glad.h"
 
+#include "skybox.h"
+#include "utility.h"
+
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/trigonometric.hpp>
+#include <vector>
 
 Skybox::Skybox() {
-    float vertices[]{ -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f, 0.5f,
-                      -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f, 0.5f, 0.5f,
-                      -0.5f, 0.5f,  0.5f,  0.5f,  0.5f,  -0.5f, 0.5f, 0.5f };
+    float vertices[]{
+        -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f, 0.5f,
+        -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f, 0.5f, 0.5f,
+        -0.5f, 0.5f,  0.5f,  0.5f,  0.5f,  -0.5f, 0.5f, 0.5f,
+    };
 
     unsigned indices[]{
         0, 2, 1,          // Front
@@ -32,15 +40,15 @@ Skybox::Skybox() {
     nightTexture = loadTextureCube(skyNight, GL_RGB);
 
     std::vector<const char*> skyDay{
-        "./res/textures/daySky.png", "./res/textures/daySky.png",
-        "./res/textures/daySky.png", "./res/textures/daySky.png",
+        "./res/textures/daySky.png",     "./res/textures/daySky.png",
+        "./res/textures/daySky.png",     "./res/textures/daySky.png",
         "./res/textures/daySkyMoon.png", "./res/textures/daySky.png",
     };
     dayTexture = loadTextureCube(skyDay, GL_RGB);
 
     std::vector<const char*> skyDusk{
-        "./res/textures/duskSky.png", "./res/textures/duskSky.png",
-        "./res/textures/duskSky.png", "./res/textures/duskSky.png",
+        "./res/textures/duskSky.png",    "./res/textures/duskSky.png",
+        "./res/textures/duskSky.png",    "./res/textures/duskSky.png",
         "./res/textures/duskSkySun.png", "./res/textures/duskSkySun.png",
     };
     duskTexture = loadTextureCube(skyDusk, GL_RGB);
@@ -61,8 +69,7 @@ Skybox::Skybox() {
         GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // Position
-    glVertexAttribPointer(
-        0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(unsigned), (void*)(0));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(unsigned), NULL);
     glEnableVertexAttribArray(0);
 }
 
@@ -109,19 +116,23 @@ void Skybox::draw(glm::mat4& view, float time) {
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"),
                        1,
                        GL_FALSE,
-                       &projection[0][0]);
-    glUniformMatrix4fv(
-        glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
+                       glm::value_ptr(projection));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),
+                       1,
+                       GL_FALSE,
+                       glm::value_ptr(view));
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "scaling"),
                        1,
                        GL_FALSE,
                        glm::value_ptr(scaling));
 
-    glm::mat4 model{1.0};
-    model = glm::rotate(model, angle, glm::vec3(1, 0, 0)); 
+    glm::mat4 model{ 1.0 };
+    model = glm::rotate(model, angle, glm::vec3(1, 0, 0));
     // where x, y, z is axis of rotation
-    glUniformMatrix4fv(
-        glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"),
+                       1,
+                       GL_FALSE,
+                       glm::value_ptr(model));
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"),
                        1,
                        GL_FALSE,

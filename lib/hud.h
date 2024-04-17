@@ -8,12 +8,12 @@
 #include <string>
 #include FT_FREETYPE_H
 
-#define NCHARS 128
+const int NCHARS = 128;
 
 class Hud {
 public:
     Hud();
-    void renderText(std::string, float, float, float scale, glm::vec3 color);
+    void renderText(std::string, float, float, float, glm::vec3);
 
 private:
     FT_Library ft;
