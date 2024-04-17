@@ -2,6 +2,8 @@
 
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
+#include <glm/fwd.hpp>
+#include <iostream>
 
 #include "skybox.h"
 #include "world.h"

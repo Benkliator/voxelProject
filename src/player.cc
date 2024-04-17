@@ -20,7 +20,7 @@ void Player::moveMouse(GLFWwindow* window, float xi, float yi) {
 void Player::movePlayer(GLFWwindow* window, float dt) {
     // only worldcam because skybox moves with player
     float speed = 12.0f * dt;
-    worldCam->processKeyboardInput(window, speed);
+    pos = worldCam->processKeyboardInput(window, speed);
 }
 
 glm::mat4 Player::worldLook() {

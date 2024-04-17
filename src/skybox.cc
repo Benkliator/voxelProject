@@ -1,9 +1,5 @@
-#include "glad/glad.h"
-
 #include "skybox.h"
-#include "utility.h"
 
-#include <glm/gtc/type_ptr.hpp>
 
 Skybox::Skybox() {
     float vertices[]{ -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f, 0.5f,

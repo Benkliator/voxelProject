@@ -1,8 +1,4 @@
 #include "game.h"
-#include <GLFW/glfw3.h>
-
-#include <glm/fwd.hpp>
-#include <iostream>
 
 Game::Game() {
     glfwInit();
@@ -71,11 +67,12 @@ void Game::gameLoop() {
         view = player->skyLook();
         skybox->draw(view, currentFrame);
 
-        hud->renderText("voxelGame V. FINAL_final.final.mov",
+        std::string fps = std::to_string((int)(1 / deltaTime));
+        hud->renderText(fps,
                         5.0f,
                         5.0f,
                         1.0f,
-                        glm::vec3{ 0.5, 0.8f, 0.2f });
+                        glm::vec3{ 1.0f, 1.0f, 1.0f });
 
         glfwPollEvents();
         glfwSwapBuffers(window);

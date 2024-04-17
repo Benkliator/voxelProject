@@ -1,9 +1,4 @@
-#include "glad/glad.h"
-
 #include "utility.h"
-
-#include <fstream>
-#include <iostream>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>

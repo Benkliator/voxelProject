@@ -1,6 +1,10 @@
 #pragma once
 
 #include <glm/fwd.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec4.hpp>
+
+#include <cmath>
 
 // NOTE: This noise is absolute garbage.
 // TODO: Implement good noise.

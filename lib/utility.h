@@ -1,6 +1,10 @@
 #pragma once
+#include "glad/glad.h"
 
 #include <vector>
+#include <fstream>
+#include <iostream>
+
 
 typedef unsigned int GLenum;
 
