@@ -30,8 +30,7 @@ void Camera::processMouseMovement(GLFWwindow* window,
     cameraFront = glm::normalize(cameraFront);
 }
 
-void Camera::processKeyboardInput(GLFWwindow* window, float deltaTime) {
-    const float cameraSpeed = 12.0f * deltaTime;
+void Camera::processKeyboardInput(GLFWwindow* window, float cameraSpeed) {
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         cameraPos += cameraSpeed * glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)

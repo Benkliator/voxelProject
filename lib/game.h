@@ -3,10 +3,10 @@
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
 
-#include "input.h"
 #include "skybox.h"
 #include "world.h"
 #include "hud.h"
+#include "player.h"
 
 const unsigned SCR_WIDTH  = 1620;
 const unsigned SCR_HEIGHT = 900;
@@ -25,10 +25,9 @@ public:
 private:
     void processInput();
 
-    Hud* hud = nullptr;;
+    Player* player = nullptr;
 
-    Camera* playerCam = nullptr;
-    Camera* skyboxCam = nullptr;
+    Hud* hud = nullptr;;
 
     Skybox* skybox = nullptr;
     World* world = nullptr;

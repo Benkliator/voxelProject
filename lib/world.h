@@ -11,6 +11,7 @@
 #include "block.h"
 #include "perlin.h"
 #include "utility.h"
+#include "position.h"
 
 ////////////Important values when it comes to bitwise operations//
 const long xBits =              0b00000000000000000001111;
@@ -26,12 +27,6 @@ const long blockTypeBitOffset = __builtin_ctzl(blockTypeBits);
 const long worldHeight =        256;
 //////////////////////////////////////////////////////////////////
 
-struct chunkPos {
-    float x;
-    float y;
-    float z;
-};
-
 // TODO: Modify visible chunks and adjust what is being rendered
 // based on camera/player position.
 class World {
@@ -43,7 +38,7 @@ public:
     void draw(glm::mat4& view);
 
     // TODO: impelent?
-    bool findChunk(chunkPos pos);
+    bool findChunk(intPos pos);
 private:
     class Chunk;
     void shaderInit();
@@ -64,7 +59,7 @@ public:
     void draw();
 
     unsigned getBlock(unsigned x, unsigned y, unsigned z);
-    chunkPos getPos();
+    intPos getPos();
 private:
     // Helper functions for the constructor so it's easier to read.
     void generateTerrain();
@@ -85,7 +80,7 @@ private:
     // ????: Will be used for additional block data, ex. transparency. To be
     // added.
     std::vector<unsigned> blockArray;
-    chunkPos pos;
+    intPos pos;
 
     unsigned VAO;
     unsigned VBO;

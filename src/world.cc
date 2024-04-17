@@ -265,7 +265,7 @@ World::Chunk::getBlock(unsigned x, unsigned y, unsigned z) {
     return blockArray[ix];
 }
 
-chunkPos World::Chunk::getPos() {
+intPos World::Chunk::getPos() {
     return pos;
 }
 

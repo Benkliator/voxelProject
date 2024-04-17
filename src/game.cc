@@ -40,20 +40,18 @@ Game::Game() {
         std::cerr << "OpenGL error: " << error << std::endl;
     }
 
+
     skybox = new Skybox {};
     world  = new World {RENDER_DISTANCE};
-
-    playerCam = new Camera{};
-    skyboxCam = new Camera{};
+    player = new Player{};
     hud = new Hud{};
 }
 
 Game::~Game() {
     delete world;
     delete skybox;
-    delete playerCam;
-    delete skyboxCam;
     delete hud;
+    delete player;
     glfwTerminate();
 }
 
@@ -67,10 +65,10 @@ void Game::gameLoop() {
 
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glm::mat4 view = playerCam->lookAt();
+        glm::mat4 view = player->worldLook();
         world->draw(view);
 
-        view = skyboxCam->lookAt();
+        view = player->skyLook();
         skybox->draw(view, currentFrame);
 
         hud->renderText("voxelGame V. FINAL_final.final.mov",
@@ -89,7 +87,7 @@ void Game::processInput() {
         glfwSetWindowShouldClose(window, true);
     }
 
-    playerCam->processKeyboardInput(window, deltaTime);
+    player->movePlayer(window, deltaTime);
 }
 
 void Game::mouseCallback(double xposIn, double yposIn) {
@@ -108,8 +106,8 @@ void Game::mouseCallback(double xposIn, double yposIn) {
 
     lastX = xpos;
     lastY = ypos;
-    playerCam->processMouseMovement(window, xoffset, yoffset);
-    skyboxCam->processMouseMovement(window, xoffset, yoffset);
+
+    player->moveMouse(window, xoffset, yoffset);
 }
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
