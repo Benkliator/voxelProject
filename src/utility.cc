@@ -9,7 +9,7 @@
 #include <stb/stb_image.h>
 
 // Loads shaderfile, takes shadertype and filepath, returns shader
-unsigned int loadShader(GLenum type, const char* filePath) {
+unsigned loadShader(GLenum type, const char* filePath) {
     // Read shader code from file
     std::ifstream shaderFile(filePath);
     if (!shaderFile.is_open()) {
@@ -44,8 +44,8 @@ unsigned int loadShader(GLenum type, const char* filePath) {
     return shader;
 }
 
-unsigned int loadTexture(const char* filepath, unsigned int format) {
-    unsigned int texture;
+unsigned loadTexture(const char* filepath, unsigned format) {
+    unsigned texture;
     int width, height, nrChannels;
     unsigned char *data = stbi_load(filepath, &width, &height, &nrChannels, 0);
 
@@ -79,9 +79,9 @@ unsigned int loadTexture(const char* filepath, unsigned int format) {
     return texture;
 }
 
-unsigned int loadTextureCube(std::vector<const char*> filepath,
-                             unsigned int format) {
-    unsigned int texture;
+unsigned loadTextureCube(std::vector<const char*> filepath,
+                             unsigned format) {
+    unsigned texture;
     int width, height, nrChannels;
     glGenTextures(1, &texture);
 
@@ -92,7 +92,7 @@ unsigned int loadTextureCube(std::vector<const char*> filepath,
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    for (unsigned int i = 0; i < 6; i++) {
+    for (unsigned i = 0; i < 6; i++) {
         unsigned char* data =
             stbi_load(filepath[i], &width, &height, &nrChannels, 0);
         if (data) {

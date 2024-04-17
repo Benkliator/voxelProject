@@ -8,8 +8,8 @@ typedef unsigned int GLenum;
 unsigned int loadShader(GLenum type, const char* filePath);
 
 // Loads texturefile, returns linked texture ID
-unsigned int loadTexture(const char* filepath, unsigned int format);
+unsigned int loadTexture(const char* filepath, unsigned format);
 
 // Loads 6 textures and maps them to a cube, returns linked texture ID
 unsigned int loadTextureCube(std::vector<const char*> filepaths,
-                             unsigned int format);
+                             unsigned format);

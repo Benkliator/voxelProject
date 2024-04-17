@@ -10,7 +10,7 @@ Skybox::Skybox() {
                       -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f, 0.5f, 0.5f,
                       -0.5f, 0.5f,  0.5f,  0.5f,  0.5f,  -0.5f, 0.5f, 0.5f };
 
-    unsigned int indices[]{
+    unsigned indices[]{
         0, 2, 1,          // Front
         0, 3, 2, 4, 5, 6, // Back
         4, 6, 7, 0, 4, 7, // Left
@@ -19,9 +19,9 @@ Skybox::Skybox() {
         3, 7, 6, 0, 1, 5, // Bottom
         0, 5, 4,
     };
-    unsigned int vertexShader =
+    unsigned vertexShader =
         loadShader(GL_VERTEX_SHADER, "./res/shaders/skybox.vert");
-    unsigned int fragmentShader =
+    unsigned fragmentShader =
         loadShader(GL_FRAGMENT_SHADER, "./res/shaders/skybox.frag");
     shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
@@ -66,7 +66,7 @@ Skybox::Skybox() {
 
     // Position
     glVertexAttribPointer(
-        0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(unsigned int), (void*)(0));
+        0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(unsigned), (void*)(0));
     glEnableVertexAttribArray(0);
 }
 

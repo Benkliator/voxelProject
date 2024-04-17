@@ -13,13 +13,13 @@ public:
     void draw(glm::mat4 view, float time);
 
 private:
-    unsigned int VAO;
-    unsigned int VBO;
-    unsigned int EBO;
+    unsigned VAO;
+    unsigned VBO;
+    unsigned EBO;
 
-    unsigned int shaderProgram;
+    unsigned shaderProgram;
 
-    unsigned int dayTexture;
-    unsigned int nightTexture;
-    unsigned int duskTexture;
+    unsigned dayTexture;
+    unsigned nightTexture;
+    unsigned duskTexture;
 };

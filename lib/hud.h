@@ -21,7 +21,7 @@ private:
 
     struct Character {
         // ID handle of the glyph texture
-        unsigned int textureID;
+        unsigned textureID;
         // Size of glyph
         glm::ivec2 size;
         // Offset from baseline to left/top of glyph
@@ -31,7 +31,7 @@ private:
     };
     std::map<char, Character> characters;
 
-    unsigned int VAO;
-    unsigned int VBO;
-    unsigned int shaderProgram;
+    unsigned VAO;
+    unsigned VBO;
+    unsigned shaderProgram;
 };

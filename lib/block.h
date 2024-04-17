@@ -4,14 +4,14 @@
 // might be better.
 class Block {
 public:
-    enum BlockType : unsigned short int {
+    enum BlockType : unsigned short {
         Air = 0,
         Dirt,
         Grass,
         Stone,
     };
 
-    enum BlockFace : unsigned short int {
+    enum BlockFace : unsigned short {
         Top,
         Bottom,
         Front,

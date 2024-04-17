@@ -25,7 +25,7 @@ Hud::Hud() {
     }
     FT_Set_Pixel_Sizes(face, 0, 48);
 
-    unsigned int textures[NCHARS];
+    unsigned textures[NCHARS];
     glGenTextures(NCHARS, textures);
     for (unsigned char charIx = 0; charIx < NCHARS; charIx++) {
         // load character glyph
@@ -61,9 +61,9 @@ Hud::Hud() {
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
 
-    unsigned int vertexShader =
+    unsigned vertexShader =
         loadShader(GL_VERTEX_SHADER, "./res/shaders/hud.vert");
-    unsigned int fragmentShader =
+    unsigned fragmentShader =
         loadShader(GL_FRAGMENT_SHADER, "./res/shaders/hud.frag");
     shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);

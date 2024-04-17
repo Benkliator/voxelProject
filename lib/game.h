@@ -8,8 +8,8 @@
 #include "world.h"
 #include "hud.h"
 
-const unsigned int SCR_WIDTH = 1620;
-const unsigned int SCR_HEIGHT = 900;
+const unsigned SCR_WIDTH  = 1620;
+const unsigned SCR_HEIGHT = 900;
 
 #define RENDER_DISTANCE 50
 

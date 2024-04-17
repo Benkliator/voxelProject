@@ -1,6 +1,6 @@
 #include "world.h"
 
-World::World(unsigned int size) {
+World::World(unsigned size) {
     textureMap = loadTexture("./res/textures/Blockmap2.png", GL_RGBA);
     shaderInit();
     projection = glm::perspective(glm::radians(45.0f), 1.8f, 0.1f, 1000.0f);
@@ -44,9 +44,9 @@ void World::draw(glm::mat4& view) {
 }
 
 void World::shaderInit() {
-    unsigned int vertexShader =
+    unsigned vertexShader =
         loadShader(GL_VERTEX_SHADER, "./res/shaders/main.vert");
-    unsigned int fragmentShader =
+    unsigned fragmentShader =
         loadShader(GL_FRAGMENT_SHADER, "./res/shaders/main.frag");
 
     shaderProgram = glCreateProgram();
@@ -72,23 +72,23 @@ World::Chunk::Chunk(int x, int y, int z) {
 
 // NOTE: Might need to actually impelent this function for memory safety (lol)
 World::Chunk::~Chunk() {
-    // std::vector<unsigned int>().swap(blockArray);
+    // std::vector<unsigned>().swap(blockArray);
 }
 
 void World::Chunk::generateMesh() {
     // NOTE: This implementation is quite slow, but very consitent.
     // it can 100% be cleaned up and become even better
     std::vector<float> vertexMesh;
-    std::vector<unsigned int> indexMesh;
-    for (unsigned int it = 0; it < blockArray.size(); it++) {
-        unsigned int block = blockArray[it];
+    std::vector<unsigned> indexMesh;
+    for (unsigned it = 0; it < blockArray.size(); it++) {
+        unsigned block = blockArray[it];
         if ((block & blockTypeBits) == Block::Air) {
             continue;
         }
 
-        unsigned int x = (block & xBits) >> xBitOffset;
-        unsigned int y = (block & yBits) >> yBitOffset;
-        unsigned int z = (block & zBits) >> zBitOffset;
+        unsigned x = (block & xBits) >> xBitOffset;
+        unsigned y = (block & yBits) >> yBitOffset;
+        unsigned z = (block & zBits) >> zBitOffset;
         Block blockType((block & blockTypeBits) >> blockTypeBitOffset);
 
         // (!obsTop(it))
@@ -259,8 +259,8 @@ void World::Chunk::draw() {
 
 // TODO(Christoffer): Should create a World::getBlock and use with the chunk's
 //                    world pointer instead
-unsigned int
-World::Chunk::getBlock(unsigned int x, unsigned int y, unsigned int z) {
+unsigned
+World::Chunk::getBlock(unsigned x, unsigned y, unsigned z) {
     size_t ix = y + (z * worldHeight) + (x * 16 * worldHeight);
     return blockArray[ix];
 }
@@ -288,7 +288,7 @@ void World::Chunk::generateTerrain() {
                 } else {
                     bt = Block::Air;
                 }
-                unsigned int val = x << xBitOffset | y << yBitOffset |
+                unsigned val = x << xBitOffset | y << yBitOffset |
                                    z << zBitOffset | bt << blockTypeBitOffset;
                 blockArray.push_back(val);
             }
@@ -296,7 +296,7 @@ void World::Chunk::generateTerrain() {
     }
 }
 
-void World::Chunk::renderInit(std::vector<float> vertexMesh, std::vector<unsigned int>indexMesh) {
+void World::Chunk::renderInit(std::vector<float> vertexMesh, std::vector<unsigned>indexMesh) {
     indexSize = indexMesh.size();
     glBindVertexArray(VAO);
 
@@ -308,7 +308,7 @@ void World::Chunk::renderInit(std::vector<float> vertexMesh, std::vector<unsigne
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 indexMesh.size() * sizeof(unsigned int),
+                 indexMesh.size() * sizeof(unsigned),
                  indexMesh.data(),
                  GL_STATIC_DRAW);
 
@@ -342,7 +342,7 @@ void World::Chunk::renderInit(std::vector<float> vertexMesh, std::vector<unsigne
 }
 
 
-std::array<float, 4> World::Chunk::getOcclusion(unsigned int x, unsigned int y, unsigned int z, unsigned short int face) {
+std::array<float, 4> World::Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, unsigned short face) {
     std::array<float, 4> vertexOcclusion{0, 0, 0, 0};
     switch (face) {
         case Block::Top: {
