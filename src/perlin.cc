@@ -50,8 +50,8 @@ float perlin(float fx, float fy) {
         fy *= (-1);
     }
     // Determine grid cell corner coordinates
-    int x0 = (int)fx;
-    int y0 = (int)fy;
+    int x0 = static_cast<int>(fx);
+    int y0 = static_cast<int>(fy);
     int x1 = x0 + 1;
     int y1 = y0 + 1;
 

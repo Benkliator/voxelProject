@@ -11,7 +11,8 @@ Game::Game() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Voxel Game", NULL, NULL);
+    window =
+        glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Voxel Game", nullptr, nullptr);
     if (!window) {
         glfwTerminate();
         std::cerr << "Failed to create window" << std::endl;
@@ -35,7 +36,7 @@ Game::Game() {
         };
     glfwSetMouseButtonCallback(window, mouseClickCallback);
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
         glfwTerminate();
         std::cerr << "Failed to initialize GLAD" << std::endl;
     }
@@ -81,7 +82,7 @@ void Game::gameLoop() {
         view = player->skyLook();
         skybox->draw(view, currentFrame);
 
-        std::string fps = std::to_string((int)(1 / deltaTime));
+        std::string fps = std::to_string(static_cast<int>(1 / deltaTime));
         hud->renderText(fps, 5.0f, 5.0f, 1.0f, glm::vec3{ 1.0f, 1.0f, 1.0f });
 
         glfwPollEvents();

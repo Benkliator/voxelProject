@@ -4,12 +4,13 @@ CC := g++
 SRCDIR := src
 OBJDIR := obj
 INCDIR := include
+LIBDIR := lib
 
 CXXFLAGS := -std=c++17
 # CXXFLAGS += -Wall
 # CXXFLAGS += -Wextra
 # CXXFLAGS += -Wpedantic
-CXXFLAGS += -I./lib
+CXXFLAGS += -I./$(LIBDIR)
 CXXFLAGS += -I./$(INCDIR)
 CXXFLAGS += $(shell pkg-config --cflags freetype2)
 
@@ -29,7 +30,7 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(CXXFLAGS) $^ -o $@ $(LDFLAGS)
 
 # Standard object files
-$(OBJDIR)/%.o: $(SRCDIR)/%.cc | $(OBJDIR)
+$(OBJDIR)/%.o: $(SRCDIR)/%.cc $(LIBDIR)/%.h | $(OBJDIR)
 	$(CC) $(CXXFLAGS) -c $< -o $@
 
 # GLAD include

@@ -6,7 +6,6 @@
 #include "world.h"
 
 #include <array>
-#include <glm/fwd.hpp>
 
 // Generates buffers and VAO, creates terrain for chunk.
 Chunk::Chunk(int x, int z, World* w) : world{ w } {
@@ -37,7 +36,7 @@ void Chunk::generateMesh() {
         unsigned x = (block & xMask) >> xOffset;
         unsigned y = (block & yMask) >> yOffset;
         unsigned z = (block & zMask) >> zOffset;
-        Block blockType{ (block & typeMask) >> blockTypeOffset };
+        Block blockType{ (block & typeMask) >> typeOffset };
 
         if (isAir(getBlockGlobal(x, y + 1, z))) {
             indexMesh.push_back(vertexMesh.size() / 9);
@@ -202,11 +201,9 @@ unsigned Chunk::getBlock(unsigned x, unsigned y, unsigned z) {
     return blockArray[ix];
 }
 
-// Signed integers to use as offset
 unsigned Chunk::getBlockGlobal(long dX, long dY, long dZ) {
     if (dY < 0 || dY >= worldHeight) {
-        // TODO(Christoffer): Better error block?
-        return UINT32_MAX;
+        return errorBlock;
     }
     if (dX >= 0 && dX <= 15 && dZ >= 0 && dZ <= 15) {
         // Can use local version
@@ -241,7 +238,7 @@ void Chunk::generateTerrain() {
                     bt = Block::Air;
                 }
                 unsigned val = x << xOffset | y << yOffset | z << zOffset |
-                               bt << blockTypeOffset;
+                               bt << typeOffset;
                 blockArray.push_back(val);
             }
         }
@@ -265,8 +262,7 @@ void Chunk::renderInit(std::vector<float>& vertexMesh,
                  indexMesh.data(),
                  GL_STATIC_DRAW);
 
-    glVertexAttribPointer(
-        0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(0));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), nullptr);
     glEnableVertexAttribArray(0);
 
     glVertexAttribPointer(1,
@@ -274,7 +270,7 @@ void Chunk::renderInit(std::vector<float>& vertexMesh,
                           GL_FLOAT,
                           GL_FALSE,
                           9 * sizeof(float),
-                          (void*)(3 * sizeof(float)));
+                          reinterpret_cast<void*>(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
     glVertexAttribPointer(2,
@@ -282,7 +278,7 @@ void Chunk::renderInit(std::vector<float>& vertexMesh,
                           GL_FLOAT,
                           GL_FALSE,
                           9 * sizeof(float),
-                          (void*)(5 * sizeof(float)));
+                          reinterpret_cast<void*>(5 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
     glVertexAttribPointer(3,
@@ -290,7 +286,7 @@ void Chunk::renderInit(std::vector<float>& vertexMesh,
                           GL_FLOAT,
                           GL_FALSE,
                           9 * sizeof(float),
-                          (void*)(8 * sizeof(float)));
+                          reinterpret_cast<void*>(8 * sizeof(float)));
     glEnableVertexAttribArray(3);
 }
 
@@ -336,7 +332,7 @@ Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, unsigned short face) {
         }
     } break;
     case Block::Front: {
-        if (!isAir(getBlock(x, y - 1, z + 1))) {
+        if (!isAir(getBlockGlobal(x, y - 1, z + 1))) {
             vertexOcclusion[1] = 3;
             vertexOcclusion[2] = 3;
         }

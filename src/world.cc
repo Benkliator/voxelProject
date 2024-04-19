@@ -1,9 +1,9 @@
 #include "glad/glad.h"
 
+#include "block.h"
 #include "utility.h"
 #include "world.h"
 
-#include <cstdint>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
@@ -23,7 +23,7 @@ World::World(unsigned size) {
 
     std::cout << "Creating meshes..." << std::endl;
 
-    for (auto& chunk : visibleChunks) {
+    for (Chunk& chunk : visibleChunks) {
         chunk.generateMesh();
     }
 
@@ -43,7 +43,7 @@ unsigned int World::getBlock(unsigned x, unsigned y, unsigned z) {
             return chunk.getBlock(blockOffsetX, y, blockOffsetZ);
         }
     }
-    return UINT32_MAX;
+    return errorBlock;
 }
 
 World::~World() {}

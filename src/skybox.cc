@@ -69,7 +69,8 @@ Skybox::Skybox() {
         GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // Position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(unsigned), NULL);
+    glVertexAttribPointer(
+        0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(unsigned), nullptr);
     glEnableVertexAttribArray(0);
 }
 
