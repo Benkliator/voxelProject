@@ -56,13 +56,14 @@ void World::draw(glm::mat4& view) {
                        1,
                        GL_FALSE,
                        glm::value_ptr(projection));
+
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"),
                        1,
                        GL_FALSE,
                        glm::value_ptr(view));
 
     for (Chunk& chunk : visibleChunks) {
-        chunk.draw();
+        chunk.draw(shaderProgram);
     }
 }
 

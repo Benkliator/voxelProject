@@ -1,36 +1,36 @@
 #version 330 core
-
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec2 aTexCoord;
-layout (location = 2) in vec3 aNormal;
-layout (location = 3) in float occlusion;
+layout (location = 0) in uvec2 vertex;
 
 uniform mat4 view;
 uniform mat4 projection;
 
+uniform uvec3 chunkPos;
+
 out vec2 texCoord;
 out vec3 color;
-out vec3 normal;
-out vec3 fragPos;
 
 void main(void)
 {
-    int occlusionInt = int(occlusion);
-    switch (occlusionInt) {
-        case 0:
+    float x = float((vertex.x  & 31u)             + chunkPos.x);
+    float y = float(((vertex.x & 8160u)    >> 5u)  + chunkPos.y);
+    float z = float(((vertex.x & 253952u) >> 13u) + chunkPos.z);
+    uint occlusion = (vertex.x & 786432u) >> 18u;
+    switch (occlusion) {
+        case 0u:
             color = vec3(1.0, 1.0, 1.0);
             break;
-        case 1:
+        case 1u:
             color = vec3(0.68, 0.68, 0.68);
             break;
-        case 2:
+        case 2u:
             color = vec3(0.55, 0.55, 0.55);
             break;
-        case 3:
+        case 3u:
             color = vec3(0.45, 0.45, 0.45);
             break;
     }
-    normal = normalize(aNormal);
-    gl_Position = projection * view * vec4(aPos, 1.0);
-    texCoord = aTexCoord / 16;
+    gl_Position = projection * view * vec4(x, y, z, 1.0);
+
+    texCoord.x = float(vertex.y & 255u) / 16;
+    texCoord.y = float((vertex.y >> 8u) & 255u) / 16;
 }

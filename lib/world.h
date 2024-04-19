@@ -8,7 +8,8 @@
 #include <glm/vec3.hpp>
 #include <vector>
 
-const unsigned worldHeight = 255;
+const unsigned worldHeight = 254;
+//////////////////////////////////////////////////////////////////
 
 class Chunk;
 

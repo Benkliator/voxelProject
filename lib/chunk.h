@@ -31,7 +31,7 @@ public:
     ~Chunk();
 
     void generateMesh();
-    void draw();
+    void draw(unsigned);
 
     unsigned getBlock(unsigned, unsigned, unsigned);
     unsigned getBlockGlobal(long, long, long);
@@ -39,9 +39,9 @@ public:
 
 private:
     void generateTerrain();
-    void renderInit(std::vector<float>&, std::vector<unsigned>&);
+    void renderInit(std::vector<GLuint>&, std::vector<unsigned>&);
 
-    std::array<float, 4>
+    std::array<unsigned, 4>
     getOcclusion(unsigned, unsigned, unsigned, unsigned short);
     std::vector<unsigned> blockArray;
     glm::uvec3 pos;
@@ -54,45 +54,87 @@ private:
     unsigned indexSize;
 };
 
-// NOTE: Might want to put these in a proper data structure.
-const float backVertices[]{
-    0.5f,  0.5f,  -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f, // top-right
-    0.5f,  -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f, // bottom-right
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, // bottom-left
-    -0.5f, 0.5f,  -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f  // top-left
+//  x  y  z
+const unsigned topFace[] {
+    1, 1, 0,
+    1, 1, 1,
+    0, 1, 1,
+    0, 1, 0,
 };
 
-const float frontVertices[]{
-    0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // top-right
-    0.5f,  -0.5f, 0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, // bottom-right
-    -0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // bottom-left
-    -0.5f, 0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, // top-left
+const unsigned backFace[] {
+    1, 0, 0,
+    1, 1, 0,
+    0, 1, 0,
+    0, 0, 0,
 };
 
-const float leftVertices[]{
-    -0.5f, 0.5f,  0.5f,  0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // top-right
-    -0.5f, -0.5f, 0.5f,  0.0f, 1.0f, -1.0f, 0.0f, 0.0f, // bottom-right
-    -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, // bottom-left
-    -0.5f, 0.5f,  -0.5f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, // top-left
+const unsigned frontFace[] {
+    1, 1, 1,
+    1, 0, 1,
+    0, 0, 1,
+    0, 1, 1,
 };
 
-const float rightVertices[]{
-    0.5f, 0.5f,  -0.5f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, // top-right
-    0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, // bottom-right
-    0.5f, -0.5f, 0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, // bottom-left
-    0.5f, 0.5f,  0.5f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // top-left
+const unsigned leftFace[] {
+    0, 1, 1,
+    0, 0, 1,
+    0, 0, 0,
+    0, 1, 0,
 };
 
-const float bottomVertices[]{
-    -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f, // top-right
-    -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 0.0f, -1.0f, 0.0f, // bottom-right
-    0.5f,  -0.5f, 0.5f,  0.0f, 1.0f, 0.0f, -1.0f, 0.0f, // bottom-left
-    0.5f,  -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, -1.0f, 0.0f, // top-left
+const unsigned rightFace[] {
+    1, 1, 0,
+    1, 0, 0,
+    1, 0, 1,
+    1, 1, 1,
 };
 
-const float topVertices[]{
-    0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, // top-right
-    0.5f,  0.5f, 0.5f,  0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom-right
-    -0.5f, 0.5f, 0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom-left
-    -0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, // top-left
+const unsigned bottomFace[] {
+    0, 0, 0,
+    0, 0, 1,
+    1, 0, 1,
+    1, 0, 0,
+};
+
+const unsigned topTexcoord[] {
+    1, 0,
+    1, 1,
+    0, 1,
+    0, 0,
+};
+
+const unsigned backTexcoord[] {
+    0, 1,
+    0, 0,
+    1, 0,
+    1, 1,
+};
+
+const unsigned frontTexcoord[] {
+    0, 0,
+    0, 1,
+    1, 1,
+    1, 0,
+};
+
+const unsigned leftTexcoord[] {
+    1, 0,
+    1, 1,
+    0, 1,
+    0, 0,
+};
+
+const unsigned rightTexcoord[] {
+    0, 0,
+    0, 1,
+    1, 1,
+    1, 0,
+};
+
+const unsigned bottomTexcoord[] {
+    0, 0,
+    0, 1,
+    1, 1,
+    1, 0,
 };
