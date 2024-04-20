@@ -7,5 +7,7 @@ For further development be wary:
 
 TODO:
 - [x] Create chunk mesh in a smarter way.
-- [ ] Don't render non-visible chunks
-- [ ] Make lighting actually work.
+- [ ] Break and build blocks.
+- [ ] Load chunks dynamically around the player.
+- [ ] Don't render non-visible chunks.
+- [ ] Seeding system, loading and saving.
