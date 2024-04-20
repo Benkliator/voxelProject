@@ -231,9 +231,8 @@ glm::uvec3 Chunk::getPos() {
 }
 
 void Chunk::generateTerrain() {
-    float freq = 0.996323343; // Frequency
-    float amp = 1.75;        // Amplifier
-    std::cout << pos.x << std::endl;
+    float freq = 0.8396323343; // Frequency
+    float amp = 1.35;        // Amplifier
     for (int x = 0; x < 16; x++) {
         for (int z = 0; z < 16; z++) {
             // Uses perlin function to calculate height for xz position
@@ -245,7 +244,9 @@ void Chunk::generateTerrain() {
                 // can let you dynamically decide block generations at
                 // different (x, y, z) values.
                 enum Block::BlockType bt;
-                if (y > height && y < height + 1) {
+                if (y < 3) {
+                    bt = Block::Water;
+                } else if (y > height && y < height + 1) {
                     bt = Block::Grass;
                 } else if (y < height) {
                     bt = Block::Dirt;

@@ -24,6 +24,12 @@ Block::Block(unsigned blockType) {
         bottom = 0b00110000;
         side = 0b00110000;
     } break;
+
+    case Block::Water: {
+        top = 0b00010011;
+        bottom = 0b00010011;
+        side = 0b00010011;
+    } break;
     }
 }
 

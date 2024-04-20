@@ -28,6 +28,7 @@ struct Block {
         Dirt,
         Grass,
         Stone,
+        Water,
     };
 
     enum BlockFace : unsigned short {
