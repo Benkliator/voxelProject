@@ -28,9 +28,6 @@ Chunk::Chunk(int x, int z, World* w) : world{ w } {
 Chunk::~Chunk() {}
 
 void Chunk::generateMesh() {
-    std::vector<GLuint> vertexMesh;
-    std::vector<unsigned> indexMesh;
-
     for (size_t i = 0; i < blockArray.size(); i++) {
         unsigned short block = blockArray[i];
         if (isAir(block)) {
@@ -42,162 +39,42 @@ void Chunk::generateMesh() {
         unsigned x = (i % (16 * worldHeight)) / worldHeight;
         Block blockType{ (block & typeMask) >> typeOffset };
 
+        // Top
         if (isAir(getBlockGlobal(x, y + 1, z))) {
-            indexMesh.push_back((vertexMesh.size() / 2) + 0);
-            indexMesh.push_back((vertexMesh.size() / 2) + 3);
-            indexMesh.push_back((vertexMesh.size() / 2) + 1);
-            indexMesh.push_back((vertexMesh.size() / 2) + 2);
-            indexMesh.push_back((vertexMesh.size() / 2) + 1);
-            indexMesh.push_back((vertexMesh.size() / 2) + 3);
-            std::array<unsigned short, 4> occlusionArray =
-                getOcclusion(x, y, z, Block::Top);
-            size_t j = 0;
-            size_t t = 0;
-            for (size_t i = 0; i < 4; i++) {
-                GLuint xi = x + topFace[j++];
-                GLuint yi = y + topFace[j++];
-                GLuint zi = z + topFace[j++];
-
-                GLuint vertex = xi | yi << 5 | zi << 13 | occlusionArray[i] << 18;
-                vertexMesh.push_back(vertex);
-
-                GLuint texX = topTexcoord[t++] + ((blockType.top & zMask) >> zOffset);
-                GLuint texY = topTexcoord[t++] + blockType.top & xMask;
-                GLuint texcoords = texX | texY << 8;
-                vertexMesh.push_back(texcoords);
-            }
+            loadFace(&topMeshData, blockType.top, x, y, z);
         }
 
-        if (isAir(getBlockGlobal(x, y, z - 1))) {
-            indexMesh.push_back((vertexMesh.size() / 2) + 0);
-            indexMesh.push_back((vertexMesh.size() / 2) + 3);
-            indexMesh.push_back((vertexMesh.size() / 2) + 1);
-            indexMesh.push_back((vertexMesh.size() / 2) + 2);
-            indexMesh.push_back((vertexMesh.size() / 2) + 1);
-            indexMesh.push_back((vertexMesh.size() / 2) + 3);
-            std::array<unsigned short, 4> occlusionArray =
-                getOcclusion(x, y, z, Block::Back);
-            size_t j = 0;
-            size_t t = 0;
-            for (size_t i = 0; i < 4; i ++) {
-                GLuint xi = x + backFace[j++];
-                GLuint yi = y + backFace[j++];
-                GLuint zi = z + backFace[j++];
-
-                GLuint vertex = xi | yi << 5 | zi << 13 | occlusionArray[i] << 18;
-                vertexMesh.push_back(vertex);
-
-                GLuint texX = backTexcoord[t++] + ((blockType.side & zMask) >> zOffset);
-                GLuint texY = backTexcoord[t++] + blockType.side & xMask;
-                GLuint texcoords = texX | texY << 8;
-                vertexMesh.push_back(texcoords);
-            }
-        }
-        if (isAir(getBlockGlobal(x, y, z + 1))) {
-            indexMesh.push_back((vertexMesh.size() / 2) + 0);
-            indexMesh.push_back((vertexMesh.size() / 2) + 3);
-            indexMesh.push_back((vertexMesh.size() / 2) + 1);
-            indexMesh.push_back((vertexMesh.size() / 2) + 2);
-            indexMesh.push_back((vertexMesh.size() / 2) + 1);
-            indexMesh.push_back((vertexMesh.size() / 2) + 3);
-            std::array<unsigned short, 4>occlusionArray =
-                getOcclusion(x, y, z, Block::Front);
-            size_t j = 0;
-            size_t t = 0;
-            for (size_t i = 0; i < 4; i++) {
-                GLuint xi = x + frontFace[j++];
-                GLuint yi = y + frontFace[j++];
-                GLuint zi = z + frontFace[j++];
-
-                GLuint vertex = xi | yi << 5 | zi << 13 | occlusionArray[i] << 18;
-                vertexMesh.push_back(vertex);
-
-                GLuint texX = frontTexcoord[t++] + ((blockType.side & zMask) >> zOffset);
-                GLuint texY = frontTexcoord[t++] + (blockType.side & xMask);
-                GLuint texcoords = texX | texY << 8;
-                vertexMesh.push_back(texcoords);
-            }
-        }
-
-        if (isAir(getBlockGlobal(x - 1, y, z))) {
-            indexMesh.push_back((vertexMesh.size() / 2) + 0);
-            indexMesh.push_back((vertexMesh.size() / 2) + 3);
-            indexMesh.push_back((vertexMesh.size() / 2) + 1);
-            indexMesh.push_back((vertexMesh.size() / 2) + 2);
-            indexMesh.push_back((vertexMesh.size() / 2) + 1);
-            indexMesh.push_back((vertexMesh.size() / 2) + 3);
-            std::array<unsigned short, 4> occlusionArray =
-                getOcclusion(x, y, z, Block::Left);
-            size_t j = 0;
-            size_t t = 0;
-            for (size_t i = 0; i < 4; i++) {
-                GLuint xi = x + leftFace[j++];
-                GLuint yi = y + leftFace[j++];
-                GLuint zi = z + leftFace[j++];
-
-                GLuint vertex = xi | yi << 5 | zi << 13 | occlusionArray[i] << 18;
-                vertexMesh.push_back(vertex);
-
-                GLuint texX = leftTexcoord[t++] + ((blockType.side & zMask) >> zOffset);
-                GLuint texY = leftTexcoord[t++] + (blockType.side & xMask);
-                GLuint texcoords = texX | texY << 8;
-                vertexMesh.push_back(texcoords);
-            }
-        }
-
-        if (isAir(getBlockGlobal(x + 1, y, z))) {
-            indexMesh.push_back((vertexMesh.size() / 2) + 0);
-            indexMesh.push_back((vertexMesh.size() / 2) + 3);
-            indexMesh.push_back((vertexMesh.size() / 2) + 1);
-            indexMesh.push_back((vertexMesh.size() / 2) + 2);
-            indexMesh.push_back((vertexMesh.size() / 2) + 1);
-            indexMesh.push_back((vertexMesh.size() / 2) + 3);
-            std::array<unsigned short, 4> occlusionArray =
-                getOcclusion(x, y, z, Block::Right);
-            size_t j = 0;
-            size_t t = 0;
-            for (size_t i = 0; i < 4; i++) {
-                GLuint xi = x + rightFace[j++];
-                GLuint yi = y + rightFace[j++];
-                GLuint zi = z + rightFace[j++];
-
-                GLuint vertex = xi | yi << 5 | zi << 13 | occlusionArray[i] << 18;
-                vertexMesh.push_back(vertex);
-
-                GLuint texX = rightTexcoord[t++] + ((blockType.side & zMask) >> zOffset);
-                GLuint texY = rightTexcoord[t++] + (blockType.side & xMask);
-                GLuint texcoords = texX | texY << 8;
-                vertexMesh.push_back(texcoords);
-            }
-        }
-
+        // Bottom
         if (isAir(getBlockGlobal(x, y - 1, z))) {
-            indexMesh.push_back((vertexMesh.size() / 2) + 0);
-            indexMesh.push_back((vertexMesh.size() / 2) + 3);
-            indexMesh.push_back((vertexMesh.size() / 2) + 1);
-            indexMesh.push_back((vertexMesh.size() / 2) + 2);
-            indexMesh.push_back((vertexMesh.size() / 2) + 1);
-            indexMesh.push_back((vertexMesh.size() / 2) + 3);
-            std::array<unsigned short, 4> occlusionArray =
-                getOcclusion(x, y, z, Block::Bottom);
-            size_t j = 0;
-            size_t t = 0;
-            for (size_t i = 0; i < 4; i++) {
-                GLuint xi = x + bottomFace[j++];
-                GLuint yi = y + bottomFace[j++];
-                GLuint zi = z + bottomFace[j++];
+            loadFace(&bottomMeshData, blockType.bottom, x, y, z);
+        }
 
-                GLuint vertex = xi | yi << 5 | zi << 13 | occlusionArray[i] << 18;
-                vertexMesh.push_back(vertex);
+        // Back
+        if (isAir(getBlockGlobal(x, y, z - 1))) {
+            loadFace(&backMeshData, blockType.side, x, y, z);
+        }
 
-                GLuint texX = bottomTexcoord[t++] + ((blockType.bottom & zMask) >> zOffset);
-                GLuint texY = bottomTexcoord[t++] + (blockType.bottom & xMask);
-                GLuint texcoords = texX | texY << 8;
-                vertexMesh.push_back(texcoords);
-            }
+        // Front
+        if (isAir(getBlockGlobal(x, y, z + 1))) {
+            loadFace(&frontMeshData, blockType.side, x, y, z);
+        }
+
+        // Left
+        if (isAir(getBlockGlobal(x - 1, y, z))) {
+            loadFace(&leftMeshData, blockType.side, x, y, z);
+        }
+
+        // Right
+        if (isAir(getBlockGlobal(x + 1, y, z))) {
+            loadFace(&rightMeshData, blockType.side, x, y, z);
         }
     }
-    renderInit(vertexMesh, indexMesh);
+    renderInit();
+}
+
+void Chunk::reloadMesh(unsigned index) {
+    // TODO: implement (Ben)
+    return;
 }
 
 void Chunk::draw(unsigned shader) {
@@ -224,6 +101,16 @@ unsigned short Chunk::getBlockGlobal(long dX, long dY, long dZ) {
         // Find the block in all chunks
         return world->getBlock(pos.x + dX, pos.y + dY, pos.z + dZ);
     }
+}
+
+bool Chunk::removeBlock(unsigned x, unsigned y, unsigned z) {
+    if (!isAir(getBlock(x, y, z))) {
+        size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
+        blockArray[ix] = 0;
+        reloadMesh(ix);
+        return true;
+    };
+    return false;
 }
 
 glm::uvec3 Chunk::getPos() {
@@ -260,8 +147,7 @@ void Chunk::generateTerrain() {
     }
 }
 
-void Chunk::renderInit(std::vector<GLuint>& vertexMesh,
-                       std::vector<unsigned>& indexMesh) {
+void Chunk::renderInit() {
     indexSize = indexMesh.size();
     glBindVertexArray(VAO);
 
@@ -280,6 +166,31 @@ void Chunk::renderInit(std::vector<GLuint>& vertexMesh,
     glVertexAttribIPointer(
         0, 2, GL_UNSIGNED_INT, 2 * sizeof(GLuint), (void*)(0));
     glEnableVertexAttribArray(0);
+}
+
+void Chunk::loadFace(const MeshData* data, unsigned bt, unsigned x, unsigned y, unsigned z) {
+    indexMesh.push_back((vertexMesh.size() / 2) + 0);
+    indexMesh.push_back((vertexMesh.size() / 2) + 3);
+    indexMesh.push_back((vertexMesh.size() / 2) + 1);
+    indexMesh.push_back((vertexMesh.size() / 2) + 2);
+    indexMesh.push_back((vertexMesh.size() / 2) + 1);
+    indexMesh.push_back((vertexMesh.size() / 2) + 3);
+    std::array<unsigned short, 4> occlusionArray = getOcclusion(x, y, z, data->blockFace);
+    size_t j = 0;
+    size_t t = 0;
+    for (size_t i = 0; i < 4; i++) {
+        GLuint xi = x + data->faceCoords[j++];
+        GLuint yi = y + data->faceCoords[j++];
+        GLuint zi = z + data->faceCoords[j++];
+        GLuint vertex = xi | yi << 5 | zi << 13 | occlusionArray[i] << 18;
+
+        GLuint texX = data->texCoords[t++] + ((bt & zMask) >> zOffset);
+        GLuint texY = data->texCoords[t++] + bt & xMask;
+        GLuint texData = texX | texY << 8;
+
+        vertexMesh.push_back(vertex);
+        vertexMesh.push_back(texData);
+    }
 }
 
 std::array<unsigned short, 4>
