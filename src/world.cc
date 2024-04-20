@@ -45,6 +45,16 @@ unsigned int World::getBlock(unsigned x, unsigned y, unsigned z) {
     return errorBlock;
 }
 
+Chunk* World::getChunk(unsigned x, unsigned y, unsigned z) {
+    glm::uvec3 findPos{x, y, z};
+    for (Chunk& chunk : visibleChunks) {
+        if (chunk.getPos() == findPos) {
+            return &chunk;
+        }
+    }
+    return nullptr;
+}
+
 World::~World() {}
 
 void World::draw(glm::mat4& view) {

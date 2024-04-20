@@ -54,7 +54,7 @@ Game::Game() {
 
     skybox = new Skybox{};
     world = new World{ RENDER_DISTANCE };
-    player = new Player{};
+    player = new Player{ world };
     hud = new Hud{};
 }
 

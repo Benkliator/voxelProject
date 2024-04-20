@@ -16,7 +16,8 @@ public:
     ~Chunk();
 
     void generateMesh();
-    void reloadMesh(unsigned);
+    void generateMesh(std::vector<unsigned short>);
+    void reloadMesh(unsigned, unsigned, unsigned);
     void draw(unsigned);
 
     unsigned short getBlock(unsigned, unsigned, unsigned);

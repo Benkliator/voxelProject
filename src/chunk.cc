@@ -72,9 +72,70 @@ void Chunk::generateMesh() {
     renderInit();
 }
 
-void Chunk::reloadMesh(unsigned index) {
-    // TODO: implement (Ben)
-    return;
+void Chunk::generateMesh(std::vector<unsigned short> blockAreaArray) {
+    for (size_t i = 0; i < blockAreaArray.size(); i++) {
+        unsigned short block = blockAreaArray[i];
+        if (isAir(block)) {
+            continue;
+        }
+
+        unsigned z = i / (worldHeight * 16);
+        unsigned y = i % worldHeight;
+        unsigned x = (i % (16 * worldHeight)) / worldHeight;
+        Block blockType{ (block & typeMask) >> typeOffset };
+
+        // Top
+        if (isAir(getBlockGlobal(x, y + 1, z))) {
+            loadFace(&topMeshData, blockType.top, x, y, z);
+        }
+
+        // Bottom
+        if (isAir(getBlockGlobal(x, y - 1, z))) {
+            loadFace(&bottomMeshData, blockType.bottom, x, y, z);
+        }
+
+        // Back
+        if (isAir(getBlockGlobal(x, y, z - 1))) {
+            loadFace(&backMeshData, blockType.side, x, y, z);
+        }
+
+        // Front
+        if (isAir(getBlockGlobal(x, y, z + 1))) {
+            loadFace(&frontMeshData, blockType.side, x, y, z);
+        }
+
+        // Left
+        if (isAir(getBlockGlobal(x - 1, y, z))) {
+            loadFace(&leftMeshData, blockType.side, x, y, z);
+        }
+
+        // Right
+        if (isAir(getBlockGlobal(x + 1, y, z))) {
+            loadFace(&rightMeshData, blockType.side, x, y, z);
+        }
+    }
+    renderInit();
+}
+
+void Chunk::reloadMesh(unsigned x, unsigned y, unsigned z) {
+    size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
+    std::vector<unsigned short> tempBlockArray;
+    tempBlockArray.push_back(blockArray[ix]);
+    if (y > 0) {
+        tempBlockArray.push_back(blockArray[ix - 1]);
+    }
+    if (y < worldHeight) {
+        tempBlockArray.push_back(blockArray[ix + 1]);
+    }
+    /*  HUGE MASSIVE NOTE:
+     *  This will need to update the meshes of adjacent CHUNKS!!!!
+     */
+    tempBlockArray.push_back(getBlockGlobal(x + 1, y, z));
+    tempBlockArray.push_back(getBlockGlobal(x - 1, y, z));
+    tempBlockArray.push_back(getBlockGlobal(x, y, z + 1));
+    tempBlockArray.push_back(getBlockGlobal(x, y, z - 1));
+    /* removeMeshArea(); */
+    generateMesh(tempBlockArray);
 }
 
 void Chunk::draw(unsigned shader) {
@@ -107,7 +168,8 @@ bool Chunk::removeBlock(unsigned x, unsigned y, unsigned z) {
     if (!isAir(getBlock(x, y, z))) {
         size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
         blockArray[ix] = 0;
-        reloadMesh(ix);
+        generateMesh();
+        // reloadMesh(x, y, z);
         return true;
     };
     return false;
@@ -195,7 +257,7 @@ void Chunk::loadFace(const MeshData* data, unsigned bt, unsigned x, unsigned y, 
 
 std::array<unsigned short, 4>
 Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, unsigned short face) {
-
+    // This is really ugly lol, will probably rework at some point.
     std::array<unsigned short, 4> vertexOcclusion{ 0, 0, 0, 0 };
     switch (face) {
     case Block::Top: {
@@ -284,6 +346,12 @@ Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, unsigned short face) {
             vertexOcclusion[2] = 3;
         }
     } break;
+    case Block::Bottom: {
+            vertexOcclusion[0] = 3;
+            vertexOcclusion[1] = 3;
+            vertexOcclusion[2] = 3;
+            vertexOcclusion[3] = 3;
+    }
     }
     return vertexOcclusion;
 }

@@ -23,6 +23,7 @@ public:
     // Draws out every chunk in visibleChunks
     void draw(glm::mat4& view);
     unsigned getBlock(unsigned, unsigned, unsigned);
+    Chunk* getChunk(unsigned, unsigned, unsigned);
 
 private:
     void shaderInit();

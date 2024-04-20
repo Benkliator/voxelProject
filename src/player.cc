@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-Player::Player() {
+Player::Player(World* w) : world{ w } {
     worldCam = new Camera{};
     skyCam = new Camera{};
 }
@@ -27,8 +27,11 @@ void Player::movePlayer(GLFWwindow* window, float dt) {
 
 void Player::breakBlock() {
     std::cout << "Breaking block!" << std::endl;
-    auto [from, to] = worldCam->rayCast(2.0f);
+    auto [from, to] = worldCam->rayCast(5.0f);
     std::cout << from.x << ' ' << to.x << std::endl;
+    int xBlock = int(to.x);
+    int yBlock = int(to.y);
+    int zBlock = int(to.z);
 }
 
 void Player::placeBlock() {

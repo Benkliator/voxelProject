@@ -1,10 +1,11 @@
 #pragma once
 
 #include "input.h"
+#include "world.h"
 
 class Player {
 public:
-    Player();
+    Player(World* w);
     ~Player();
 
     void moveMouse(GLFWwindow* window, float xi, float yi);
@@ -17,6 +18,8 @@ public:
 
 private:
     void view();
+
+    World* world;
 
     Camera* worldCam = nullptr;
     Camera* skyCam = nullptr;
