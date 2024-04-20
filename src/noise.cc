@@ -1,4 +1,4 @@
-#include "perlin.h"
+#include "noise.h"
 
 #include <cmath>
 #include <glm/vec2.hpp>

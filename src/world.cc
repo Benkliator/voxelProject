@@ -15,7 +15,6 @@ World::World(unsigned size) {
     std::cout << "Creating chunks..." << std::endl;
 
     for (unsigned x = 0; x < size; x++) {
-        std::vector<Chunk> temp;
         for (unsigned z = 0; z < size; z++) {
             visibleChunks.emplace_back(x, z, this);
         }

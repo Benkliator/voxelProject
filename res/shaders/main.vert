@@ -11,9 +11,9 @@ out vec3 color;
 
 void main(void)
 {
-    float x = float((vertex.x  & 31u)             + chunkPos.x);
-    float y = float(((vertex.x & 8160u)    >> 5u)  + chunkPos.y);
-    float z = float(((vertex.x & 253952u) >> 13u) + chunkPos.z);
+    float x = float((vertex.x  & 31u)             + chunkPos.x) - 0.5;
+    float y = float(((vertex.x & 8160u)    >> 5u)  + chunkPos.y) - 0.5;
+    float z = float(((vertex.x & 253952u) >> 13u) + chunkPos.z) - 0.5;
     uint occlusion = (vertex.x & 786432u) >> 18u;
     switch (occlusion) {
         case 0u:

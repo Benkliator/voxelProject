@@ -2,7 +2,7 @@
 
 #include "block.h"
 #include "chunk.h"
-#include "perlin.h"
+#include "noise.h"
 #include "world.h"
 
 #include <array>
@@ -231,21 +231,24 @@ glm::uvec3 Chunk::getPos() {
 }
 
 void Chunk::generateTerrain() {
-    float freq = 0.96323343; // Frequency
-    float amp = 0.95;        // Amplifier
+    float freq = 0.996323343; // Frequency
+    float amp = 1.75;        // Amplifier
+    std::cout << pos.x << std::endl;
     for (int x = 0; x < 16; x++) {
         for (int z = 0; z < 16; z++) {
             // Uses perlin function to calculate height for xz position
             float noise =
-                perlin(((x + pos.x) * freq) / 16, ((z + pos.z) * freq) / 16);
+                perlin(((z + pos.x) * freq) / 16, ((x + pos.z) * freq) / 16);
             float height = noise * amp + 1;
             for (unsigned y = 0; y < worldHeight; y++) {
                 // Using the following line in an if or switch case
                 // can let you dynamically decide block generations at
                 // different (x, y, z) values.
                 enum Block::BlockType bt;
-                if (y < height) {
+                if (y > height && y < height + 1) {
                     bt = Block::Grass;
+                } else if (y < height) {
+                    bt = Block::Dirt;
                 } else {
                     bt = Block::Air;
                 }
@@ -315,8 +318,12 @@ Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, unsigned short face) {
     } break;
     case Block::Back: {
         if (!isAir(getBlock(x, y - 1, z))) {
-            vertexOcclusion[0] = 2;
-            vertexOcclusion[3] = 2;
+            vertexOcclusion[0] = 1;
+            vertexOcclusion[3] = 1;
+        }
+        if (!isAir(getBlock(x, y + 1, z))) {
+            vertexOcclusion[1] = 1;
+            vertexOcclusion[2] = 1;
         }
         if (!isAir(getBlockGlobal(x, y - 1, z - 1))) {
             vertexOcclusion[0] = 3;
@@ -325,8 +332,12 @@ Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, unsigned short face) {
     } break;
     case Block::Front: {
         if (!isAir(getBlock(x, y - 1, z))) {
-            vertexOcclusion[1] = 2;
-            vertexOcclusion[2] = 2;
+            vertexOcclusion[1] = 1;
+            vertexOcclusion[2] = 1;
+        }
+        if (!isAir(getBlock(x, y + 1, z))) {
+            vertexOcclusion[0] = 1;
+            vertexOcclusion[3] = 1;
         }
         if (!isAir(getBlockGlobal(x, y - 1, z + 1))) {
             vertexOcclusion[1] = 3;
@@ -335,8 +346,12 @@ Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, unsigned short face) {
     } break;
     case Block::Right: {
         if (!isAir(getBlock(x, y - 1, z))) {
-            vertexOcclusion[1] = 2;
-            vertexOcclusion[2] = 2;
+            vertexOcclusion[1] = 1;
+            vertexOcclusion[2] = 1;
+        }
+        if (!isAir(getBlock(x, y + 1, z))) {
+            vertexOcclusion[0] = 1;
+            vertexOcclusion[3] = 1;
         }
         if (!isAir(getBlockGlobal(x + 1, y - 1, z))) {
             vertexOcclusion[1] = 3;
@@ -345,8 +360,12 @@ Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, unsigned short face) {
     } break;
     case Block::Left: {
         if (!isAir(getBlock(x, y - 1, z))) {
-            vertexOcclusion[1] = 2;
-            vertexOcclusion[2] = 2;
+            vertexOcclusion[1] = 1;
+            vertexOcclusion[2] = 1;
+        }
+        if (!isAir(getBlock(x, y + 1, z))) {
+            vertexOcclusion[0] = 1;
+            vertexOcclusion[3] = 1;
         }
         if (!isAir(getBlockGlobal(x - 1, y - 1, z))) {
             vertexOcclusion[1] = 3;
