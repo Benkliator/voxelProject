@@ -12,8 +12,8 @@ class World;
 /*
  * Bit values for each element in the blockArray vector:
  *
- * 0000   0000 0000   0000 0000 0000   0000 0000
- * ????     block          ypos        zpos xpos
+ * 0000 0000   0000 0000
+ *   block
  *
  * xpos: X position for block in chunk, first 4 bits (0 - 15)
  * zpos: Z position for block in chunk, second 4 bits (0 - 15)
@@ -33,17 +33,17 @@ public:
     void generateMesh();
     void draw(unsigned);
 
-    unsigned getBlock(unsigned, unsigned, unsigned);
-    unsigned getBlockGlobal(long, long, long);
+    unsigned short getBlock(unsigned, unsigned, unsigned);
+    unsigned short getBlockGlobal(long, long, long);
     glm::uvec3 getPos();
 
 private:
     void generateTerrain();
     void renderInit(std::vector<GLuint>&, std::vector<unsigned>&);
 
-    std::array<unsigned, 4>
+    std::array<unsigned short, 4>
     getOcclusion(unsigned, unsigned, unsigned, unsigned short);
-    std::vector<unsigned> blockArray;
+    std::vector<unsigned short> blockArray;
     glm::uvec3 pos;
 
     World* world;
