@@ -6,6 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
+#include <optional>
 #include <vector>
 
 const unsigned worldHeight = 254;
@@ -22,8 +23,9 @@ public:
 
     // Draws out every chunk in visibleChunks
     void draw(glm::mat4& view);
-    unsigned getBlock(unsigned, unsigned, unsigned);
+    std::optional<ushort> getBlock(unsigned, unsigned, unsigned);
     Chunk* getChunk(unsigned, unsigned, unsigned);
+
 private:
     void shaderInit();
 

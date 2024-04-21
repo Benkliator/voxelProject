@@ -1,7 +1,5 @@
 #include "player.h"
 
-#include <iostream>
-
 Player::Player(World* w) : world{ w } {
     worldCam = new Camera{};
     skyCam = new Camera{};
@@ -36,7 +34,7 @@ void Player::breakBlock() {
     unsigned zChunk = zBlock - (zBlock % 16);
 
     world->getChunk(xChunk, 0, zChunk)
-         ->removeBlock(xBlock % 16, yBlock, zBlock % 16);
+        ->removeBlock(xBlock % 16, yBlock, zBlock % 16);
 }
 
 void Player::placeBlock() {
@@ -50,7 +48,7 @@ void Player::placeBlock() {
     unsigned zChunk = zBlock - (zBlock % 16);
 
     world->getChunk(xChunk, 0, zChunk)
-         ->placeBlock(xBlock % 16, yBlock, zBlock % 16);
+        ->placeBlock(xBlock % 16, yBlock, zBlock % 16);
 }
 
 glm::mat4 Player::worldLook() {

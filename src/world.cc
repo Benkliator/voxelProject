@@ -1,6 +1,5 @@
 #include "glad/glad.h"
 
-#include "block.h"
 #include "utility.h"
 #include "world.h"
 
@@ -30,7 +29,7 @@ World::World(unsigned size) {
     std::cout << "Created " << visibleChunks.size() << " chunks!" << std::endl;
 }
 
-unsigned int World::getBlock(unsigned x, unsigned y, unsigned z) {
+std::optional<ushort> World::getBlock(unsigned x, unsigned y, unsigned z) {
     const unsigned chunkMask = 0b1111;
     unsigned chunkX = x & ~chunkMask;
     unsigned chunkZ = z & ~chunkMask;
@@ -42,11 +41,11 @@ unsigned int World::getBlock(unsigned x, unsigned y, unsigned z) {
             return chunk.getBlock(blockOffsetX, y, blockOffsetZ);
         }
     }
-    return errorBlock;
+    return std::nullopt;
 }
 
 Chunk* World::getChunk(unsigned x, unsigned y, unsigned z) {
-    glm::uvec3 findPos{x, y, z};
+    glm::uvec3 findPos{ x, y, z };
     for (Chunk& chunk : visibleChunks) {
         if (chunk.getPos() == findPos) {
             return &chunk;

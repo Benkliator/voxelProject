@@ -8,7 +8,8 @@
 #include <array>
 #include <glm/fwd.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <iostream>
+#include <optional>
+#include <sys/types.h>
 
 // Generates buffers and VAO, creates terrain for chunk.
 Chunk::Chunk(int x, int z, World* w) : world{ w } {
@@ -27,9 +28,11 @@ Chunk::Chunk(int x, int z, World* w) : world{ w } {
 
 Chunk::~Chunk() {}
 
-void Chunk::generateMesh() {
-    for (size_t i = 0; i < blockArray.size(); i++) {
-        unsigned short block = blockArray[i];
+void Chunk::generateMesh(std::optional<std::vector<ushort>> blockAreaArray) {
+    std::vector<ushort> blocks = blockAreaArray.value_or(this->blockArray);
+    const ushort obstruct = Block::Dirt << typeOffset;
+    for (size_t i = 0; i < blocks.size(); i++) {
+        ushort block = blocks[i];
         if (isAir(block)) {
             continue;
         }
@@ -37,86 +40,43 @@ void Chunk::generateMesh() {
         unsigned z = i / (worldHeight * 16);
         unsigned y = i % worldHeight;
         unsigned x = (i % (16 * worldHeight)) / worldHeight;
-        Block blockType{ (block & typeMask) >> typeOffset };
+        Block blockType{
+            static_cast<ushort>((block & typeMask) >> typeOffset),
+        };
 
         // Top
-        if (isAir(getBlockGlobal(x, y + 1, z))) {
+        if (isAir(getBlockGlobal(x, y + 1, z).value_or(obstruct))) {
             blockArray[i] = blockArray[i] | topMask;
             loadFace(&topMeshData, blockType.top, x, y, z);
         }
 
         // Bottom
-        if (isAir(getBlockGlobal(x, y - 1, z))) {
+        if (isAir(getBlockGlobal(x, y - 1, z).value_or(obstruct))) {
             blockArray[i] = blockArray[i] | bottomMask;
             loadFace(&bottomMeshData, blockType.bottom, x, y, z);
         }
 
         // Back
-        if (isAir(getBlockGlobal(x, y, z - 1))) {
+        if (isAir(getBlockGlobal(x, y, z - 1).value_or(obstruct))) {
             blockArray[i] = blockArray[i] | backMask;
             loadFace(&backMeshData, blockType.side, x, y, z);
         }
 
         // Front
-        if (isAir(getBlockGlobal(x, y, z + 1))) {
+        if (isAir(getBlockGlobal(x, y, z + 1).value_or(obstruct))) {
             blockArray[i] = blockArray[i] | frontMask;
             loadFace(&frontMeshData, blockType.side, x, y, z);
         }
 
         // Left
-        if (isAir(getBlockGlobal(x - 1, y, z))) {
+        if (isAir(getBlockGlobal(x - 1, y, z).value_or(obstruct))) {
             blockArray[i] = blockArray[i] | leftMask;
             loadFace(&leftMeshData, blockType.side, x, y, z);
         }
 
         // Right
-        if (isAir(getBlockGlobal(x + 1, y, z))) {
+        if (isAir(getBlockGlobal(x + 1, y, z).value_or(obstruct))) {
             blockArray[i] = blockArray[i] | rightMask;
-            loadFace(&rightMeshData, blockType.side, x, y, z);
-        }
-    }
-    renderInit();
-}
-
-void Chunk::generateMesh(std::vector<unsigned short> blockAreaArray) {
-    for (size_t i = 0; i < blockAreaArray.size(); i++) {
-        unsigned short block = blockAreaArray[i];
-        if (isAir(block)) {
-            continue;
-        }
-
-        unsigned z = i / (worldHeight * 16);
-        unsigned y = i % worldHeight;
-        unsigned x = (i % (16 * worldHeight)) / worldHeight;
-        Block blockType{ (block & typeMask) >> typeOffset };
-
-        // Top
-        if (isAir(getBlockGlobal(x, y + 1, z))) {
-            loadFace(&topMeshData, blockType.top, x, y, z);
-        }
-
-        // Bottom
-        if (isAir(getBlockGlobal(x, y - 1, z))) {
-            loadFace(&bottomMeshData, blockType.bottom, x, y, z);
-        }
-
-        // Back
-        if (isAir(getBlockGlobal(x, y, z - 1))) {
-            loadFace(&backMeshData, blockType.side, x, y, z);
-        }
-
-        // Front
-        if (isAir(getBlockGlobal(x, y, z + 1))) {
-            loadFace(&frontMeshData, blockType.side, x, y, z);
-        }
-
-        // Left
-        if (isAir(getBlockGlobal(x - 1, y, z))) {
-            loadFace(&leftMeshData, blockType.side, x, y, z);
-        }
-
-        // Right
-        if (isAir(getBlockGlobal(x + 1, y, z))) {
             loadFace(&rightMeshData, blockType.side, x, y, z);
         }
     }
@@ -125,7 +85,7 @@ void Chunk::generateMesh(std::vector<unsigned short> blockAreaArray) {
 
 void Chunk::reloadMesh(unsigned x, unsigned y, unsigned z) {
     size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
-    std::vector<unsigned short> tempBlockArray;
+    std::vector<ushort> tempBlockArray;
     tempBlockArray.push_back(blockArray[ix]);
     if (y > 0) {
         tempBlockArray.push_back(blockArray[ix - 1]);
@@ -136,36 +96,35 @@ void Chunk::reloadMesh(unsigned x, unsigned y, unsigned z) {
     /*  HUGE MASSIVE NOTE:
      *  This will need to update the meshes of adjacent CHUNKS!!!!
      */
-    tempBlockArray.push_back(getBlockGlobal(x + 1, y, z));
-    tempBlockArray.push_back(getBlockGlobal(x - 1, y, z));
-    tempBlockArray.push_back(getBlockGlobal(x, y, z + 1));
-    tempBlockArray.push_back(getBlockGlobal(x, y, z - 1));
+    tempBlockArray.push_back(getBlockGlobal(x + 1, y, z).value_or(0)); // FIXME
+    tempBlockArray.push_back(getBlockGlobal(x - 1, y, z).value_or(0)); // FIXME
+    tempBlockArray.push_back(getBlockGlobal(x, y, z + 1).value_or(0)); // FIXME
+    tempBlockArray.push_back(getBlockGlobal(x, y, z - 1).value_or(0)); // FIXME
     /* removeMeshArea(); */
     generateMesh(tempBlockArray);
 }
 
 void Chunk::draw(unsigned shader) {
     glBindVertexArray(VAO);
-    glUniform3uiv(glGetUniformLocation(shader, "chunkPos"),
-                 1,
-                 glm::value_ptr(pos));
+    glUniform3uiv(
+        glGetUniformLocation(shader, "chunkPos"), 1, glm::value_ptr(pos));
     glDrawElements(GL_TRIANGLES, indexSize, GL_UNSIGNED_INT, 0);
 }
 
-unsigned short Chunk::getBlock(unsigned x, unsigned y, unsigned z) {
+ushort Chunk::getBlock(unsigned x, unsigned y, unsigned z) {
     size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
     return blockArray[ix];
 }
 
-unsigned short Chunk::getBlockGlobal(long dX, long dY, long dZ) {
+std::optional<ushort> Chunk::getBlockGlobal(long dX, long dY, long dZ) {
     if (dY < 0 || dY >= worldHeight) {
-        return errorBlock;
+        return std::nullopt;
     }
     if (dX >= 0 && dX <= 15 && dZ >= 0 && dZ <= 15) {
         // Can use local version
         return getBlock(dX, dY, dZ);
     } else {
-        // Find the block in all chunks
+        // Try find an opt<block> in all chunks
         return world->getBlock(pos.x + dX, pos.y + dY, pos.z + dZ);
     }
 }
@@ -184,7 +143,7 @@ bool Chunk::removeBlock(unsigned x, unsigned y, unsigned z) {
 
 bool Chunk::removeBlockMesh(unsigned x, unsigned y, unsigned z) {
     // TODO: Implement, for implement:
-    // How can we know where a blocks mesh data 
+    // How can we know where a blocks mesh data
     // is in the vertex and index mesh?
     size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
     unsigned block = blockArray[ix];
@@ -207,7 +166,7 @@ bool Chunk::placeBlock(unsigned x, unsigned y, unsigned z) {
     return false;
 }
 
-void Chunk::clearMesh()  {
+void Chunk::clearMesh() {
     vertexMesh.clear();
     indexMesh.clear();
 }
@@ -218,7 +177,7 @@ glm::uvec3 Chunk::getPos() {
 
 void Chunk::generateTerrain() {
     float freq = 0.8396323343; // Frequency
-    float amp = 1.35;        // Amplifier
+    float amp = 1.35;          // Amplifier
     for (int x = 0; x < 16; x++) {
         for (int z = 0; z < 16; z++) {
             // Uses perlin function to calculate height for xz position
@@ -267,14 +226,16 @@ void Chunk::renderInit() {
     glEnableVertexAttribArray(0);
 }
 
-void Chunk::loadFace(const MeshData* data, unsigned bt, unsigned x, unsigned y, unsigned z) {
+void Chunk::loadFace(
+    const MeshData* data, unsigned bt, unsigned x, unsigned y, unsigned z) {
     indexMesh.push_back((vertexMesh.size() / 2) + 0);
     indexMesh.push_back((vertexMesh.size() / 2) + 3);
     indexMesh.push_back((vertexMesh.size() / 2) + 1);
     indexMesh.push_back((vertexMesh.size() / 2) + 2);
     indexMesh.push_back((vertexMesh.size() / 2) + 1);
     indexMesh.push_back((vertexMesh.size() / 2) + 3);
-    std::array<unsigned short, 4> occlusionArray = getOcclusion(x, y, z, data->blockFace);
+    std::array<ushort, 4> occlusionArray =
+        getOcclusion(x, y, z, data->blockFace);
     size_t j = 0;
     size_t t = 0;
     for (size_t i = 0; i < 4; i++) {
@@ -284,7 +245,7 @@ void Chunk::loadFace(const MeshData* data, unsigned bt, unsigned x, unsigned y, 
         GLuint vertex = xi | yi << 5 | zi << 13 | occlusionArray[i] << 18;
 
         GLuint texX = data->texCoords[t++] + ((bt & zMask) >> zOffset);
-        GLuint texY = data->texCoords[t++] + bt & xMask;
+        GLuint texY = data->texCoords[t++] + ((bt & xMask) >> xOffset);
         GLuint texData = texX | texY << 8;
 
         vertexMesh.push_back(vertex);
@@ -292,38 +253,39 @@ void Chunk::loadFace(const MeshData* data, unsigned bt, unsigned x, unsigned y, 
     }
 }
 
-std::array<unsigned short, 4>
-Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, unsigned short face) {
+std::array<ushort, 4>
+Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, ushort face) {
     // This is really ugly lol, will probably rework at some point.
-    std::array<unsigned short, 4> vertexOcclusion{ 0, 0, 0, 0 };
+    std::array<ushort, 4> vertexOcclusion{ 0, 0, 0, 0 };
+    const ushort air = Block::Air << typeOffset;
     switch (face) {
     case Block::Top: {
-        if (!isAir(getBlockGlobal(x, y + 1, z + 1))) {
+        if (!isAir(getBlockGlobal(x, y + 1, z + 1).value_or(air))) {
             vertexOcclusion[1] += 1;
             vertexOcclusion[2] += 1;
         }
-        if (!isAir(getBlockGlobal(x, y + 1, z - 1))) {
+        if (!isAir(getBlockGlobal(x, y + 1, z - 1).value_or(air))) {
             vertexOcclusion[0] += 1;
             vertexOcclusion[3] += 1;
         }
-        if (!isAir(getBlockGlobal(x + 1, y + 1, z))) {
+        if (!isAir(getBlockGlobal(x + 1, y + 1, z).value_or(air))) {
             vertexOcclusion[0] += 1;
             vertexOcclusion[1] += 1;
         }
-        if (!isAir(getBlockGlobal(x - 1, y + 1, z))) {
+        if (!isAir(getBlockGlobal(x - 1, y + 1, z).value_or(air))) {
             vertexOcclusion[2] += 1;
             vertexOcclusion[3] += 1;
         }
-        if (!isAir(getBlockGlobal(x + 1, y + 1, z + 1))) {
+        if (!isAir(getBlockGlobal(x + 1, y + 1, z + 1).value_or(air))) {
             vertexOcclusion[1] += 1;
         }
-        if (!isAir(getBlockGlobal(x - 1, y + 1, z + 1))) {
+        if (!isAir(getBlockGlobal(x - 1, y + 1, z + 1).value_or(air))) {
             vertexOcclusion[2] += 1;
         }
-        if (!isAir(getBlockGlobal(x + 1, y + 1, z - 1))) {
+        if (!isAir(getBlockGlobal(x + 1, y + 1, z - 1).value_or(air))) {
             vertexOcclusion[0] += 1;
         }
-        if (!isAir(getBlockGlobal(x - 1, y + 1, z - 1))) {
+        if (!isAir(getBlockGlobal(x - 1, y + 1, z - 1).value_or(air))) {
             vertexOcclusion[3] += 1;
         }
     } break;
@@ -336,7 +298,7 @@ Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, unsigned short face) {
             vertexOcclusion[1] = 1;
             vertexOcclusion[2] = 1;
         }
-        if (!isAir(getBlockGlobal(x, y - 1, z - 1))) {
+        if (!isAir(getBlockGlobal(x, y - 1, z - 1).value_or(air))) {
             vertexOcclusion[0] = 3;
             vertexOcclusion[3] = 3;
         }
@@ -350,7 +312,7 @@ Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, unsigned short face) {
             vertexOcclusion[0] = 1;
             vertexOcclusion[3] = 1;
         }
-        if (!isAir(getBlockGlobal(x, y - 1, z + 1))) {
+        if (!isAir(getBlockGlobal(x, y - 1, z + 1).value_or(air))) {
             vertexOcclusion[1] = 3;
             vertexOcclusion[2] = 3;
         }
@@ -364,7 +326,7 @@ Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, unsigned short face) {
             vertexOcclusion[0] = 1;
             vertexOcclusion[3] = 1;
         }
-        if (!isAir(getBlockGlobal(x + 1, y - 1, z))) {
+        if (!isAir(getBlockGlobal(x + 1, y - 1, z).value_or(air))) {
             vertexOcclusion[1] = 3;
             vertexOcclusion[2] = 3;
         }
@@ -378,16 +340,16 @@ Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, unsigned short face) {
             vertexOcclusion[0] = 1;
             vertexOcclusion[3] = 1;
         }
-        if (!isAir(getBlockGlobal(x - 1, y - 1, z))) {
+        if (!isAir(getBlockGlobal(x - 1, y - 1, z).value_or(air))) {
             vertexOcclusion[1] = 3;
             vertexOcclusion[2] = 3;
         }
     } break;
     case Block::Bottom: {
-            vertexOcclusion[0] = 3;
-            vertexOcclusion[1] = 3;
-            vertexOcclusion[2] = 3;
-            vertexOcclusion[3] = 3;
+        vertexOcclusion[0] = 3;
+        vertexOcclusion[1] = 3;
+        vertexOcclusion[2] = 3;
+        vertexOcclusion[3] = 3;
     }
     }
     return vertexOcclusion;
