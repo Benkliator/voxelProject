@@ -23,6 +23,8 @@ public:
     unsigned short getBlock(unsigned, unsigned, unsigned);
     unsigned short getBlockGlobal(long, long, long);
     bool removeBlock(unsigned, unsigned, unsigned);
+    bool removeBlockMesh(unsigned, unsigned, unsigned);
+    void clearMesh();
     glm::uvec3 getPos();
 
 private:

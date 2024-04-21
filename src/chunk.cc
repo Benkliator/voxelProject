@@ -41,31 +41,37 @@ void Chunk::generateMesh() {
 
         // Top
         if (isAir(getBlockGlobal(x, y + 1, z))) {
+            blockArray[i] = blockArray[i] | topMask;
             loadFace(&topMeshData, blockType.top, x, y, z);
         }
 
         // Bottom
         if (isAir(getBlockGlobal(x, y - 1, z))) {
+            blockArray[i] = blockArray[i] | bottomMask;
             loadFace(&bottomMeshData, blockType.bottom, x, y, z);
         }
 
         // Back
         if (isAir(getBlockGlobal(x, y, z - 1))) {
+            blockArray[i] = blockArray[i] | backMask;
             loadFace(&backMeshData, blockType.side, x, y, z);
         }
 
         // Front
         if (isAir(getBlockGlobal(x, y, z + 1))) {
+            blockArray[i] = blockArray[i] | frontMask;
             loadFace(&frontMeshData, blockType.side, x, y, z);
         }
 
         // Left
         if (isAir(getBlockGlobal(x - 1, y, z))) {
+            blockArray[i] = blockArray[i] | leftMask;
             loadFace(&leftMeshData, blockType.side, x, y, z);
         }
 
         // Right
         if (isAir(getBlockGlobal(x + 1, y, z))) {
+            blockArray[i] = blockArray[i] | rightMask;
             loadFace(&rightMeshData, blockType.side, x, y, z);
         }
     }
@@ -173,6 +179,23 @@ bool Chunk::removeBlock(unsigned x, unsigned y, unsigned z) {
         return true;
     };
     return false;
+}
+
+bool Chunk::removeBlockMesh(unsigned x, unsigned y, unsigned z) {
+    // TODO: Implement, for implement:
+    // How can we know where a blocks mesh data 
+    // is in the vertex and index mesh?
+    size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
+    unsigned block = blockArray[ix];
+    if (isAir(block)) {
+        return false;
+    }
+    return true;
+}
+
+void Chunk::clearMesh()  {
+    vertexMesh.clear();
+    indexMesh.clear();
 }
 
 glm::uvec3 Chunk::getPos() {

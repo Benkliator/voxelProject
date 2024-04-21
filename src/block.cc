@@ -26,9 +26,9 @@ Block::Block(unsigned blockType) {
     } break;
 
     case Block::Water: {
-        top = 0b00010011;
-        bottom = 0b00010011;
-        side = 0b00010011;
+        top = 0b00000011;
+        bottom = 0b00000011;
+        side = 0b00000011;
     } break;
     }
 }

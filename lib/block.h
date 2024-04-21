@@ -12,6 +12,13 @@ const unsigned yOffset = __builtin_ctz(yMask);
 const unsigned zOffset = __builtin_ctz(zMask);
 const unsigned typeOffset = __builtin_ctz(typeMask);
 
+const unsigned topMask      = 0b10000000;
+const unsigned bottomMask   = 0b1000000;
+const unsigned backMask     = 0b100000;
+const unsigned frontMask    = 0b10000;
+const unsigned leftMask     = 0b1000;
+const unsigned rightMask    = 0b100;
+
 // TODO(Christoffer): Better error block for visually showing it?
 //                    currently only used for returning values for blocks
 //                    that are requested outside of the loaded chunk bounds
