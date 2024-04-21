@@ -24,7 +24,6 @@ public:
     void draw(glm::mat4& view);
     unsigned getBlock(unsigned, unsigned, unsigned);
     Chunk* getChunk(unsigned, unsigned, unsigned);
-
 private:
     void shaderInit();
 

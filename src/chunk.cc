@@ -174,6 +174,7 @@ bool Chunk::removeBlock(unsigned x, unsigned y, unsigned z) {
     if (!isAir(getBlock(x, y, z))) {
         size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
         blockArray[ix] = 0;
+        clearMesh();
         generateMesh();
         // reloadMesh(x, y, z);
         return true;

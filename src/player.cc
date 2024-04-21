@@ -26,12 +26,17 @@ void Player::movePlayer(GLFWwindow* window, float dt) {
 }
 
 void Player::breakBlock() {
-    std::cout << "Breaking block!" << std::endl;
-    auto [from, to] = worldCam->rayCast(5.0f);
-    std::cout << from.x << ' ' << to.x << std::endl;
-    int xBlock = int(to.x);
-    int yBlock = int(to.y);
-    int zBlock = int(to.z);
+    auto [from, to] = worldCam->rayCast(2.0f);
+
+    unsigned xBlock = unsigned(to.x);
+    unsigned yBlock = unsigned(to.y);
+    unsigned zBlock = unsigned(to.z);
+
+    unsigned xChunk = xBlock - (xBlock % 16);
+    unsigned zChunk = zBlock - (zBlock % 16);
+
+    world->getChunk(xChunk, 0, zChunk)
+         ->removeBlock(xBlock % 16, yBlock, zBlock % 16);
 }
 
 void Player::placeBlock() {
