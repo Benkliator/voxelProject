@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+
 #include "input.h"
 #include "world.h"
 

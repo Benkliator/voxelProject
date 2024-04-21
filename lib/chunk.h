@@ -24,6 +24,7 @@ public:
     unsigned short getBlockGlobal(long, long, long);
     bool removeBlock(unsigned, unsigned, unsigned);
     bool removeBlockMesh(unsigned, unsigned, unsigned);
+    bool placeBlock(unsigned, unsigned, unsigned);
     void clearMesh();
     glm::uvec3 getPos();
 

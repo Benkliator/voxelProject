@@ -194,6 +194,19 @@ bool Chunk::removeBlockMesh(unsigned x, unsigned y, unsigned z) {
     return true;
 }
 
+bool Chunk::placeBlock(unsigned x, unsigned y, unsigned z) {
+    if (isAir(getBlock(x, y, z))) {
+        size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
+        enum Block::BlockType bt = Block::Stone;
+        blockArray[ix] = bt << typeOffset;
+        clearMesh();
+        generateMesh();
+        // reloadMesh(x, y, z);
+        return true;
+    };
+    return false;
+}
+
 void Chunk::clearMesh()  {
     vertexMesh.clear();
     indexMesh.clear();
