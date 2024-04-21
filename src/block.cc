@@ -1,7 +1,9 @@
 #include "block.h"
 
+#include <sys/types.h>
+
 // NOTE: Additional bits might be block unique, consider for future.
-Block::Block(unsigned blockType) {
+Block::Block(ushort blockType) {
     switch (blockType) {
     case Block::Air: {
         // Skipped in drawing

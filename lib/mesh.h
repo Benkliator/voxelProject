@@ -5,7 +5,7 @@
 struct MeshData {
     const unsigned faceCoords[12];
     const unsigned texCoords[8];
-    unsigned short blockFace;
+    ushort blockFace;
 };
 
 const MeshData topMeshData = {
