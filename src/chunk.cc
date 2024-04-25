@@ -154,7 +154,8 @@ bool Chunk::removeBlockMesh(unsigned x, unsigned y, unsigned z) {
 }
 
 bool Chunk::placeBlock(unsigned x, unsigned y, unsigned z) {
-    if (isAir(getBlock(x, y, z))) {
+    unsigned block = getBlock(x, y, z);
+    if (isAir(block)) {
         size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
         enum Block::BlockType bt = Block::Stone;
         blockArray[ix] = bt << typeOffset;

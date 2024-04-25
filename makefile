@@ -33,6 +33,9 @@ $(EXECUTABLE): $(OBJECTS)
 $(OBJDIR)/%.o: $(SRCDIR)/%.cc $(LIBDIR)/%.h | $(OBJDIR)
 	$(CC) $(CXXFLAGS) -c $< -o $@
 
+$(OBJDIR)/main.o: $(SRCDIR)/main.cc | $(OBJDIR)
+	$(CC) $(CXXFLAGS) -c $< -o $@
+
 # GLAD include
 $(OBJDIR)/glad.o: $(INCDIR)/glad/glad.c $(INCDIR)/glad/glad.h | $(OBJDIR)
 	$(CC) $(CXXFLAGS) -c $< -o $@
