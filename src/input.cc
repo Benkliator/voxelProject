@@ -31,27 +31,6 @@ void Camera::processMouseMovement(GLFWwindow* window,
     cameraFront = glm::normalize(cameraFront);
 }
 
-glm::vec3 Camera::processKeyboardInput(GLFWwindow* window, float cameraSpeed) {
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        cameraPos += cameraSpeed *
-                     glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        cameraPos -= cameraSpeed *
-                     glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        cameraPos -=
-            glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        cameraPos +=
-            glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        cameraPos.y += cameraSpeed;
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-        cameraPos.y -= cameraSpeed;
-
-    return cameraPos;
-}
-
 std::pair<glm::vec3, glm::vec3> Camera::rayCast(float length) {
     return std::make_pair(cameraPos, cameraPos + (cameraFront * length));
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <sys/types.h>
 
 const ushort xMask = 0b00000000000000000001111;
@@ -31,6 +32,7 @@ struct Block {
         Grass,
         Stone,
         Water,
+        NUM_BLOCKTYPES,
     };
 
     enum BlockFace : ushort {
@@ -49,3 +51,4 @@ struct Block {
 
 // Helper functions
 bool isAir(unsigned);
+std::string blockToString(Block::BlockType);

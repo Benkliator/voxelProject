@@ -35,6 +35,23 @@ Block::Block(ushort blockType) {
     }
 }
 
+std::string blockToString(Block::BlockType bt) {
+    switch (bt) {
+    case Block::Air:
+        return "Air";
+    case Block::Dirt:
+        return "Dirt";
+    case Block::Grass:
+        return "Grass";
+    case Block::Stone:
+        return "Stone";
+    case Block::Water:
+        return "Water";
+    default:
+        __builtin_unreachable();
+    }
+};
+
 bool isAir(unsigned block) {
     return (block & typeMask) == Block::Air;
 }

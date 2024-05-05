@@ -19,15 +19,22 @@ Game::Game() {
     }
 
     glfwMakeContextCurrent(window);
-    glfwSetWindowUserPointer(window, this);
 
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
+    glfwSetWindowUserPointer(window, this);
     auto mouseMotionCallback = [](GLFWwindow* w, double x, double y) {
         static_cast<Game*>(glfwGetWindowUserPointer(w))
             ->mouseMotionCallback(x, y);
     };
     glfwSetCursorPosCallback(window, mouseMotionCallback);
+
+    glfwSetWindowUserPointer(window, this);
+    auto mouseScrollCallback = [](GLFWwindow* w, double x, double y) {
+        static_cast<Game*>(glfwGetWindowUserPointer(w))
+            ->mouseScrollCallback(x, y);
+    };
+    glfwSetScrollCallback(window, mouseScrollCallback);
 
     auto mouseClickCallback =
         [](GLFWwindow* w, int button, int action, int mods) {
@@ -55,14 +62,12 @@ Game::Game() {
     skybox = new Skybox{};
     world = new World{ RENDER_DISTANCE };
     player = new Player{ world };
-    hud = new Hud{};
 }
 
 Game::~Game() {
+    delete player;
     delete world;
     delete skybox;
-    delete hud;
-    delete player;
     glfwTerminate();
 }
 
@@ -81,9 +86,7 @@ void Game::gameLoop() {
 
         view = player->skyLook();
         skybox->draw(view, currentFrame);
-
-        std::string fps = std::to_string(static_cast<int>(1 / deltaTime));
-        hud->renderText(fps, 5.0f, 5.0f, 1.0f, glm::vec3{ 1.0f, 1.0f, 1.0f });
+        player->draw();
 
         glfwPollEvents();
         glfwSwapBuffers(window);
@@ -116,6 +119,10 @@ void Game::mouseMotionCallback(double xposIn, double yposIn) {
     lastY = ypos;
 
     player->moveMouse(window, xoffset, yoffset);
+}
+
+void Game::mouseScrollCallback(double x, double y) {
+    player->selectBlock(window, x, y);
 }
 
 void Game::mouseClickCallback(int button, int action, int mods) {

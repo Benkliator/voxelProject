@@ -46,37 +46,37 @@ void Chunk::generateMesh(std::optional<std::vector<ushort>> blockAreaArray) {
 
         // Top
         if (isAir(getBlockGlobal(x, y + 1, z).value_or(obstruct))) {
-            blockArray[i] = blockArray[i] | topMask;
+            blockArray[i] |= topMask;
             loadFace(&topMeshData, blockType.top, x, y, z);
         }
 
         // Bottom
         if (isAir(getBlockGlobal(x, y - 1, z).value_or(obstruct))) {
-            blockArray[i] = blockArray[i] | bottomMask;
+            blockArray[i] |= bottomMask;
             loadFace(&bottomMeshData, blockType.bottom, x, y, z);
         }
 
         // Back
         if (isAir(getBlockGlobal(x, y, z - 1).value_or(obstruct))) {
-            blockArray[i] = blockArray[i] | backMask;
+            blockArray[i] |= backMask;
             loadFace(&backMeshData, blockType.side, x, y, z);
         }
 
         // Front
         if (isAir(getBlockGlobal(x, y, z + 1).value_or(obstruct))) {
-            blockArray[i] = blockArray[i] | frontMask;
+            blockArray[i] |= frontMask;
             loadFace(&frontMeshData, blockType.side, x, y, z);
         }
 
         // Left
         if (isAir(getBlockGlobal(x - 1, y, z).value_or(obstruct))) {
-            blockArray[i] = blockArray[i] | leftMask;
+            blockArray[i] |= leftMask;
             loadFace(&leftMeshData, blockType.side, x, y, z);
         }
 
         // Right
         if (isAir(getBlockGlobal(x + 1, y, z).value_or(obstruct))) {
-            blockArray[i] = blockArray[i] | rightMask;
+            blockArray[i] |= rightMask;
             loadFace(&rightMeshData, blockType.side, x, y, z);
         }
     }
@@ -177,11 +177,10 @@ bool Chunk::removeBlockMesh(unsigned x, unsigned y, unsigned z) {
     return true;
 }
 
-bool Chunk::placeBlock(unsigned x, unsigned y, unsigned z) {
+bool Chunk::placeBlock(Block::BlockType bt, unsigned x, unsigned y, unsigned z) {
     unsigned block = getBlock(x, y, z);
     if (isAir(block)) {
         size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
-        enum Block::BlockType bt = Block::Stone;
         blockArray[ix] = bt << typeOffset;
         clearMesh();
         generateMesh();
@@ -201,6 +200,7 @@ glm::uvec3 Chunk::getPos() {
 }
 
 void Chunk::generateTerrain() {
+    float yIntercept = 3.0f;
     float freq = 0.8396323343; // Frequency
     float amp = 1.35;          // Amplifier
     for (int x = 0; x < 16; x++) {
@@ -208,13 +208,13 @@ void Chunk::generateTerrain() {
             // Uses perlin function to calculate height for xz position
             float noise =
                 perlin(((z + pos.x) * freq) / 16, ((x + pos.z) * freq) / 16);
-            float height = noise * amp + 1;
+            float height = noise * amp + yIntercept;
             for (unsigned y = 0; y < worldHeight; y++) {
                 // Using the following line in an if or switch case
                 // can let you dynamically decide block generations at
                 // different (x, y, z) values.
                 enum Block::BlockType bt;
-                if (y < 3) {
+                if (y <= 1 + yIntercept) {
                     bt = Block::Water;
                 } else if (y > height && y < height + 1) {
                     bt = Block::Grass;
