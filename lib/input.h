@@ -18,17 +18,14 @@ public:
                               double yoffset,
                               GLboolean constrainPitch = true);
 
-    glm::vec3 processKeyboardInput(GLFWwindow* window, float deltaTime);
-
     std::pair<glm::vec3, glm::vec3> rayCast(float length);
 
-private:
-    glm::vec3 cameraPos = glm::vec3(32.0f, 15.0f, 32.0f);
+protected:
+    glm::vec3 cameraPos = glm::vec3(32.0f, 25.0f, 32.0f);
     glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
     glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
     float mouseSensitivity = 0.3f;
-    bool firstMouse = true;
 
     float yaw = -90.0f;
     float pitch = 0.0f;

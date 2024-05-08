@@ -26,7 +26,7 @@ public:
     std::optional<ushort> getBlockGlobal(long, long, long);
     bool removeBlock(unsigned, unsigned, unsigned);
     bool removeBlockMesh(unsigned, unsigned, unsigned);
-    bool placeBlock(unsigned, unsigned, unsigned);
+    bool placeBlock(Block::BlockType, unsigned, unsigned, unsigned);
     void clearMesh();
     void unhighlightBlock(unsigned, unsigned, unsigned);
     void highlightBlock(unsigned, unsigned, unsigned);

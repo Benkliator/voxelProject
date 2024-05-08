@@ -29,7 +29,7 @@ World::World(unsigned size) {
     std::cout << "Created " << visibleChunks.size() << " chunks!" << std::endl;
 }
 
-std::optional<ushort> World::getBlock(unsigned x, unsigned y, unsigned z) {
+std::optional<ushort> World::getBlock(long x, long y, long z) {
     const unsigned chunkMask = 0b1111;
     unsigned chunkX = x & ~chunkMask;
     unsigned chunkZ = z & ~chunkMask;

@@ -17,12 +17,12 @@ public:
 
     void gameLoop();
     void mouseMotionCallback(double, double);
+    void mouseScrollCallback(double, double);
     void mouseClickCallback(int, int, int);
 private:
     void processInput();
 
     Player* player = nullptr;
-    Hud* hud = nullptr;
     Skybox* skybox = nullptr;
     World* world = nullptr;
 

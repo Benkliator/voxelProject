@@ -23,7 +23,7 @@ public:
 
     // Draws out every chunk in visibleChunks
     void draw(glm::mat4& view);
-    std::optional<ushort> getBlock(unsigned, unsigned, unsigned);
+    std::optional<ushort> getBlock(long, long, long);
     Chunk* getChunk(unsigned, unsigned, unsigned);
 
 private:
