@@ -135,6 +135,30 @@ bool Chunk::removeBlock(unsigned x, unsigned y, unsigned z) {
         blockArray[ix] = 0;
         clearMesh();
         generateMesh();
+        if (x == 15) {
+            Chunk* temp = world->getChunk(pos.x + 16, 0, pos.z);
+            if (temp) {
+                temp->generateMesh();
+            }
+        } else if  (x == 0) {
+            world->getChunk(pos.x - 16, 0, pos.z)->generateMesh();
+            Chunk* temp = world->getChunk(pos.x - 16, 0, pos.z);
+            if (temp) {
+                temp->generateMesh();
+            }
+        }
+
+        if (z == 15) { 
+            Chunk* temp = world->getChunk(pos.x, 0, pos.z + 16);
+            if (temp) {
+                temp->generateMesh();
+            }
+        } else if (z == 0) {
+            Chunk* temp = world->getChunk(pos.x, 0, pos.z - 16);
+            if (temp) {
+                temp->generateMesh();
+            }
+        }
         // reloadMesh(x, y, z);
         return true;
     };

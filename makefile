@@ -6,7 +6,7 @@ OBJDIR := obj
 INCDIR := include
 LIBDIR := lib
 
-CXXFLAGS := -std=c++17
+CXXFLAGS := -std=c++17 -o2
 # CXXFLAGS += -Wall
 # CXXFLAGS += -Wextra
 # CXXFLAGS += -Wpedantic

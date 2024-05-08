@@ -51,30 +51,32 @@ void Player::breakBlock() {
 }
 
 void Player::placeBlock() {
+    auto [from, to] = worldCam->rayCast(5.0f);
 
-    for (float i = 0.0f; i <= 3.0f; i++) {
-        auto [from, to] = worldCam->rayCast(6.0f - i);
+    unsigned xBlock = unsigned(std::round(to.x));
+    unsigned yBlock = unsigned(std::round(to.y));
+    unsigned zBlock = unsigned(std::round(to.z));
 
-        unsigned xBlock = unsigned(std::round(to.x));
-        unsigned yBlock = unsigned(std::round(to.y));
-        unsigned zBlock = unsigned(std::round(to.z));
+    unsigned xChunk = xBlock - (xBlock % 16);
+    unsigned zChunk = zBlock - (zBlock % 16);
 
-        unsigned xChunk = xBlock - (xBlock % 16);
-        unsigned zChunk = zBlock - (zBlock % 16);
+    float it = 1.0f;
+    while(!isAir(world->getChunk(xChunk, 0, zChunk)
+          ->getBlock(xBlock % 16, yBlock, zBlock % 16)) 
+          && it <= 4.0f) {
+        auto [from, to] = worldCam->rayCast(5.0f - it);
 
-        Chunk* temp = world->getChunk(xChunk, 0, zChunk);
-        if (!isAir(temp->getBlock(xBlock % 16, yBlock, zBlock % 16))) {
-            auto [from, to] = worldCam->rayCast(5.0f - i);
+        xBlock = unsigned(std::round(to.x));
+        yBlock = unsigned(std::round(to.y));
+        zBlock = unsigned(std::round(to.z));
 
-            xBlock = unsigned(std::round(to.x));
-            yBlock = unsigned(std::round(to.y));
-            zBlock = unsigned(std::round(to.z));
-
-            xChunk = xBlock - (xBlock % 16);
-            zChunk = zBlock - (zBlock % 16);
-            temp->placeBlock(xBlock % 16, yBlock, zBlock % 16);
-            break;
-        }
+        xChunk = xBlock - (xBlock % 16);
+        zChunk = zBlock - (zBlock % 16);
+        it++;
+    }
+    if (it != 4){
+        auto [from, to] = worldCam->rayCast(5.0f - it);
+        world->getChunk(xChunk, 0, zChunk)->placeBlock(xBlock % 16, yBlock, zBlock % 16);
     }
 }
 
