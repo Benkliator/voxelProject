@@ -25,4 +25,5 @@ private:
     Camera* skyCam = nullptr;
 
     glm::vec3 pos;
+    glm::uvec3 viewBlock;
 };

@@ -10,6 +10,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <optional>
 #include <sys/types.h>
+#include <iostream>
 
 // Generates buffers and VAO, creates terrain for chunk.
 Chunk::Chunk(int x, int z, World* w) : world{ w } {
@@ -47,42 +48,43 @@ void Chunk::generateMesh(std::optional<std::vector<ushort>> blockAreaArray) {
         // Top
         if (isAir(getBlockGlobal(x, y + 1, z).value_or(obstruct))) {
             blockArray[i] = blockArray[i] | topMask;
-            loadFace(&topMeshData, blockType.top, x, y, z);
+            loadFace(&topMeshData, blockType.top, x, y, z, block & 1);
         }
 
         // Bottom
         if (isAir(getBlockGlobal(x, y - 1, z).value_or(obstruct))) {
             blockArray[i] = blockArray[i] | bottomMask;
-            loadFace(&bottomMeshData, blockType.bottom, x, y, z);
+            loadFace(&bottomMeshData, blockType.bottom, x, y, z, block & 1);
         }
 
         // Back
         if (isAir(getBlockGlobal(x, y, z - 1).value_or(obstruct))) {
             blockArray[i] = blockArray[i] | backMask;
-            loadFace(&backMeshData, blockType.side, x, y, z);
+            loadFace(&backMeshData, blockType.side, x, y, z, block & 1);
         }
 
         // Front
         if (isAir(getBlockGlobal(x, y, z + 1).value_or(obstruct))) {
             blockArray[i] = blockArray[i] | frontMask;
-            loadFace(&frontMeshData, blockType.side, x, y, z);
+            loadFace(&frontMeshData, blockType.side, x, y, z, block & 1);
         }
 
         // Left
         if (isAir(getBlockGlobal(x - 1, y, z).value_or(obstruct))) {
             blockArray[i] = blockArray[i] | leftMask;
-            loadFace(&leftMeshData, blockType.side, x, y, z);
+            loadFace(&leftMeshData, blockType.side, x, y, z, block & 1);
         }
 
         // Right
         if (isAir(getBlockGlobal(x + 1, y, z).value_or(obstruct))) {
             blockArray[i] = blockArray[i] | rightMask;
-            loadFace(&rightMeshData, blockType.side, x, y, z);
+            loadFace(&rightMeshData, blockType.side, x, y, z, block & 1);
         }
     }
     renderInit();
 }
 
+// NOTE: not currently used.
 void Chunk::reloadMesh(unsigned x, unsigned y, unsigned z) {
     size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
     std::vector<ushort> tempBlockArray;
@@ -141,7 +143,6 @@ bool Chunk::removeBlock(unsigned x, unsigned y, unsigned z) {
                 temp->generateMesh();
             }
         } else if  (x == 0) {
-            world->getChunk(pos.x - 16, 0, pos.z)->generateMesh();
             Chunk* temp = world->getChunk(pos.x - 16, 0, pos.z);
             if (temp) {
                 temp->generateMesh();
@@ -194,6 +195,16 @@ bool Chunk::placeBlock(unsigned x, unsigned y, unsigned z) {
 void Chunk::clearMesh() {
     vertexMesh.clear();
     indexMesh.clear();
+}
+
+void Chunk::unhighlightBlock(unsigned x, unsigned y, unsigned z) {
+    size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
+    blockArray[ix] = blockArray[ix] & ~1;
+}
+
+void Chunk::highlightBlock(unsigned x, unsigned y, unsigned z) {
+    size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
+    blockArray[ix] = blockArray[ix] | 1;
 }
 
 glm::uvec3 Chunk::getPos() {
@@ -252,7 +263,7 @@ void Chunk::renderInit() {
 }
 
 void Chunk::loadFace(
-    const MeshData* data, unsigned bt, unsigned x, unsigned y, unsigned z) {
+    const MeshData* data, unsigned bt, unsigned x, unsigned y, unsigned z, bool highlight) {
     indexMesh.push_back((vertexMesh.size() / 2) + 0);
     indexMesh.push_back((vertexMesh.size() / 2) + 3);
     indexMesh.push_back((vertexMesh.size() / 2) + 1);
@@ -267,7 +278,7 @@ void Chunk::loadFace(
         GLuint xi = x + data->faceCoords[j++];
         GLuint yi = y + data->faceCoords[j++];
         GLuint zi = z + data->faceCoords[j++];
-        GLuint vertex = xi | yi << 5 | zi << 13 | occlusionArray[i] << 18;
+        GLuint vertex = xi | yi << 5 | zi << 13 | occlusionArray[i] << 18 | (unsigned)highlight << 20;
 
         GLuint texX = data->texCoords[t++] + ((bt & zMask) >> zOffset);
         GLuint texY = data->texCoords[t++] + ((bt & xMask) >> xOffset);
@@ -278,6 +289,7 @@ void Chunk::loadFace(
     }
 }
 
+// if if if if if if if if if if if if if if if if else
 std::array<ushort, 4>
 Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, ushort face) {
     // This is really ugly lol, will probably rework at some point.

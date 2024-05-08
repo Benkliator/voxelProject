@@ -18,7 +18,6 @@ public:
     void gameLoop();
     void mouseMotionCallback(double, double);
     void mouseClickCallback(int, int, int);
-
 private:
     void processInput();
 

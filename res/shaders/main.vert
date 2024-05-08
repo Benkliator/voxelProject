@@ -15,6 +15,7 @@ void main(void)
     float y = float(((vertex.x & 8160u)    >> 5u)  + chunkPos.y) - 0.5;
     float z = float(((vertex.x & 253952u) >> 13u) + chunkPos.z) - 0.5;
     uint occlusion = (vertex.x & 786432u) >> 18u;
+    uint highlight = (vertex.x & 1048576u) >> 20u;
     switch (occlusion) {
         case 0u:
             color = vec3(1.0, 1.0, 1.0);
@@ -28,6 +29,9 @@ void main(void)
         case 3u:
             color = vec3(0.45, 0.45, 0.45);
             break;
+    }
+    if (highlight == 1u) {
+        color = vec3(0.2, 0.2, 0.2);
     }
     gl_Position = projection * view * vec4(x, y, z, 1.0);
 

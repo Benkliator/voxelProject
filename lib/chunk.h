@@ -28,12 +28,14 @@ public:
     bool removeBlockMesh(unsigned, unsigned, unsigned);
     bool placeBlock(unsigned, unsigned, unsigned);
     void clearMesh();
+    void unhighlightBlock(unsigned, unsigned, unsigned);
+    void highlightBlock(unsigned, unsigned, unsigned);
     glm::uvec3 getPos();
 
 private:
     void generateTerrain();
     void renderInit();
-    void loadFace(const MeshData*, unsigned, unsigned, unsigned, unsigned);
+    void loadFace(const MeshData*, unsigned, unsigned, unsigned, unsigned, bool);
 
     std::array<ushort, 4> getOcclusion(unsigned, unsigned, unsigned, ushort);
     std::vector<ushort> blockArray;
