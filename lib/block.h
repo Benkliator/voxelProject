@@ -30,8 +30,16 @@ struct Block {
         Air,
         Dirt,
         Grass,
+        FlowerGrass,
         Stone,
         Water,
+        Plank,
+        Log,
+        Wall,
+        BrokenWall,
+        FlowerWall,
+        Brick,
+        Sand,
         NUM_BLOCKTYPES,
     };
 

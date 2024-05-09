@@ -31,6 +31,7 @@ private:
     Camera skyCam;
 
     glm::uvec3 viewBlock;
+    Block::BlockFace viewFace;
     float ySpeed = 0.0f;
     bool onGround = false;
 

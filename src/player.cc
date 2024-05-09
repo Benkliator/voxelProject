@@ -4,6 +4,7 @@
 #include <glm/common.hpp>
 #include <glm/ext/scalar_constants.hpp>
 #include <string>
+#include <iostream>
 
 Player::Player(World* w) : world{ w } {}
 
@@ -93,6 +94,7 @@ void Player::movePlayer(GLFWwindow* window, float dt) {
     }
 
     cameraPos.y += ySpeed * dt;
+    view();
 }
 
 void Player::selectBlock(GLFWwindow*, float, float yOffset) {
@@ -111,44 +113,27 @@ void Player::selectBlock(GLFWwindow*, float, float yOffset) {
 void Player::breakBlock() {
     unsigned xChunk = viewBlock.x - (viewBlock.x % 16);
     unsigned zChunk = viewBlock.z - (viewBlock.z % 16);
-
-    world->getChunk(xChunk, 0, zChunk)
-        ->removeBlock(viewBlock.x % 16, viewBlock.y, viewBlock.z % 16);
+    
+    Chunk* temp = world->getChunk(xChunk, 0, zChunk);
+    if (temp) {
+        temp->removeBlock(viewBlock.x % 16, viewBlock.y, viewBlock.z % 16);
+    }
 
     view();
 }
 
-// NOTE: this works but is sub-optimal
+// NOTE: this works but for future make the block face placig more intuitive 
+// i.e somehow figure out which block is being looked at.
 void Player::placeBlock() {
-    auto [from, to] = rayCast(5.0f);
-
-    unsigned xBlock = unsigned(std::round(to.x));
-    unsigned yBlock = unsigned(std::round(to.y));
-    unsigned zBlock = unsigned(std::round(to.z));
-
-    unsigned xChunk = xBlock - (xBlock % 16);
-    unsigned zChunk = zBlock - (zBlock % 16);
-
-    float it = 1.0f;
-    while (!isAir(world->getChunk(xChunk, 0, zChunk)
-                      ->getBlock(xBlock % 16, yBlock, zBlock % 16)) &&
-           it <= 4.0f) {
-        auto [from, to] = rayCast(5.0f - it);
-
-        xBlock = unsigned(std::round(to.x));
-        yBlock = unsigned(std::round(to.y));
-        zBlock = unsigned(std::round(to.z));
-
-        xChunk = xBlock - (xBlock % 16);
-        zChunk = zBlock - (zBlock % 16);
-        it++;
+    unsigned xChunk = viewBlock.x - (viewBlock.x % 16);
+    unsigned zChunk = viewBlock.z - (viewBlock.z % 16);
+    
+    Chunk* temp = world->getChunk(xChunk, 0, zChunk);
+    if (temp) {
+            temp->placeBlock(selectedBlock, viewBlock.x % 16, viewBlock.y + 1, viewBlock.z % 16);
     }
-    if (it != 4) {
-        auto [from, to] = rayCast(5.0f - it);
-        world->getChunk(xChunk, 0, zChunk)
-            ->placeBlock(selectedBlock, xBlock % 16, yBlock, zBlock % 16);
-        view();
-    }
+
+    view();
 }
 
 glm::mat4 Player::worldLook() {
@@ -180,6 +165,7 @@ void Player::draw() {
 void Player::view() {
     auto [from, to] = rayCast(1.0f);
 
+
     unsigned xBlock = unsigned(std::round(to.x));
     unsigned yBlock = unsigned(std::round(to.y));
     unsigned zBlock = unsigned(std::round(to.z));
@@ -210,7 +196,8 @@ void Player::view() {
         prevChunk->generateMesh();
     }
     Chunk* temp = world->getChunk(xChunk, 0, zChunk);
-    if (!isAir(temp->getBlock(xBlock % 16, yBlock, zBlock % 16))) {
+    if (!isAir(temp->getBlock(xBlock % 16, yBlock, zBlock % 16)) &&
+        temp) {
         // Highlight new viewblock
         temp->highlightBlock(xBlock % 16, yBlock, zBlock % 16);
         // Reload mesh

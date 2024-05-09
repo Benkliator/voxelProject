@@ -69,7 +69,7 @@ float perlin(float fx, float fy) {
     n1 = dotGradient(x1, y1, fx, fy);
     float ix1 = interpolate(n0, n1, sx);
 
-    // Final step: interpolate between the two previously interpolated values,
+    // interpolate between the two previously interpolated values,
     // now in y
     float value = interpolate(ix0, ix1, sy);
 
