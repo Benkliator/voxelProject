@@ -8,15 +8,16 @@
 #include <iostream>
 #include <optional>
 
-World::World(unsigned size) {
+World::World(unsigned size, unsigned os) 
+: renderDistance{ size }, offset{ os } {
     textureMap = loadTexture("./res/textures/Blockmap2.png", GL_RGBA);
     shaderInit();
     projection = glm::perspective(glm::radians(45.0f), 1.8f, 0.1f, 1000.0f);
 
     std::cout << "Creating chunks..." << std::endl;
 
-    for (unsigned x = 0; x < size; x++) {
-        for (unsigned z = 0; z < size; z++) {
+    for (unsigned x = offset; x < offset + renderDistance; x++) {
+        for (unsigned z = offset; z < offset + renderDistance; z++) {
             visibleChunks.emplace_back(x, z, this);
         }
     }
@@ -55,6 +56,26 @@ World::getChunk(unsigned x, unsigned y, unsigned z) {
         }
     }
     return std::nullopt;
+}
+
+void World::reloadChunksAround(unsigned x, unsigned y, unsigned z) {
+    bool deleted = false;
+    for (size_t i = 0; i < visibleChunks.size(); i++) {
+        if (visibleChunks[i].getPos().x > x + ((renderDistance) * 8)) {
+            visibleChunks.erase(visibleChunks.begin() + i--);
+            deleted = true;
+        }
+    }
+    if (!deleted) {
+        return;
+    }
+
+    for (unsigned z = offset; z < offset + renderDistance; z++) {
+        visibleChunks.emplace_back((x / 16) - ((renderDistance - 1) / 2), z, this);
+    }
+    for (unsigned z = 0; z < renderDistance; z++) {
+        visibleChunks[visibleChunks.size() - 1 - z].generateMesh();
+    }
 }
 
 World::~World() {}

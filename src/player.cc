@@ -5,7 +5,9 @@
 #include <glm/ext/scalar_constants.hpp>
 #include <string>
 
-Player::Player(World* w) : world{ w } {}
+Player::Player(World* w, glm::vec3 pos) : world{ w } {
+    cameraPos = pos;
+}
 
 Player::~Player() {}
 
@@ -94,6 +96,7 @@ void Player::movePlayer(GLFWwindow* window, float dt) {
 
     cameraPos.y += ySpeed * dt;
     view();
+    world->reloadChunksAround(cameraPos.x, 0, cameraPos.z);
 }
 
 void Player::selectBlock(GLFWwindow*, float, float yOffset) {

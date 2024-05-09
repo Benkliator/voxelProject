@@ -8,7 +8,7 @@
 
 class Player : protected Camera {
 public:
-    Player(World* w);
+    Player(World* w, glm::vec3);
     ~Player();
 
     void moveMouse(GLFWwindow*, float, float);

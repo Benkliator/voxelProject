@@ -213,7 +213,7 @@ glm::uvec3 Chunk::getPos() {
 }
 
 void Chunk::generateTerrain() {
-    float yIntercept = 3.0f;
+    float yIntercept = 30.0f;
     float freq = 0.8396323343; // Frequency
     float amp = 1.35;          // Amplifier
     for (int x = 0; x < 16; x++) {

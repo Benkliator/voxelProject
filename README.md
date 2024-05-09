@@ -1,8 +1,7 @@
 # voxelProject
 
 ## About
-Created for the course TSBK11 at Linköping University to learn about graphics
-programming by making a videogame.
+Soul project because we find programming fun.
 
 ## Requirements
 To run this program you will need:

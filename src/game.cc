@@ -60,8 +60,11 @@ Game::Game() {
     }
 
     skybox = new Skybox{};
-    world = new World{ RENDER_DISTANCE };
-    player = new Player{ world };
+    unsigned offset = 2000;
+    world = new World{RENDER_DISTANCE, offset};
+    player = new Player{world , glm::vec3(16*offset + (RENDER_DISTANCE * 8), 
+                                          50,
+                                          16*offset + (RENDER_DISTANCE * 8))};
 }
 
 Game::~Game() {

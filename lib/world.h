@@ -19,7 +19,7 @@ class Chunk;
 // based on camera/player position.
 class World {
 public:
-    World(unsigned size);
+    World(unsigned, unsigned);
     ~World();
 
     // Draws out every chunk in visibleChunks
@@ -27,11 +27,15 @@ public:
     std::optional<ushort> getBlock(long, long, long);
     std::optional<std::reference_wrapper<Chunk>>
     getChunk(unsigned, unsigned, unsigned);
+    void reloadChunksAround(unsigned, unsigned, unsigned);
 
 private:
     void shaderInit();
 
     std::vector<Chunk> visibleChunks;
+    unsigned renderDistance;
+    unsigned offset;
+
     unsigned textureMap;
     unsigned shaderProgram;
     glm::mat4 projection;
