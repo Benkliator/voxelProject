@@ -10,7 +10,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <optional>
 #include <sys/types.h>
-#include <iostream>
 
 // Generates buffers and VAO, creates terrain for chunk.
 Chunk::Chunk(int x, int z, World* w) : world{ w } {
@@ -138,26 +137,26 @@ bool Chunk::removeBlock(unsigned x, unsigned y, unsigned z) {
         clearMesh();
         generateMesh();
         if (x == 15) {
-            Chunk* temp = world->getChunk(pos.x + 16, 0, pos.z);
-            if (temp) {
-                temp->generateMesh();
+            auto chunkOptRef = world->getChunk(pos.x + 16, 0, pos.z);
+            if (chunkOptRef.has_value()) {
+                chunkOptRef.value().get().generateMesh();
             }
-        } else if  (x == 0) {
-            Chunk* temp = world->getChunk(pos.x - 16, 0, pos.z);
-            if (temp) {
-                temp->generateMesh();
+        } else if (x == 0) {
+            auto chunkOptRef = world->getChunk(pos.x - 16, 0, pos.z);
+            if (chunkOptRef.has_value()) {
+                chunkOptRef.value().get().generateMesh();
             }
         }
 
-        if (z == 15) { 
-            Chunk* temp = world->getChunk(pos.x, 0, pos.z + 16);
-            if (temp) {
-                temp->generateMesh();
+        if (z == 15) {
+            auto chunkOptRef = world->getChunk(pos.x, 0, pos.z + 16);
+            if (chunkOptRef.has_value()) {
+                chunkOptRef.value().get().generateMesh();
             }
         } else if (z == 0) {
-            Chunk* temp = world->getChunk(pos.x, 0, pos.z - 16);
-            if (temp) {
-                temp->generateMesh();
+            auto chunkOptRef = world->getChunk(pos.x, 0, pos.z - 16);
+            if (chunkOptRef.has_value()) {
+                chunkOptRef.value().get().generateMesh();
             }
         }
         // reloadMesh(x, y, z);
@@ -178,7 +177,10 @@ bool Chunk::removeBlockMesh(unsigned x, unsigned y, unsigned z) {
     return true;
 }
 
-bool Chunk::placeBlock(Block::BlockType bt, unsigned x, unsigned y, unsigned z) {
+bool Chunk::placeBlock(Block::BlockType bt,
+                       unsigned x,
+                       unsigned y,
+                       unsigned z) {
     unsigned block = getBlock(x, y, z);
     if (isAir(block)) {
         size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
@@ -262,8 +264,12 @@ void Chunk::renderInit() {
     glEnableVertexAttribArray(0);
 }
 
-void Chunk::loadFace(
-    const MeshData* data, unsigned bt, unsigned x, unsigned y, unsigned z, bool highlight) {
+void Chunk::loadFace(const MeshData* data,
+                     unsigned bt,
+                     unsigned x,
+                     unsigned y,
+                     unsigned z,
+                     bool highlight) {
     indexMesh.push_back((vertexMesh.size() / 2) + 0);
     indexMesh.push_back((vertexMesh.size() / 2) + 3);
     indexMesh.push_back((vertexMesh.size() / 2) + 1);
@@ -278,7 +284,8 @@ void Chunk::loadFace(
         GLuint xi = x + data->faceCoords[j++];
         GLuint yi = y + data->faceCoords[j++];
         GLuint zi = z + data->faceCoords[j++];
-        GLuint vertex = xi | yi << 5 | zi << 13 | occlusionArray[i] << 18 | (unsigned)highlight << 20;
+        GLuint vertex = xi | yi << 5 | zi << 13 | occlusionArray[i] << 18 |
+                        (unsigned)highlight << 20;
 
         GLuint texX = data->texCoords[t++] + ((bt & zMask) >> zOffset);
         GLuint texY = data->texCoords[t++] + ((bt & xMask) >> xOffset);

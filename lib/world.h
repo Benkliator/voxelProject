@@ -2,6 +2,7 @@
 
 #include "chunk.h"
 
+#include <functional>
 #include <glm/fwd.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/mat4x4.hpp>
@@ -24,7 +25,8 @@ public:
     // Draws out every chunk in visibleChunks
     void draw(glm::mat4& view);
     std::optional<ushort> getBlock(long, long, long);
-    Chunk* getChunk(unsigned, unsigned, unsigned);
+    std::optional<std::reference_wrapper<Chunk>>
+    getChunk(unsigned, unsigned, unsigned);
 
 private:
     void shaderInit();

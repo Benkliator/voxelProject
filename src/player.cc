@@ -4,7 +4,6 @@
 #include <glm/common.hpp>
 #include <glm/ext/scalar_constants.hpp>
 #include <string>
-#include <iostream>
 
 Player::Player(World* w) : world{ w } {}
 
@@ -113,24 +112,26 @@ void Player::selectBlock(GLFWwindow*, float, float yOffset) {
 void Player::breakBlock() {
     unsigned xChunk = viewBlock.x - (viewBlock.x % 16);
     unsigned zChunk = viewBlock.z - (viewBlock.z % 16);
-    
-    Chunk* temp = world->getChunk(xChunk, 0, zChunk);
-    if (temp) {
-        temp->removeBlock(viewBlock.x % 16, viewBlock.y, viewBlock.z % 16);
+    auto chunkOpt = world->getChunk(xChunk, 0, zChunk);
+    if (chunkOpt.has_value()) {
+        Chunk& chunk = chunkOpt.value().get();
+        chunk.removeBlock(viewBlock.x % 16, viewBlock.y, viewBlock.z % 16);
     }
 
     view();
 }
 
-// NOTE: this works but for future make the block face placig more intuitive 
+// NOTE: this works but for future make the block face placig more intuitive
 // i.e somehow figure out which block is being looked at.
 void Player::placeBlock() {
     unsigned xChunk = viewBlock.x - (viewBlock.x % 16);
     unsigned zChunk = viewBlock.z - (viewBlock.z % 16);
-    
-    Chunk* temp = world->getChunk(xChunk, 0, zChunk);
-    if (temp) {
-            temp->placeBlock(selectedBlock, viewBlock.x % 16, viewBlock.y + 1, viewBlock.z % 16);
+
+    auto tempChunkOpt = world->getChunk(xChunk, 0, zChunk);
+    if (tempChunkOpt.has_value()) {
+        Chunk& tempChunk = tempChunkOpt.value().get();
+        tempChunk.placeBlock(
+            selectedBlock, viewBlock.x % 16, viewBlock.y + 1, viewBlock.z % 16);
     }
 
     view();
@@ -161,10 +162,9 @@ void Player::draw() {
                    glm::vec3{ 1.0f, 1.0f, 1.0f });
 }
 
-// NOTE: better raycasting?
+// TODO: better raycasting?
 void Player::view() {
     auto [from, to] = rayCast(1.0f);
-
 
     unsigned xBlock = unsigned(std::round(to.x));
     unsigned yBlock = unsigned(std::round(to.y));
@@ -173,9 +173,14 @@ void Player::view() {
     unsigned xChunk = xBlock - (xBlock % 16);
     unsigned zChunk = zBlock - (zBlock % 16);
     float it = 1.0f;
-    while (isAir(world->getChunk(xChunk, 0, zChunk)
-                     ->getBlock(xBlock % 16, yBlock, zBlock % 16)) &&
-           it <= 4.0f) {
+    while (it <= 4.0f) {
+        auto chunkOpt = world->getChunk(xChunk, 0, zChunk);
+        if (chunkOpt.has_value()) {
+            Chunk& chunk = chunkOpt.value().get();
+            if (!isAir(chunk.getBlock(xBlock % 16, yBlock, zBlock % 16))) {
+                break;
+            }
+        }
         auto [from, to] = rayCast(1.0f + it);
 
         xBlock = unsigned(std::round(to.x));
@@ -186,24 +191,27 @@ void Player::view() {
         zChunk = zBlock - (zBlock % 16);
         it++;
     }
-    Chunk* prevChunk = world->getChunk(
+    auto prevChunkOpt = world->getChunk(
         viewBlock.x - (viewBlock.x % 16), 0, viewBlock.z - (viewBlock.z % 16));
     // Unhighlight viewblock
-    if (prevChunk) {
-        prevChunk->unhighlightBlock(
+    if (prevChunkOpt.has_value()) {
+        Chunk& prevChunk = prevChunkOpt.value().get();
+        prevChunk.unhighlightBlock(
             viewBlock.x % 16, viewBlock.y, viewBlock.z % 16);
-        prevChunk->clearMesh();
-        prevChunk->generateMesh();
+        prevChunk.clearMesh();
+        prevChunk.generateMesh();
     }
-    Chunk* temp = world->getChunk(xChunk, 0, zChunk);
-    if (!isAir(temp->getBlock(xBlock % 16, yBlock, zBlock % 16)) &&
-        temp) {
-        // Highlight new viewblock
-        temp->highlightBlock(xBlock % 16, yBlock, zBlock % 16);
-        // Reload mesh
-        temp->clearMesh();
-        temp->generateMesh();
-        // Assign new viewblock
-        viewBlock = glm::uvec3(xBlock, yBlock, zBlock);
+    auto tempChunkOpt = world->getChunk(xChunk, 0, zChunk);
+    if (tempChunkOpt.has_value()) {
+        Chunk& tempChunk = tempChunkOpt.value().get();
+        if (!isAir(tempChunk.getBlock(xBlock % 16, yBlock, zBlock % 16))) {
+            // Highlight new viewblock
+            tempChunk.highlightBlock(xBlock % 16, yBlock, zBlock % 16);
+            // Reload mesh
+            tempChunk.clearMesh();
+            tempChunk.generateMesh();
+            // Assign new viewblock
+            viewBlock = glm::uvec3(xBlock, yBlock, zBlock);
+        }
     }
 }

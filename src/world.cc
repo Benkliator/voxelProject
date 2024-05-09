@@ -3,8 +3,10 @@
 #include "utility.h"
 #include "world.h"
 
+#include <functional>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include <optional>
 
 World::World(unsigned size) {
     textureMap = loadTexture("./res/textures/Blockmap2.png", GL_RGBA);
@@ -44,14 +46,15 @@ std::optional<ushort> World::getBlock(long x, long y, long z) {
     return std::nullopt;
 }
 
-Chunk* World::getChunk(unsigned x, unsigned y, unsigned z) {
+std::optional<std::reference_wrapper<Chunk>>
+World::getChunk(unsigned x, unsigned y, unsigned z) {
     glm::uvec3 findPos{ x, y, z };
-    for (Chunk& chunk : visibleChunks) {
-        if (chunk.getPos() == findPos) {
-            return &chunk;
+    for (int i = 0; i < visibleChunks.size(); i++) {
+        if (visibleChunks[i].getPos() == findPos) {
+            return std::make_optional(std::ref(visibleChunks[i]));
         }
     }
-    return nullptr;
+    return std::nullopt;
 }
 
 World::~World() {}
