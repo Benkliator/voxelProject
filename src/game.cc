@@ -63,7 +63,7 @@ Game::Game() {
     unsigned offset = 2000;
     world = new World{RENDER_DISTANCE, offset};
     player = new Player{world , glm::vec3(16*offset + (RENDER_DISTANCE * 8), 
-                                          50,
+                                          200,
                                           16*offset + (RENDER_DISTANCE * 8))};
 }
 
@@ -76,10 +76,12 @@ Game::~Game() {
 
 void Game::gameLoop() {
     float currentFrame = 0.0f;
+    glfwSetTime(0);
     while (!glfwWindowShouldClose(window)) {
         currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+        world->meshCatchup();
         processInput();
 
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);

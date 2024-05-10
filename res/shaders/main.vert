@@ -31,7 +31,7 @@ void main(void)
             break;
     }
     if (highlight == 1u) {
-        color = vec3(0.2, 0.2, 0.2);
+        color = vec3(0.5, 0.5, 0.5);
     }
     gl_Position = projection * view * vec4(x, y, z, 1.0);
 

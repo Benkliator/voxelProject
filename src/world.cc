@@ -7,6 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <optional>
+#include <algorithm>
 
 World::World(unsigned size, unsigned offset) 
 : renderDistance{ size } {
@@ -23,10 +24,10 @@ World::World(unsigned size, unsigned offset)
     }
 
     std::cout << "Creating meshes..." << std::endl;
-
-    for (Chunk& chunk : visibleChunks) {
-        chunk.generateMesh();
-    }
+    std::for_each(visibleChunks.begin(), visibleChunks.end(),
+                  [](Chunk& chunk) {
+                    chunk.generateMesh();
+                  });
 
     std::cout << "Done!" << std::endl;
     std::cout << "Created " << visibleChunks.size() << " chunks!" << std::endl;
@@ -58,6 +59,9 @@ World::getChunk(unsigned x, unsigned y, unsigned z) {
     return std::nullopt;
 }
 
+// IDEA: Run this function whenever there is extra time to do stuff,
+// and pre-load chunks outside of render distance without actually rendering
+// , this would probably result in smoother world traversal.
 void World::reloadChunksAround(unsigned x, unsigned y, unsigned z) {
     unsigned chunkVal = 0;
     for (size_t i = 0; i < visibleChunks.size(); i++) {
@@ -77,39 +81,56 @@ void World::reloadChunksAround(unsigned x, unsigned y, unsigned z) {
 
     }
 
-    if (!chunkVal) {
-        return;
-    }
-    
-    if (chunkVal == 1) { // -x
-        for (unsigned zi = (z / 16) - (renderDistance  / 2); zi < (z / 16) + (renderDistance / 2); zi++) {
-            unsigned xi = (x / 16) - ((renderDistance - 1) / 2);
-            if (!getChunk(xi, 0, zi))
-                visibleChunks.emplace_back(xi, zi, this);
-        }
-    } else if (chunkVal == 2) { // -z
-        for (unsigned xi = (x / 16) - renderDistance / 2; xi < (x / 16) + renderDistance / 2; xi++) {
-            unsigned zi = (z / 16) - ((renderDistance - 1) / 2);
-            if (!getChunk(xi, 0, zi))
-                visibleChunks.emplace_back(xi, zi, this);
-        }
-    } else if (chunkVal == 3) { // +x
-        for (unsigned zi = (z / 16) - renderDistance / 2; zi < (z / 16) + renderDistance / 2; zi++) {
-            unsigned xi = (x / 16) + ((renderDistance - 1) / 2);
-            if (!getChunk(xi, 0, zi))
-                visibleChunks.emplace_back(xi, zi, this);
-        }
-    } else if (chunkVal == 4) { // +z
-        for (unsigned xi = (x / 16) - renderDistance / 2; xi < (x / 16) + renderDistance / 2; xi++) {
-            unsigned zi = (z / 16) + ((renderDistance - 1) / 2);
-            if (!getChunk(xi, 0, zi))
-                visibleChunks.emplace_back(xi, zi, this);
-        }
-    }
+    switch (chunkVal) {
+        case 0:
+            return;
+        case 1: {// -x 
+                    for (unsigned zi = (z / 16) - (renderDistance  / 2); zi < (z / 16) + (renderDistance / 2); zi++) {
+                        unsigned xi = (x / 16) - ((renderDistance - 1) / 2);
+                        if (!getChunk(xi, 0, zi)) {
+                            visibleChunks.emplace_back(xi, zi, this);
+                            loadQueue.push(&visibleChunks.back());
+                        }
+                    }
+                } return;
+        case 2: { // -z
+                    for (unsigned xi = (x / 16) - renderDistance / 2; xi < (x / 16) + renderDistance / 2; xi++) {
+                        unsigned zi = (z / 16) - ((renderDistance - 1) / 2);
+                        if (!getChunk(xi, 0, zi)) {
+                            visibleChunks.emplace_back(xi, zi, this);
+                            loadQueue.push(&visibleChunks.back());
+                        }
+                    }
+                } return;
 
-    for (unsigned i = 0; i < renderDistance; i++) {
-        visibleChunks[visibleChunks.size() - 1 - i].generateMesh();
+        case 3: { // +x
+                    for (unsigned zi = (z / 16) - renderDistance / 2; zi < (z / 16) + renderDistance / 2; zi++) {
+                        unsigned xi = (x / 16) + ((renderDistance - 1) / 2);
+                        if (!getChunk(xi, 0, zi)) {
+                            visibleChunks.emplace_back(xi, zi, this);
+                            loadQueue.push(&visibleChunks.back());
+                        }
+                    }
+                } return;
+        case 4: { // +x
+                    for (unsigned xi = (x / 16) - renderDistance / 2; xi < (x / 16) + renderDistance / 2; xi++) {
+                        unsigned zi = (z / 16) + ((renderDistance - 1) / 2);
+                        if (!getChunk(xi, 0, zi)) {
+                            visibleChunks.emplace_back(xi, zi, this);
+                            loadQueue.push(&visibleChunks.back());
+                        }
+                    }
+                } return;
     }
+}
+
+// TODO: reload adjacent chunk meshes.
+void World::meshCatchup() {
+    if (loadQueue.empty())
+        return;
+    if (loadQueue.front())
+        loadQueue.front()->generateMesh();
+    loadQueue.pop();
 }
 
 World::~World() {}
@@ -129,6 +150,7 @@ void World::draw(glm::mat4& view) {
                        glm::value_ptr(view));
 
     for (Chunk& chunk : visibleChunks) {
+        if(chunk.hasLoaded())
         chunk.draw(shaderProgram);
     }
 }

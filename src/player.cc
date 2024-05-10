@@ -76,7 +76,7 @@ bool Player::checkHitbox() {
 
 void Player::movePlayer(GLFWwindow* window, float dt) {
     glm::vec3 oldCameraPos = cameraPos;
-    const float cameraSpeed = 7.0f * dt;
+    const float cameraSpeed = 5.0f * dt;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         cameraPos += cameraSpeed *
                      glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
@@ -115,7 +115,11 @@ void Player::movePlayer(GLFWwindow* window, float dt) {
     unsigned xChunk = (unsigned)cameraPos.x - ((unsigned)(cameraPos.x) % 16);
     unsigned zChunk = (unsigned)cameraPos.z - ((unsigned)(cameraPos.z) % 16);
     glm::uvec3 tempChunkPos = glm::uvec3(xChunk, 0, zChunk); 
-    if (tempChunkPos.x != chunkPos.x || tempChunkPos.z != chunkPos.z) {
+    if (tempChunkPos.x != chunkPos.x) {
+        world->reloadChunksAround(xChunk, 0, zChunk);
+        chunkPos = tempChunkPos;
+    }
+    if (tempChunkPos.z != chunkPos.z) {
         world->reloadChunksAround(xChunk, 0, zChunk);
         chunkPos = tempChunkPos;
     }

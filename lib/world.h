@@ -9,6 +9,7 @@
 #include <glm/vec3.hpp>
 #include <optional>
 #include <vector>
+#include <queue>
 
 const unsigned worldHeight = 254;
 //////////////////////////////////////////////////////////////////
@@ -28,11 +29,14 @@ public:
     std::optional<std::reference_wrapper<Chunk>>
     getChunk(unsigned, unsigned, unsigned);
     void reloadChunksAround(unsigned, unsigned, unsigned);
+    void meshCatchup();
 
 private:
     void shaderInit();
 
     std::vector<Chunk> visibleChunks;
+    std::queue<Chunk*> loadQueue;
+
     unsigned renderDistance;
 
     unsigned textureMap;

@@ -28,6 +28,10 @@ Chunk::Chunk(int x, int z, World* w) : world{ w } {
 
 Chunk::~Chunk() {}
 
+bool Chunk::hasLoaded() {
+    return loaded;
+}
+
 void Chunk::generateMesh(std::optional<std::vector<ushort>> blockAreaArray) {
     std::vector<ushort> blocks = blockAreaArray.value_or(this->blockArray);
     const ushort obstruct = Block::Dirt << typeOffset;
@@ -80,6 +84,7 @@ void Chunk::generateMesh(std::optional<std::vector<ushort>> blockAreaArray) {
         }
     }
     renderInit();
+    loaded = true;
 }
 
 // NOTE: not currently used.

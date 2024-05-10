@@ -31,6 +31,7 @@ public:
     void unhighlightBlock(unsigned, unsigned, unsigned);
     void highlightBlock(unsigned, unsigned, unsigned);
     glm::uvec3 getPos();
+    bool hasLoaded();
 
 private:
     void generateTerrain();
@@ -47,6 +48,7 @@ private:
     unsigned VBO;
     unsigned EBO;
     unsigned indexSize;
+    bool loaded = false;
 
     std::vector<GLuint> vertexMesh;
     std::vector<unsigned> indexMesh;
