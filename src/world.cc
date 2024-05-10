@@ -64,21 +64,25 @@ World::getChunk(unsigned x, unsigned y, unsigned z) {
 // , this would probably result in smoother world traversal.
 void World::reloadChunksAround(unsigned x, unsigned y, unsigned z) {
     unsigned chunkVal = 0;
-    for (size_t i = 0; i < visibleChunks.size(); i++) {
+    unsigned size = visibleChunks.size();
+    for (size_t i = 0; i < size; i++) {
         if (visibleChunks[i].getPos().x > x + ((renderDistance) * 8)) {
             visibleChunks.erase(visibleChunks.begin() + i--);
             chunkVal = 1;
+            size--;
         } else if (visibleChunks[i].getPos().z > z + ((renderDistance) * 8)) {
             visibleChunks.erase(visibleChunks.begin() + i--);
             chunkVal = 2;
+            size--;
         } else if (visibleChunks[i].getPos().x < x - ((renderDistance) * 8)) {
             visibleChunks.erase(visibleChunks.begin() + i--);
             chunkVal = 3;
+            size--;
         } else if (visibleChunks[i].getPos().z < z - ((renderDistance) * 8)) {
             visibleChunks.erase(visibleChunks.begin() + i--);
             chunkVal = 4;
+            size--;
         }
-
     }
 
     switch (chunkVal) {
@@ -126,11 +130,10 @@ void World::reloadChunksAround(unsigned x, unsigned y, unsigned z) {
 
 // TODO: reload adjacent chunk meshes.
 void World::meshCatchup() {
-    if (loadQueue.empty())
-        return;
-    if (loadQueue.front())
+    if (!loadQueue.empty() && loadQueue.front()) {
         loadQueue.front()->generateMesh();
-    loadQueue.pop();
+        loadQueue.pop();
+    }
 }
 
 World::~World() {}
