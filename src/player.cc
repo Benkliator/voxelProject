@@ -23,13 +23,18 @@ void Player::moveMouse(GLFWwindow* window, float xi, float yi) {
 }
 
 bool Player::checkHitbox() {
+    float xPos = std::round(cameraPos.x);
+    float yPos = std::round(cameraPos.y);
+    float zPos = std::round(cameraPos.z);
     // BELOW
     ushort blockBelow =
-        world->getBlock(cameraPos.x, cameraPos.y - playerHeight, cameraPos.z)
+        world->getBlock(xPos, 
+                        yPos - playerHeight,
+                        zPos)
             .value_or(Block::Air << typeOffset);
     if (!isAir(blockBelow)) {
         if (ySpeed < 0.0f) {
-            float blockPos = std::floor(cameraPos.y - playerHeight);
+            float blockPos = yPos - playerHeight;
             ySpeed = 0.0f;
             onGround = true;
             cameraPos.y = std::max(cameraPos.y, blockPos + playerHeight);
@@ -37,25 +42,31 @@ bool Player::checkHitbox() {
     } else {
         onGround = false;
     }
+    xPos = std::round(cameraPos.x);
+    yPos = std::round(cameraPos.y);
+    zPos = std::round(cameraPos.z);
     // ABOVE
-    ushort blockAbove = world->getBlock(cameraPos.x, cameraPos.y, cameraPos.z)
+    ushort blockAbove = world->getBlock(std::round(cameraPos.x), std::round(cameraPos.y), std::round(cameraPos.z))
                             .value_or(Block::Air << typeOffset);
     if (!isAir(blockAbove)) {
         if (ySpeed > 0.0f) {
-            float blockPos = std::floor(cameraPos.y);
+            float blockPos = std::round(cameraPos.y);
             ySpeed = 0.0f;
             cameraPos.y = std::min(cameraPos.y, blockPos);
         }
     }
+    xPos = std::round(cameraPos.x);
+    yPos = std::round(cameraPos.y);
+    zPos = std::round(cameraPos.z);
     // INSIDE BOTTOM
     ushort blockInBot =
-        world->getBlock(cameraPos.x, cameraPos.y - 1.0f, cameraPos.z)
+        world->getBlock(xPos, yPos - 1.0f, zPos)
             .value_or(Block::Air << typeOffset);
     if (!isAir(blockInBot)) {
         return true;
     }
     // INSIDE TOP
-    ushort blockInTop = world->getBlock(cameraPos.x, cameraPos.y, cameraPos.z)
+    ushort blockInTop = world->getBlock(xPos, yPos, zPos)
                             .value_or(Block::Air << typeOffset);
     if (!isAir(blockInTop)) {
         return true;
@@ -84,7 +95,7 @@ void Player::movePlayer(GLFWwindow* window, float dt) {
     }
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
         if (onGround) {
-            ySpeed += 5.0f;
+            ySpeed += 9.82 / 2.0;
             onGround = false;
         }
     }

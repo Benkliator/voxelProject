@@ -36,7 +36,6 @@ void Chunk::generateMesh(std::optional<std::vector<ushort>> blockAreaArray) {
         if (isAir(block)) {
             continue;
         }
-
         unsigned z = i / (worldHeight * 16);
         unsigned y = i % worldHeight;
         unsigned x = (i % (16 * worldHeight)) / worldHeight;
