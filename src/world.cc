@@ -8,8 +8,8 @@
 #include <iostream>
 #include <optional>
 
-World::World(unsigned size, unsigned os) 
-: renderDistance{ size }, offset{ os } {
+World::World(unsigned size, unsigned offset) 
+: renderDistance{ size } {
     textureMap = loadTexture("./res/textures/Blockmap2.png", GL_RGBA);
     shaderInit();
     projection = glm::perspective(glm::radians(45.0f), 1.8f, 0.1f, 1000.0f);
@@ -59,22 +59,56 @@ World::getChunk(unsigned x, unsigned y, unsigned z) {
 }
 
 void World::reloadChunksAround(unsigned x, unsigned y, unsigned z) {
-    bool deleted = false;
+    unsigned chunkVal = 0;
     for (size_t i = 0; i < visibleChunks.size(); i++) {
         if (visibleChunks[i].getPos().x > x + ((renderDistance) * 8)) {
             visibleChunks.erase(visibleChunks.begin() + i--);
-            deleted = true;
+            chunkVal = 1;
+        } else if (visibleChunks[i].getPos().z > z + ((renderDistance) * 8)) {
+            visibleChunks.erase(visibleChunks.begin() + i--);
+            chunkVal = 2;
+        } else if (visibleChunks[i].getPos().x < x - ((renderDistance) * 8)) {
+            visibleChunks.erase(visibleChunks.begin() + i--);
+            chunkVal = 3;
+        } else if (visibleChunks[i].getPos().z < z - ((renderDistance) * 8)) {
+            visibleChunks.erase(visibleChunks.begin() + i--);
+            chunkVal = 4;
         }
-    }
-    if (!deleted) {
-        return;
+
     }
 
-    for (unsigned z = offset; z < offset + renderDistance; z++) {
-        visibleChunks.emplace_back((x / 16) - ((renderDistance - 1) / 2), z, this);
+    if (!chunkVal) {
+        return;
     }
-    for (unsigned z = 0; z < renderDistance; z++) {
-        visibleChunks[visibleChunks.size() - 1 - z].generateMesh();
+    
+    if (chunkVal == 1) { // -x
+        for (unsigned zi = (z / 16) - (renderDistance  / 2); zi < (z / 16) + (renderDistance / 2); zi++) {
+            unsigned xi = (x / 16) - ((renderDistance - 1) / 2);
+            if (!getChunk(xi, 0, zi))
+                visibleChunks.emplace_back(xi, zi, this);
+        }
+    } else if (chunkVal == 2) { // -z
+        for (unsigned xi = (x / 16) - renderDistance / 2; xi < (x / 16) + renderDistance / 2; xi++) {
+            unsigned zi = (z / 16) - ((renderDistance - 1) / 2);
+            if (!getChunk(xi, 0, zi))
+                visibleChunks.emplace_back(xi, zi, this);
+        }
+    } else if (chunkVal == 3) { // +x
+        for (unsigned zi = (z / 16) - renderDistance / 2; zi < (z / 16) + renderDistance / 2; zi++) {
+            unsigned xi = (x / 16) + ((renderDistance - 1) / 2);
+            if (!getChunk(xi, 0, zi))
+                visibleChunks.emplace_back(xi, zi, this);
+        }
+    } else if (chunkVal == 4) { // +z
+        for (unsigned xi = (x / 16) - renderDistance / 2; xi < (x / 16) + renderDistance / 2; xi++) {
+            unsigned zi = (z / 16) + ((renderDistance - 1) / 2);
+            if (!getChunk(xi, 0, zi))
+                visibleChunks.emplace_back(xi, zi, this);
+        }
+    }
+
+    for (unsigned i = 0; i < renderDistance; i++) {
+        visibleChunks[visibleChunks.size() - 1 - i].generateMesh();
     }
 }
 

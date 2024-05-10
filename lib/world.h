@@ -34,7 +34,6 @@ private:
 
     std::vector<Chunk> visibleChunks;
     unsigned renderDistance;
-    unsigned offset;
 
     unsigned textureMap;
     unsigned shaderProgram;

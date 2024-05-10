@@ -7,6 +7,10 @@
 
 Player::Player(World* w, glm::vec3 pos) : world{ w } {
     cameraPos = pos;
+
+    unsigned xChunk = (unsigned)cameraPos.x - ((unsigned)(cameraPos.x) % 16);
+    unsigned zChunk = (unsigned)cameraPos.z - ((unsigned)(cameraPos.z) % 16);
+    chunkPos = glm::uvec3(xChunk, 0, zChunk); 
 }
 
 Player::~Player() {}
@@ -96,7 +100,14 @@ void Player::movePlayer(GLFWwindow* window, float dt) {
 
     cameraPos.y += ySpeed * dt;
     view();
-    world->reloadChunksAround(cameraPos.x, 0, cameraPos.z);
+
+    unsigned xChunk = (unsigned)cameraPos.x - ((unsigned)(cameraPos.x) % 16);
+    unsigned zChunk = (unsigned)cameraPos.z - ((unsigned)(cameraPos.z) % 16);
+    glm::uvec3 tempChunkPos = glm::uvec3(xChunk, 0, zChunk); 
+    if (tempChunkPos.x != chunkPos.x || tempChunkPos.z != chunkPos.z) {
+        world->reloadChunksAround(xChunk, 0, zChunk);
+        chunkPos = tempChunkPos;
+    }
 }
 
 void Player::selectBlock(GLFWwindow*, float, float yOffset) {

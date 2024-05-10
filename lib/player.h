@@ -34,6 +34,7 @@ private:
     Block::BlockFace viewFace;
     float ySpeed = 0.0f;
     bool onGround = false;
+    glm::uvec3 chunkPos;
 
     Block::BlockType selectedBlock = Block::Dirt;
 

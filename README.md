@@ -1,7 +1,7 @@
 # voxelProject
 
 ## About
-Soul project because we find programming fun.
+Simple voxel game with a sandbox theme.
 
 ## Requirements
 To run this program you will need:
@@ -26,7 +26,7 @@ make run
 - [x] Object placement / destruction.
 - [ ] Saving and loading the world state.
 - [ ] Player animations.
-- [ ] Procedurally generated terrain.
+- [x] Procedurally generated terrain.
 - [ ] Loading / unloading of world data to improve performance.
 - [ ] Procedurally placed structures.
 - [ ] Sound.
