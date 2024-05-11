@@ -11,9 +11,9 @@
 
 World::World(unsigned size, unsigned offset, glm::vec3 center) {
     if (!(size % 2)) {
-        renderDistace = size + 1;
+        renderDistance = size + 1;
     } else {
-        renderDistace = size;
+        renderDistance = size;
     }
 
     unsigned xChunk = (unsigned)center.x - ((unsigned)(center.x) % 16);
@@ -89,26 +89,26 @@ void World::reloadChunksAround(unsigned xChunk, unsigned yChunk, unsigned zChunk
     for (int i = 0; i < size; i++) {
         if (visibleChunks[i].distanceFrom(worldCenter) > (renderDistance * 8) /* RD / 2 * 16 */) {
             if (visibleChunks[i].getPos().x > xChunk + ((renderDistance) * 8)) {        // -x
-                Chunk chunk{(visibleChunks[i].getPos().x / 16) - renderDistance,
-                            (visibleChunks[i].getPos().z / 16),
+                Chunk chunk{(visibleChunks[i].getPos().x / 16u) - renderDistance,
+                            (visibleChunks[i].getPos().z / 16u),
                              this};
                 visibleChunks[i] = chunk;
                 loadQueue.push(&visibleChunks[i]);
             } else if (visibleChunks[i].getPos().z > zChunk + ((renderDistance) * 8)) { // -z
-                Chunk chunk{(visibleChunks[i].getPos().x / 16),
-                            (visibleChunks[i].getPos().z / 16) - renderDistance,
+                Chunk chunk{(visibleChunks[i].getPos().x / 16u),
+                            (visibleChunks[i].getPos().z / 16u) - renderDistance,
                              this};
                 visibleChunks[i] = chunk;
                 loadQueue.push(&visibleChunks[i]);
             } else if (visibleChunks[i].getPos().x < xChunk - ((renderDistance) * 8)) { // +x
-                Chunk chunk{(visibleChunks[i].getPos().x / 16) - 1 + renderDistance,
-                            (visibleChunks[i].getPos().z / 16),
+                Chunk chunk{(visibleChunks[i].getPos().x / 16u) + renderDistance,
+                            (visibleChunks[i].getPos().z / 16u),
                              this};
                 visibleChunks[i] = chunk;
                 loadQueue.push(&visibleChunks[i]);
             } else if (visibleChunks[i].getPos().z < zChunk - ((renderDistance) * 8)) { // +z
-                Chunk chunk{(visibleChunks[i].getPos().x / 16),
-                            (visibleChunks[i].getPos().z / 16) - 1 + renderDistance,
+                Chunk chunk{(visibleChunks[i].getPos().x / 16u),
+                            (visibleChunks[i].getPos().z / 16u) + renderDistance,
                              this};
                 visibleChunks[i] = chunk;
                 loadQueue.push(&visibleChunks[i]);
