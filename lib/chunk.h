@@ -10,6 +10,7 @@
 #include <optional>
 #include <sys/types.h>
 #include <vector>
+#include <cmath>
 
 class World;
 
@@ -32,6 +33,7 @@ public:
     void highlightBlock(unsigned, unsigned, unsigned);
     glm::uvec3 getPos();
     bool hasLoaded();
+    unsigned distanceFrom(glm::uvec3);
 
 private:
     void generateTerrain();

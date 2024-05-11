@@ -402,3 +402,7 @@ Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, ushort face) {
     }
     return vertexOcclusion;
 }
+
+unsigned Chunk::distanceFrom(glm::uvec3 point) {
+    return std::max(abs((int)point.x - (int)pos.x), abs((int)point.z - (int)pos.z));
+}

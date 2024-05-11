@@ -9,17 +9,38 @@
 #include <optional>
 #include <algorithm>
 
-World::World(unsigned size, unsigned offset) 
-: renderDistance{ size } {
+World::World(unsigned size, unsigned offset, glm::vec3 center) {
+    if (!(size % 2)) {
+        renderDistace = size + 1;
+    } else {
+        renderDistace = size;
+    }
+
+    unsigned xChunk = (unsigned)center.x - ((unsigned)(center.x) % 16);
+    unsigned zChunk = (unsigned)center.z - ((unsigned)(center.z) % 16);
+    worldCenter = glm::uvec3(xChunk, 0, zChunk);
+    
     textureMap = loadTexture("./res/textures/Blockmap2.png", GL_RGBA);
     shaderInit();
     projection = glm::perspective(glm::radians(45.0f), 1.8f, 0.1f, 1000.0f);
 
     std::cout << "Creating chunks..." << std::endl;
 
-    for (unsigned x = offset; x < offset + renderDistance; x++) {
-        for (unsigned z = offset; z < offset + renderDistance; z++) {
-            visibleChunks.emplace_back(x, z, this);
+    int x = 0;
+    int z = 0;
+    int end = renderDistance * renderDistance;
+    // Generate chunks in a spiral around the world center.
+    for(int i = 0; i < end; i++) {
+        int xp = x + renderDistance / 2;
+        int zp = z + renderDistance / 2;
+        if(xp >= 0 && xp < renderDistance && zp >= 0 && zp < renderDistance) {
+            visibleChunks.emplace_back(x + (xChunk / 16), z + (zChunk / 16), this);
+        }
+
+        if(abs(x) <= abs(z) && (x != z || x >= 0)) {
+            x += ((z >= 0) ? 1 : -1);
+        } else {
+            z += ((x >= 0) ? -1 : 1);
         }
     }
 
@@ -62,70 +83,42 @@ World::getChunk(unsigned x, unsigned y, unsigned z) {
 // IDEA: Run this function whenever there is extra time to do stuff,
 // and pre-load chunks outside of render distance without actually rendering
 // , this would probably result in smoother world traversal.
-void World::reloadChunksAround(unsigned x, unsigned y, unsigned z) {
-    unsigned chunkVal = 0;
+void World::reloadChunksAround(unsigned xChunk, unsigned yChunk, unsigned zChunk) {
+    worldCenter = glm::uvec3(xChunk, yChunk, zChunk);
     unsigned size = visibleChunks.size();
-    for (size_t i = 0; i < size; i++) {
-        if (visibleChunks[i].getPos().x > x + ((renderDistance) * 8)) {
-            visibleChunks.erase(visibleChunks.begin() + i--);
-            chunkVal = 1;
-            size--;
-        } else if (visibleChunks[i].getPos().z > z + ((renderDistance) * 8)) {
-            visibleChunks.erase(visibleChunks.begin() + i--);
-            chunkVal = 2;
-            size--;
-        } else if (visibleChunks[i].getPos().x < x - ((renderDistance) * 8)) {
-            visibleChunks.erase(visibleChunks.begin() + i--);
-            chunkVal = 3;
-            size--;
-        } else if (visibleChunks[i].getPos().z < z - ((renderDistance) * 8)) {
-            visibleChunks.erase(visibleChunks.begin() + i--);
-            chunkVal = 4;
-            size--;
+    for (int i = 0; i < size; i++) {
+        if (visibleChunks[i].distanceFrom(worldCenter) > (renderDistance * 8) /* RD / 2 * 16 */) {
+            if (visibleChunks[i].getPos().x > xChunk + ((renderDistance) * 8)) {        // -x
+                Chunk chunk{(visibleChunks[i].getPos().x / 16) - renderDistance,
+                            (visibleChunks[i].getPos().z / 16),
+                             this};
+                visibleChunks[i] = chunk;
+                loadQueue.push(&visibleChunks[i]);
+            } else if (visibleChunks[i].getPos().z > zChunk + ((renderDistance) * 8)) { // -z
+                Chunk chunk{(visibleChunks[i].getPos().x / 16),
+                            (visibleChunks[i].getPos().z / 16) - renderDistance,
+                             this};
+                visibleChunks[i] = chunk;
+                loadQueue.push(&visibleChunks[i]);
+            } else if (visibleChunks[i].getPos().x < xChunk - ((renderDistance) * 8)) { // +x
+                Chunk chunk{(visibleChunks[i].getPos().x / 16) - 1 + renderDistance,
+                            (visibleChunks[i].getPos().z / 16),
+                             this};
+                visibleChunks[i] = chunk;
+                loadQueue.push(&visibleChunks[i]);
+            } else if (visibleChunks[i].getPos().z < zChunk - ((renderDistance) * 8)) { // +z
+                Chunk chunk{(visibleChunks[i].getPos().x / 16),
+                            (visibleChunks[i].getPos().z / 16) - 1 + renderDistance,
+                             this};
+                visibleChunks[i] = chunk;
+                loadQueue.push(&visibleChunks[i]);
+            }
         }
     }
-
-    switch (chunkVal) {
-        case 0:
-            return;
-        case 1: {// -x 
-                    for (unsigned zi = (z / 16) - (renderDistance  / 2); zi < (z / 16) + (renderDistance / 2); zi++) {
-                        unsigned xi = (x / 16) - ((renderDistance - 1) / 2);
-                        if (!getChunk(xi, 0, zi)) {
-                            visibleChunks.emplace_back(xi, zi, this);
-                            loadQueue.push(&visibleChunks.back());
-                        }
-                    }
-                } return;
-        case 2: { // -z
-                    for (unsigned xi = (x / 16) - renderDistance / 2; xi < (x / 16) + renderDistance / 2; xi++) {
-                        unsigned zi = (z / 16) - ((renderDistance - 1) / 2);
-                        if (!getChunk(xi, 0, zi)) {
-                            visibleChunks.emplace_back(xi, zi, this);
-                            loadQueue.push(&visibleChunks.back());
-                        }
-                    }
-                } return;
-
-        case 3: { // +x
-                    for (unsigned zi = (z / 16) - renderDistance / 2; zi < (z / 16) + renderDistance / 2; zi++) {
-                        unsigned xi = (x / 16) + ((renderDistance - 1) / 2);
-                        if (!getChunk(xi, 0, zi)) {
-                            visibleChunks.emplace_back(xi, zi, this);
-                            loadQueue.push(&visibleChunks.back());
-                        }
-                    }
-                } return;
-        case 4: { // +x
-                    for (unsigned xi = (x / 16) - renderDistance / 2; xi < (x / 16) + renderDistance / 2; xi++) {
-                        unsigned zi = (z / 16) + ((renderDistance - 1) / 2);
-                        if (!getChunk(xi, 0, zi)) {
-                            visibleChunks.emplace_back(xi, zi, this);
-                            loadQueue.push(&visibleChunks.back());
-                        }
-                    }
-                } return;
-    }
+    /*
+     * Sort the remaining elements to the first element is centered, 
+     * continue the spiral generation from the end. (Outdated comment but leave it for now)
+     */ 
 }
 
 // TODO: reload adjacent chunk meshes.
