@@ -16,7 +16,7 @@ class World;
 
 class Chunk {
 public:
-    Chunk(int, int, World*);
+    Chunk(unsigned, unsigned, World*);
     ~Chunk();
 
     void generateMesh(std::optional<std::vector<ushort>> = std::nullopt);

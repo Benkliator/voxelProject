@@ -22,7 +22,7 @@ World::World(unsigned size, unsigned offset, glm::vec3 center) {
     
     textureMap = loadTexture("./res/textures/Blockmap2.png", GL_RGBA);
     shaderInit();
-    projection = glm::perspective(glm::radians(45.0f), 1.8f, 0.1f, 1000.0f);
+    projection = glm::perspective(glm::radians(60.0f), 1.8f, 0.1f, 1000.0f);
 
     std::cout << "Creating chunks..." << std::endl;
 
@@ -89,29 +89,56 @@ void World::reloadChunksAround(unsigned xChunk, unsigned yChunk, unsigned zChunk
     for (int i = 0; i < size; i++) {
         if (visibleChunks[i].distanceFrom(worldCenter) > (renderDistance * 8) /* RD / 2 * 16 */) {
             if (visibleChunks[i].getPos().x > xChunk + ((renderDistance) * 8)) {        // -x
-                Chunk chunk{(visibleChunks[i].getPos().x / 16u) - renderDistance,
-                            (visibleChunks[i].getPos().z / 16u),
+                Chunk chunk{(visibleChunks[i].getPos().x / 16) - renderDistance,
+                            (visibleChunks[i].getPos().z / 16),
                              this};
                 visibleChunks[i] = chunk;
+                auto chunkOpt = getChunk(chunk.getPos().x + 16, 
+                                         0,
+                                         chunk.getPos().z);
+                if (chunkOpt.has_value()) {
+                    loadQueue.push(&chunkOpt.value().get());
+                }
                 loadQueue.push(&visibleChunks[i]);
+                continue;
             } else if (visibleChunks[i].getPos().z > zChunk + ((renderDistance) * 8)) { // -z
-                Chunk chunk{(visibleChunks[i].getPos().x / 16u),
-                            (visibleChunks[i].getPos().z / 16u) - renderDistance,
+                Chunk chunk{(visibleChunks[i].getPos().x / 16),
+                            (visibleChunks[i].getPos().z / 16) - renderDistance,
                              this};
                 visibleChunks[i] = chunk;
+                auto chunkOpt = getChunk(chunk.getPos().x, 0,
+                                         chunk.getPos().z + 16);
+                if (chunkOpt.has_value()) {
+                    loadQueue.push(&chunkOpt.value().get());
+                }
                 loadQueue.push(&visibleChunks[i]);
+                continue;
             } else if (visibleChunks[i].getPos().x < xChunk - ((renderDistance) * 8)) { // +x
-                Chunk chunk{(visibleChunks[i].getPos().x / 16u) + renderDistance,
-                            (visibleChunks[i].getPos().z / 16u),
+                Chunk chunk{(visibleChunks[i].getPos().x / 16) + renderDistance,
+                            (visibleChunks[i].getPos().z / 16),
                              this};
                 visibleChunks[i] = chunk;
+                auto chunkOpt = getChunk(chunk.getPos().x - 16,
+                                         0,
+                                         chunk.getPos().z);
+                if (chunkOpt.has_value()) {
+                    loadQueue.push(&chunkOpt.value().get());
+                }
                 loadQueue.push(&visibleChunks[i]);
+                continue;
             } else if (visibleChunks[i].getPos().z < zChunk - ((renderDistance) * 8)) { // +z
                 Chunk chunk{(visibleChunks[i].getPos().x / 16u),
                             (visibleChunks[i].getPos().z / 16u) + renderDistance,
                              this};
                 visibleChunks[i] = chunk;
+                auto chunkOpt = getChunk(chunk.getPos().x,
+                                         0,
+                                         chunk.getPos().z - 16);
+                if (chunkOpt.has_value()) {
+                    loadQueue.push(&chunkOpt.value().get());
+                }
                 loadQueue.push(&visibleChunks[i]);
+                continue;
             }
         }
     }

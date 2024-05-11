@@ -12,7 +12,7 @@
 #include <sys/types.h>
 
 // Generates buffers and VAO, creates terrain for chunk.
-Chunk::Chunk(int x, int z, World* w) : world{ w } {
+Chunk::Chunk(unsigned x, unsigned z, World* w) : world{ w } {
     // Chunk offset
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);

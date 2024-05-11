@@ -76,7 +76,7 @@ bool Player::checkHitbox() {
 
 void Player::movePlayer(GLFWwindow* window, float dt) {
     glm::vec3 oldCameraPos = cameraPos;
-    const float cameraSpeed = 35.0f * dt;
+    const float cameraSpeed = 15.0f * dt;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         cameraPos += cameraSpeed *
                      glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
