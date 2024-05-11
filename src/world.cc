@@ -148,9 +148,9 @@ void World::reloadChunksAround(unsigned xChunk, unsigned yChunk, unsigned zChunk
      */ 
 }
 
-// TODO: reload adjacent chunk meshes.
 void World::meshCatchup() {
     if (!loadQueue.empty() && loadQueue.front()) {
+        loadQueue.front()->clearMesh();
         loadQueue.front()->generateMesh();
         loadQueue.pop();
     }
@@ -180,9 +180,9 @@ void World::draw(glm::mat4& view) {
 
 void World::shaderInit() {
     unsigned vertexShader =
-        loadShader(GL_VERTEX_SHADER, "./res/shaders/main.vert");
+        loadShader(GL_VERTEX_SHADER, "./res/shaders/world.vert");
     unsigned fragmentShader =
-        loadShader(GL_FRAGMENT_SHADER, "./res/shaders/main.frag");
+        loadShader(GL_FRAGMENT_SHADER, "./res/shaders/world.frag");
 
     shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
