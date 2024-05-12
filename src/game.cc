@@ -61,11 +61,11 @@ Game::Game() {
 
     skybox = new Skybox{};
     unsigned offset = 2000;
-    glm::vec3 startCoords{16 * offset + RENDER_DISTANCE * 8,
-                          100,
-                          16 * offset + RENDER_DISTANCE * 8};
-    world = new World{RENDER_DISTANCE, offset, startCoords};
-    player = new Player{world, startCoords};
+    glm::vec3 startCoords{ 16 * offset + RENDER_DISTANCE * 8,
+                           100,
+                           16 * offset + RENDER_DISTANCE * 8 };
+    world = new World{ RENDER_DISTANCE, offset, startCoords };
+    player = new Player{ world, startCoords };
 }
 
 Game::~Game() {
@@ -82,6 +82,11 @@ void Game::gameLoop() {
         currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+        if (deltaTime > 0.1) {
+            std::cout << " Skipping frame... "
+                      << "dt=" << deltaTime << std::endl;
+            continue;
+        }
         world->meshCatchup();
         processInput();
 

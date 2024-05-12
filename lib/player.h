@@ -38,5 +38,7 @@ private:
 
     Block::BlockType selectedBlock = Block::Dirt;
 
-    const float playerHeight = 1.30f;
+    const float playerHeight = 1.8f;
+    // NOTE: 0.3 out to all four sides
+    const float playerWidth = 0.6f;
 };

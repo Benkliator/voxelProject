@@ -234,8 +234,7 @@ void Chunk::generateTerrain() {
                 // can let you dynamically decide block generations at
                 // different (x, y, z) values.
                 enum Block::BlockType bt;
-                if (y <= 1 + yIntercept &&
-                    !(y < height)) {
+                if (y <= 1 + yIntercept && !(y < height)) {
                     bt = Block::Water;
                 } else if (y > height && y < height + 1) {
                     bt = Block::Grass;
@@ -407,5 +406,6 @@ Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, ushort face) {
 }
 
 unsigned Chunk::distanceFrom(glm::uvec3 point) {
-    return std::max(abs((int)point.x - (int)pos.x), abs((int)point.z - (int)pos.z));
+    return std::max(abs((int)point.x - (int)pos.x),
+                    abs((int)point.z - (int)pos.z));
 }
