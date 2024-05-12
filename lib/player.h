@@ -40,7 +40,7 @@ private:
     Block::BlockFace selectedFace = Block::Top;
 
     // NOTE: Based on the center of the block below (effectively -0.5f)
-    const float playerHeight = 2.0f;
+    const float playerHeight = 1.8f;
     // NOTE: (playerWidth / 2.0f) out to all four sides
     const float playerWidth = 0.6f;
 };
