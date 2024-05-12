@@ -1,15 +1,12 @@
 #include "player.h"
 #include "block.h"
 #include "game.h"
-#include <cassert>
 #include <cmath>
 #include <glm/common.hpp>
 #include <glm/ext/scalar_constants.hpp>
 #include <glm/fwd.hpp>
-#include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
 
 Player::Player(World* w, glm::vec3 pos) : world{ w } {
     cameraPos = pos;
@@ -180,32 +177,32 @@ void Player::placeBlock() {
     auto tempChunkOpt = world->getChunk(xChunk, 0, zChunk);
     if (tempChunkOpt.has_value()) {
         Chunk& tempChunk = tempChunkOpt.value().get();
-        if (isAir(tempChunk.getBlock(viewBlock.x % 16, viewBlock.y, viewBlock.z % 16))) {
+        if (isAir(tempChunk.getBlock(
+                viewBlock.x % 16, viewBlock.y, viewBlock.z % 16))) {
             return;
         }
     }
 
     glm::uvec3 placePos = viewBlock;
     switch (selectedFace) {
-        case Block::Top: {
-            placePos.y++;
-            } break;
-        case Block::Bottom: {
-            placePos.y--;
-            } break;
-        case Block::Right: {
-            placePos.x++;
-            } break;
-        case Block::Left: {
-            placePos.x--;
-            } break;
-        case Block::Front: {
-            placePos.z++;
-            } break;
-        case Block::Back: {
-            placePos.z--;
-            } break;
-            
+    case Block::Top: {
+        placePos.y++;
+    } break;
+    case Block::Bottom: {
+        placePos.y--;
+    } break;
+    case Block::Right: {
+        placePos.x++;
+    } break;
+    case Block::Left: {
+        placePos.x--;
+    } break;
+    case Block::Front: {
+        placePos.z++;
+    } break;
+    case Block::Back: {
+        placePos.z--;
+    } break;
     }
 
     xChunk = placePos.x - (placePos.x % 16);
@@ -214,8 +211,8 @@ void Player::placeBlock() {
     tempChunkOpt = world->getChunk(xChunk, 0, zChunk);
     if (tempChunkOpt.has_value()) {
         Chunk& tempChunk = tempChunkOpt.value().get();
-                tempChunk.placeBlock(
-                        selectedBlock, placePos.x % 16, placePos.y, placePos.z % 16);
+        tempChunk.placeBlock(
+            selectedBlock, placePos.x % 16, placePos.y, placePos.z % 16);
     }
 
     view();

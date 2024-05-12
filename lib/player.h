@@ -39,7 +39,8 @@ private:
     Block::BlockType selectedBlock = Block::Dirt;
     Block::BlockFace selectedFace = Block::Top;
 
-    const float playerHeight = 1.8f;
-    // NOTE: 0.3 out to all four sides
+    // NOTE: Based on the center of the block below (effectively -0.5f)
+    const float playerHeight = 2.0f;
+    // NOTE: (playerWidth / 2.0f) out to all four sides
     const float playerWidth = 0.6f;
 };

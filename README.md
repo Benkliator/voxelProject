@@ -10,6 +10,7 @@ To run this program you will need:
 - STB Image
 - OpenGL 3.3
 - C++17
+- FreeType 2
 
 ## Compiling and running
 ```bash
