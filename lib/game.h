@@ -1,6 +1,5 @@
 #pragma once
 
-#include "hud.h"
 #include "player.h"
 #include "skybox.h"
 #include "world.h"

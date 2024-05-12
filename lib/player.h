@@ -23,7 +23,7 @@ public:
 
 private:
     void view();
-    bool checkHitbox();
+    void checkCollisions(glm::vec3);
 
     World* world;
     Hud hud{};

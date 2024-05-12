@@ -82,7 +82,7 @@ void Game::gameLoop() {
         currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-        if (deltaTime > 0.1) {
+        if (deltaTime > 0.05) {
             std::cout << " Skipping frame... "
                       << "dt=" << deltaTime << std::endl;
             continue;

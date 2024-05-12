@@ -1,10 +1,12 @@
 #include "player.h"
 #include "block.h"
 #include "game.h"
+#include <cassert>
 #include <cmath>
 #include <glm/common.hpp>
 #include <glm/ext/scalar_constants.hpp>
 #include <glm/fwd.hpp>
+#include <iostream>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -26,18 +28,12 @@ void Player::moveMouse(GLFWwindow* window, float xi, float yi) {
     view();
 }
 
-// TODO(Christoffer): Rewrite side collision to allow gliding along sides of
-//                    blocks
-bool Player::checkHitbox() {
+void Player::checkCollisions(glm::vec3 oldCameraPos) {
     std::vector<glm::vec3> checkDirs = {
-        // Forward
-        glm::vec3{ 0.0f, 0.0f, -playerWidth / 2.0f },
-        // Backward
-        glm::vec3{ 0.0f, 0.0f, playerWidth / 2.0f },
-        // Left
-        glm::vec3{ -playerWidth / 2.0f, 0.0f, 0.0f },
-        // Right
-        glm::vec3{ playerWidth / 2.0f, 0.0f, 0.0f },
+        { 0.0f, 0.0f, -playerWidth / 2.0f },
+        { 0.0f, 0.0f, playerWidth / 2.0f },
+        { -playerWidth / 2.0f, 0.0f, 0.0f },
+        { playerWidth / 2.0f, 0.0f, 0.0f },
     };
     // BELOW
     for (glm::vec3& dir : checkDirs) {
@@ -73,20 +69,37 @@ bool Player::checkHitbox() {
         }
     }
     // SIDES
-    for (glm::vec3& dir : checkDirs) {
-        // Check at least once per block in player-height
-        float xPos = std::round(cameraPos.x + dir.x);
-        float zPos = std::round(cameraPos.z + dir.z);
-        for (float height = 0; height < playerHeight; height += 1.0f) {
+    glm::vec3 moveDir = cameraPos - oldCameraPos;
+    for (float height = 0; height < playerHeight; height += 1.0f) {
+        // HACK: Detect if we have two collisions per height and restore the
+        // oldCameraPos.{x,z}
+        bool collidedHorizontally = false;
+        for (glm::vec3& checkDir : checkDirs) {
+            float xPos = std::round(cameraPos.x + checkDir.x);
+            float zPos = std::round(cameraPos.z + checkDir.z);
             ushort checkBlock =
                 world->getBlock(xPos, std::ceil(cameraPos.y) - height, zPos)
                     .value_or(Block::Air << typeOffset);
             if (!isAir(checkBlock)) {
-                return true;
+                if (collidedHorizontally) {
+                    cameraPos = oldCameraPos;
+                    return;
+                }
+                glm::vec3 normal;
+                if (checkDir.x && ((checkDir.x < 0) == (moveDir.x < 0))) {
+                    normal = { 1.0f, 0.0f, 0.0f };
+                } else if (checkDir.z &&
+                           ((checkDir.z < 0) == (moveDir.z < 0))) {
+                    normal = { 0.0f, 0.0f, 1.0f };
+                } else {
+                    continue;
+                }
+                cameraPos =
+                    oldCameraPos + moveDir - glm::dot(moveDir, normal) * normal;
+                collidedHorizontally = true;
             }
         }
     }
-    return false;
 }
 
 void Player::movePlayer(GLFWwindow* window, float dt) {
@@ -119,10 +132,7 @@ void Player::movePlayer(GLFWwindow* window, float dt) {
         ySpeed -= 9.82 * dt;
     }
 
-    if (checkHitbox()) {
-        cameraPos.x = oldCameraPos.x;
-        cameraPos.z = oldCameraPos.z;
-    }
+    checkCollisions(oldCameraPos);
 
     cameraPos.y += ySpeed * dt;
     view();
@@ -221,11 +231,13 @@ glm::mat4 Player::skyLook() {
 
 void Player::draw() {
     std::string playerPosStr{};
-    playerPosStr += std::to_string(cameraPos.x);
-    playerPosStr += " : ";
-    playerPosStr += std::to_string(cameraPos.y - playerHeight);
-    playerPosStr += " : ";
-    playerPosStr += std::to_string(cameraPos.z);
+    playerPosStr += " x: ";
+    playerPosStr += std::to_string(static_cast<int>(cameraPos.x));
+    playerPosStr += " y: ";
+    playerPosStr +=
+        std::to_string(static_cast<int>(cameraPos.y - playerHeight));
+    playerPosStr += " z: ";
+    playerPosStr += std::to_string(static_cast<int>(cameraPos.z));
     hud.renderText(
         playerPosStr, 5.0f, 0.0f, 0.5f, glm::vec3{ 1.0f, 1.0f, 1.0f });
 
