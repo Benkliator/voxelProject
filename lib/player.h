@@ -37,6 +37,7 @@ private:
     glm::uvec3 chunkPos;
 
     Block::BlockType selectedBlock = Block::Dirt;
+    Block::BlockFace selectedFace = Block::Top;
 
     const float playerHeight = 1.8f;
     // NOTE: 0.3 out to all four sides

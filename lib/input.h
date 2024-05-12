@@ -18,7 +18,8 @@ public:
                               double yoffset,
                               GLboolean constrainPitch = true);
 
-    std::pair<glm::vec3, glm::vec3> rayCast(float length);
+    glm::vec3 rayCast(float length);
+    glm::vec3 rayCast(float length, glm::vec3 pos);
 
 protected:
     glm::vec3 cameraPos = glm::vec3(32.0f, 45.0f, 32.0f);

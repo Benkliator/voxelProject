@@ -56,14 +56,14 @@ World::World(unsigned size, unsigned offset, glm::vec3 center) {
 
 std::optional<ushort> World::getBlock(long x, long y, long z) {
     const unsigned chunkMask = 0b1111;
-    unsigned chunkX = x & ~chunkMask;
-    unsigned chunkZ = z & ~chunkMask;
-    unsigned blockOffsetX = x & chunkMask;
-    unsigned blockOffsetZ = z & chunkMask;
+    unsigned xChunk = x & ~chunkMask;
+    unsigned zChunk = z & ~chunkMask;
+    unsigned xBlockOffset = x & chunkMask;
+    unsigned zBlockOffset = z & chunkMask;
     for (Chunk& chunk : visibleChunks) {
         glm::uvec3 chunkpos = chunk.getPos();
-        if (chunkpos.x == chunkX && chunkpos.z == chunkZ) {
-            return chunk.getBlock(blockOffsetX, y, blockOffsetZ);
+        if (chunkpos.x == xChunk && chunkpos.z == zChunk) {
+            return chunk.getBlock(xBlockOffset, y, zBlockOffset);
         }
     }
     return std::nullopt;
@@ -80,9 +80,6 @@ World::getChunk(unsigned x, unsigned y, unsigned z) {
     return std::nullopt;
 }
 
-// IDEA: Run this function whenever there is extra time to do stuff,
-// and pre-load chunks outside of render distance without actually rendering
-// , this would probably result in smoother world traversal.
 void World::reloadChunksAround(unsigned xChunk,
                                unsigned yChunk,
                                unsigned zChunk) {

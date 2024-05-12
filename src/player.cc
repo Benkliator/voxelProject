@@ -7,6 +7,7 @@
 #include <glm/fwd.hpp>
 #include <string>
 #include <vector>
+#include <iostream>
 
 Player::Player(World* w, glm::vec3 pos) : world{ w } {
     cameraPos = pos;
@@ -169,8 +170,42 @@ void Player::placeBlock() {
     auto tempChunkOpt = world->getChunk(xChunk, 0, zChunk);
     if (tempChunkOpt.has_value()) {
         Chunk& tempChunk = tempChunkOpt.value().get();
-        tempChunk.placeBlock(
-            selectedBlock, viewBlock.x % 16, viewBlock.y + 1, viewBlock.z % 16);
+        if (isAir(tempChunk.getBlock(viewBlock.x % 16, viewBlock.y, viewBlock.z % 16))) {
+            return;
+        }
+    }
+
+    glm::uvec3 placePos = viewBlock;
+    switch (selectedFace) {
+        case Block::Top: {
+            placePos.y++;
+            } break;
+        case Block::Bottom: {
+            placePos.y--;
+            } break;
+        case Block::Right: {
+            placePos.x++;
+            } break;
+        case Block::Left: {
+            placePos.x--;
+            } break;
+        case Block::Front: {
+            placePos.z++;
+            } break;
+        case Block::Back: {
+            placePos.z--;
+            } break;
+            
+    }
+
+    xChunk = placePos.x - (placePos.x % 16);
+    zChunk = placePos.z - (placePos.z % 16);
+
+    tempChunkOpt = world->getChunk(xChunk, 0, zChunk);
+    if (tempChunkOpt.has_value()) {
+        Chunk& tempChunk = tempChunkOpt.value().get();
+                tempChunk.placeBlock(
+                        selectedBlock, placePos.x % 16, placePos.y, placePos.z % 16);
     }
 
     view();
@@ -204,13 +239,12 @@ void Player::draw() {
     hud.renderText("*",
                    SCR_WIDTH / 2.0f,
                    SCR_HEIGHT / 2.0f,
-                   1.0f,
+                   0.5f,
                    glm::vec3{ 1.0f, 1.0f, 1.0f });
 }
 
-// TODO: better raycasting?
 void Player::view() {
-    auto [from, to] = rayCast(0.5f);
+    glm::vec3 to = rayCast(0.02f);
 
     unsigned xBlock = unsigned(std::round(to.x));
     unsigned yBlock = unsigned(std::round(to.y));
@@ -218,7 +252,7 @@ void Player::view() {
 
     unsigned xChunk = xBlock - (xBlock % 16);
     unsigned zChunk = zBlock - (zBlock % 16);
-    float it = 0.5f;
+    float it = 0.02f;
     while (it <= 4.0f) {
         auto chunkOpt = world->getChunk(xChunk, 0, zChunk);
         if (chunkOpt.has_value()) {
@@ -227,7 +261,7 @@ void Player::view() {
                 break;
             }
         }
-        auto [from, to] = rayCast(0.5f + it);
+        to = rayCast(0.02f + it);
 
         xBlock = unsigned(std::round(to.x));
         yBlock = unsigned(std::round(to.y));
@@ -235,7 +269,7 @@ void Player::view() {
 
         xChunk = xBlock - (xBlock % 16);
         zChunk = zBlock - (zBlock % 16);
-        it += 0.5;
+        it += 0.02;
     }
     auto prevChunkOpt = world->getChunk(
         viewBlock.x - (viewBlock.x % 16), 0, viewBlock.z - (viewBlock.z % 16));
@@ -251,6 +285,7 @@ void Player::view() {
     if (tempChunkOpt.has_value()) {
         Chunk& tempChunk = tempChunkOpt.value().get();
         if (!isAir(tempChunk.getBlock(xBlock % 16, yBlock, zBlock % 16))) {
+
             // Highlight new viewblock
             tempChunk.highlightBlock(xBlock % 16, yBlock, zBlock % 16);
             // Reload mesh
@@ -258,6 +293,27 @@ void Player::view() {
             tempChunk.generateMesh();
             // Assign new viewblock
             viewBlock = glm::uvec3(xBlock, yBlock, zBlock);
+
+            if (abs(to.x - viewBlock.x - 0.5) > 0.9f &&
+                abs(to.x - viewBlock.x) <= 1.0f) {
+                selectedFace = Block::Left;
+            } else if (abs(to.x - viewBlock.x - 0.5) < 0.1f) {
+                selectedFace = Block::Right;
+            }
+
+            if (abs(to.z - viewBlock.z - 0.5) > 0.9f &&
+                abs(to.z - viewBlock.z) <= 1.0f) {
+                selectedFace = Block::Back;
+            } else if (abs(to.z - viewBlock.z - 0.5) < 0.1f) {
+                selectedFace = Block::Front;
+            }
+
+            if (abs(to.y - viewBlock.y - 0.5) > 0.9f &&
+                abs(to.y - viewBlock.y) <= 1.0f) {
+                selectedFace = Block::Bottom;
+            } else if (abs(to.y - viewBlock.y - 0.5) < 0.1f) {
+                selectedFace = Block::Top;
+            }
         }
     }
 }

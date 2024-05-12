@@ -31,6 +31,10 @@ void Camera::processMouseMovement(GLFWwindow* window,
     cameraFront = glm::normalize(cameraFront);
 }
 
-std::pair<glm::vec3, glm::vec3> Camera::rayCast(float length) {
-    return std::make_pair(cameraPos, cameraPos + (cameraFront * length));
+glm::vec3 Camera::rayCast(float length) {
+    return cameraPos + (cameraFront * length);
+}
+
+glm::vec3 Camera::rayCast(float length, glm::vec3 pos) {
+    return pos - (cameraFront * length);
 }
