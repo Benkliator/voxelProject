@@ -13,7 +13,7 @@ public:
 
     void moveMouse(GLFWwindow*, float, float);
     void movePlayer(GLFWwindow*, float);
-    void selectBlock(GLFWwindow*, float, float);
+    void selectBlock(GLFWwindow*, float);
     void breakBlock();
     void placeBlock();
     void draw();

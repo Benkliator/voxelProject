@@ -76,7 +76,7 @@ bool Player::checkHitbox() {
 
 void Player::movePlayer(GLFWwindow* window, float dt) {
     glm::vec3 oldCameraPos = cameraPos;
-    const float cameraSpeed = 15.0f * dt;
+    const float cameraSpeed = 5.0f * dt;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         cameraPos += cameraSpeed *
                      glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
@@ -121,7 +121,7 @@ void Player::movePlayer(GLFWwindow* window, float dt) {
     chunkPos = tempChunkPos;
 }
 
-void Player::selectBlock(GLFWwindow*, float, float yOffset) {
+void Player::selectBlock(GLFWwindow*, float yOffset) {
     selectedBlock = static_cast<Block::BlockType>(selectedBlock +
                                                   static_cast<int>(yOffset));
     if (selectedBlock <= Block::Air) {
@@ -189,7 +189,7 @@ void Player::draw() {
 
 // TODO: better raycasting?
 void Player::view() {
-    auto [from, to] = rayCast(1.0f);
+    auto [from, to] = rayCast(0.5f);
 
     unsigned xBlock = unsigned(std::round(to.x));
     unsigned yBlock = unsigned(std::round(to.y));
@@ -197,7 +197,7 @@ void Player::view() {
 
     unsigned xChunk = xBlock - (xBlock % 16);
     unsigned zChunk = zBlock - (zBlock % 16);
-    float it = 1.0f;
+    float it = 0.5f;
     while (it <= 4.0f) {
         auto chunkOpt = world->getChunk(xChunk, 0, zChunk);
         if (chunkOpt.has_value()) {
@@ -206,7 +206,7 @@ void Player::view() {
                 break;
             }
         }
-        auto [from, to] = rayCast(1.0f + it);
+        auto [from, to] = rayCast(0.5f + it);
 
         xBlock = unsigned(std::round(to.x));
         yBlock = unsigned(std::round(to.y));
@@ -214,7 +214,7 @@ void Player::view() {
 
         xChunk = xBlock - (xBlock % 16);
         zChunk = zBlock - (zBlock % 16);
-        it++;
+        it += 0.5;
     }
     auto prevChunkOpt = world->getChunk(
         viewBlock.x - (viewBlock.x % 16), 0, viewBlock.z - (viewBlock.z % 16));

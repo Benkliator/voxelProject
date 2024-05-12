@@ -128,7 +128,7 @@ void Game::mouseMotionCallback(double xposIn, double yposIn) {
 }
 
 void Game::mouseScrollCallback(double x, double y) {
-    player->selectBlock(window, x, y);
+    player->selectBlock(window, y);
 }
 
 void Game::mouseClickCallback(int button, int action, int mods) {

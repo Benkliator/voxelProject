@@ -149,7 +149,12 @@ void World::reloadChunksAround(unsigned xChunk, unsigned yChunk, unsigned zChunk
 }
 
 void World::meshCatchup() {
-    if (!loadQueue.empty() && loadQueue.front()) {
+    if (!loadQueue.front()) {
+        while (!loadQueue.front() && !loadQueue.empty()) {
+            loadQueue.pop();
+        }
+    }
+    if (!loadQueue.empty()) {
         loadQueue.front()->clearMesh();
         loadQueue.front()->generateMesh();
         loadQueue.pop();

@@ -135,6 +135,9 @@ std::optional<ushort> Chunk::getBlockGlobal(long dX, long dY, long dZ) {
 }
 
 bool Chunk::removeBlock(unsigned x, unsigned y, unsigned z) {
+    if (!y) {
+        return false;
+    }
     if (!isAir(getBlock(x, y, z))) {
         size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
         blockArray[ix] = 0;
@@ -217,7 +220,7 @@ glm::uvec3 Chunk::getPos() {
 }
 
 void Chunk::generateTerrain() {
-    float yIntercept = 63.0f;
+    float yIntercept = 30.0f;
     float freq = 0.8396323343; // Frequency
     float amp = 1.35;          // Amplifier
     for (int x = 0; x < 16; x++) {
@@ -231,7 +234,8 @@ void Chunk::generateTerrain() {
                 // can let you dynamically decide block generations at
                 // different (x, y, z) values.
                 enum Block::BlockType bt;
-                if (y <= 1 + yIntercept) {
+                if (y <= 1 + yIntercept &&
+                    !(y < height)) {
                     bt = Block::Water;
                 } else if (y > height && y < height + 1) {
                     bt = Block::Grass;
@@ -300,7 +304,6 @@ void Chunk::loadFace(const MeshData* data,
     }
 }
 
-// if if if if if if if if if if if if if if if if else
 std::array<ushort, 4>
 Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, ushort face) {
     // This is really ugly lol, will probably rework at some point.
