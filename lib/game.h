@@ -7,7 +7,7 @@
 const unsigned SCR_WIDTH = 1620;
 const unsigned SCR_HEIGHT = 900;
 
-const unsigned RENDER_DISTANCE = 8;
+const unsigned RENDER_DISTANCE = 16;
 
 class Game {
 public:

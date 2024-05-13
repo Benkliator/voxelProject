@@ -62,7 +62,7 @@ Game::Game() {
     skybox = new Skybox{};
     unsigned offset = 2000;
     glm::vec3 startCoords{ 16 * offset + RENDER_DISTANCE * 8,
-                           100,
+                           70,
                            16 * offset + RENDER_DISTANCE * 8 };
     world = new World{ RENDER_DISTANCE, offset, startCoords };
     player = new Player{ world, startCoords };

@@ -101,32 +101,47 @@ void Player::checkCollisions(glm::vec3 oldCameraPos) {
 
 void Player::movePlayer(GLFWwindow* window, float dt) {
     glm::vec3 oldCameraPos = cameraPos;
-    const float cameraSpeed = 5.0f * dt;
+    const float cameraSpeed = 5.5f * dt;
+    const float sprintBoost = 1.8f*dt;
+
+    const float gravitySpeed = 23.f*dt;
+    const float jumpBoost = gravitySpeed*22;
+
+    glm::vec3 resultingSpeed = glm::vec3(0.0, 0.0, 0.0);
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        cameraPos += cameraSpeed *
-                     glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
+        resultingSpeed += glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        cameraPos -= cameraSpeed *
-                     glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
+        resultingSpeed -= glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        cameraPos -=
-            glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        resultingSpeed -= glm::normalize(glm::cross(glm::vec3(cameraFront.x, 0, cameraFront.z), cameraUp));
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        cameraPos +=
-            glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        resultingSpeed += glm::normalize(glm::cross(glm::vec3(cameraFront.x, 0, cameraFront.z), cameraUp));
     }
+
+    if(resultingSpeed.x != 0 || 
+       resultingSpeed.y != 0 || 
+       resultingSpeed.z != 0) {
+        resultingSpeed = glm::normalize(resultingSpeed);
+        cameraPos += resultingSpeed*cameraSpeed;
+    }
+
+    int isSprinting =((glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) && (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS));
+    if (isSprinting) {
+        cameraPos += glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z))*sprintBoost;
+    }
+
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
         if (onGround) {
-            ySpeed += 9.82 / 2.0;
+            ySpeed += jumpBoost;
             onGround = false;
         }
     }
 
     if (!onGround) {
-        ySpeed -= 9.82 * dt;
+        ySpeed -= gravitySpeed;
     }
 
     checkCollisions(oldCameraPos);
