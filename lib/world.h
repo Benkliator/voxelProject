@@ -20,7 +20,7 @@ class Chunk;
 // based on camera/player position.
 class World {
 public:
-    World(unsigned, unsigned, glm::vec3);
+    World(unsigned, glm::vec3);
     ~World();
 
     // Draws out every chunk in visibleChunks

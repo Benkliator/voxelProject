@@ -9,7 +9,7 @@
 #include <iostream>
 #include <optional>
 
-World::World(unsigned size, unsigned offset, glm::vec3 center) {
+World::World(unsigned size, glm::vec3 center) {
     if (!(size % 2)) {
         renderDistance = size + 1;
     } else {
@@ -33,7 +33,8 @@ World::World(unsigned size, unsigned offset, glm::vec3 center) {
     for (int i = 0; i < end; i++) {
         int xp = x + renderDistance / 2;
         int zp = z + renderDistance / 2;
-        if (xp >= 0 && xp < renderDistance && zp >= 0 && zp < renderDistance) {
+        if (xp >= 0 && static_cast<unsigned>(xp) < renderDistance && zp >= 0 &&
+            static_cast<unsigned>(zp) < renderDistance) {
             visibleChunks.emplace_back(
                 x + (xChunk / 16), z + (zChunk / 16), this);
         }
@@ -72,7 +73,7 @@ std::optional<ushort> World::getBlock(long x, long y, long z) {
 std::optional<std::reference_wrapper<Chunk>>
 World::getChunk(unsigned x, unsigned y, unsigned z) {
     glm::uvec3 findPos{ x, y, z };
-    for (int i = 0; i < visibleChunks.size(); i++) {
+    for (size_t i = 0; i < visibleChunks.size(); i++) {
         if (visibleChunks[i].getPos() == findPos) {
             return std::make_optional(std::ref(visibleChunks[i]));
         }
@@ -84,8 +85,8 @@ void World::reloadChunksAround(unsigned xChunk,
                                unsigned yChunk,
                                unsigned zChunk) {
     worldCenter = glm::uvec3(xChunk, yChunk, zChunk);
-    unsigned size = visibleChunks.size();
-    for (int i = 0; i < size; i++) {
+    size_t size = visibleChunks.size();
+    for (size_t i = 0; i < size; i++) {
         if (visibleChunks[i].distanceFrom(worldCenter) >
             (renderDistance * 8) /* RD / 2 * 16 */) {
             if (visibleChunks[i].getPos().x >

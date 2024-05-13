@@ -111,9 +111,10 @@ std::string blockToString(Block::BlockType bt) {
         return "Brick";
     case Block::Sand:
         return "Sand";
-    default:
-        __builtin_unreachable();
+    case Block::NUM_BLOCKTYPES:
+        break;
     }
+    __builtin_unreachable();
 };
 
 bool isAir(unsigned block) {
