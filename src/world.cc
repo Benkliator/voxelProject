@@ -167,6 +167,26 @@ void World::meshCatchup() {
     }
 }
 
+// in fact not yet threadsafe B)
+void World::threadsafeMeshCatchup() {
+    using namespace std::chrono_literals;
+    while (meshLoad) {
+        while (!loadQueue.empty()) {
+            if (loadQueue.front()) {
+                Chunk* chunk = loadQueue.front();
+                chunk->clearMesh();
+                chunk->generateMesh();
+            }
+            loadQueue.pop();
+        }
+
+        const auto start = std::chrono::high_resolution_clock::now();
+        std::this_thread::sleep_for(500ms);
+        const auto end = std::chrono::high_resolution_clock::now();
+        const std::chrono::duration<double, std::milli> elapsed = end - start;
+    }
+}
+
 World::~World() {}
 
 void World::draw(glm::mat4& view) {

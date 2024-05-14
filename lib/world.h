@@ -1,6 +1,7 @@
 #pragma once
 
 #include "chunk.h"
+#include "synchQueue.h"
 
 #include <functional>
 #include <glm/fwd.hpp>
@@ -9,7 +10,8 @@
 #include <glm/vec3.hpp>
 #include <optional>
 #include <vector>
-#include <queue>
+#include <thread>
+#include <chrono>
 
 const unsigned worldHeight = 254;
 //////////////////////////////////////////////////////////////////
@@ -30,12 +32,15 @@ public:
     getChunk(unsigned, unsigned, unsigned);
     void reloadChunksAround(unsigned, unsigned, unsigned);
     void meshCatchup();
+    void threadsafeMeshCatchup();
 
 private:
     void shaderInit();
 
     std::vector<Chunk> visibleChunks;
+    //synchQueue<Chunk*> loadQueue;
     std::queue<Chunk*> loadQueue;
+    bool meshLoad = true;
 
     glm::uvec3 worldCenter;
     unsigned renderDistance;

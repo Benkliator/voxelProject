@@ -13,13 +13,13 @@ public:
 
     glm::mat4 lookAt();
 
-    void processMouseMovement(GLFWwindow* window,
-                              double xoffset,
-                              double yoffset,
-                              GLboolean constrainPitch = true);
+    void processMouseMovement(GLFWwindow*,
+                              double,
+                              double,
+                              GLboolean = true);
 
-    glm::vec3 rayCast(float length);
-    glm::vec3 rayCast(float length, glm::vec3 pos);
+    glm::vec3 rayCast(float);
+    glm::vec3 rayCast(float, glm::vec3);
 
 protected:
     glm::vec3 cameraPos = glm::vec3(32.0f, 45.0f, 32.0f);
