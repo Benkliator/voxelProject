@@ -1,6 +1,7 @@
 #include "player.h"
 #include "block.h"
 #include "game.h"
+#include <GLFW/glfw3.h>
 #include <cmath>
 #include <glm/common.hpp>
 #include <glm/ext/scalar_constants.hpp>
@@ -26,25 +27,29 @@ void Player::moveMouse(GLFWwindow* window, float xi, float yi) {
 }
 
 void Player::checkCollisions(glm::vec3 oldCameraPos) {
-    std::vector<glm::vec3> checkDirs = {
+    const std::vector<glm::vec3> checkDirs = {
         { 0.0f, 0.0f, -playerWidth / 2.0f },
         { 0.0f, 0.0f, playerWidth / 2.0f },
         { -playerWidth / 2.0f, 0.0f, 0.0f },
         { playerWidth / 2.0f, 0.0f, 0.0f },
+        { playerWidth / 2.0f, 0.0f, playerWidth / 2.0f },
+        { -playerWidth / 2.0f, 0.0f, playerWidth / 2.0f },
+        { playerWidth / 2.0f, 0.0f, -playerWidth / 2.0f },
+        { -playerWidth / 2.0f, 0.0f, -playerWidth / 2.0f },
     };
     // BELOW
-    for (glm::vec3& dir : checkDirs) {
+    for (glm::vec3 const& dir : checkDirs) {
         float xPos = std::round(cameraPos.x + dir.x);
         float zPos = std::round(cameraPos.z + dir.z);
         ushort blockBelow =
-            world->getBlock(xPos, std::ceil(cameraPos.y - playerHeight), zPos)
+            world->getBlock(xPos, std::round(cameraPos.y - playerHeight), zPos)
                 .value_or(Block::Air << typeOffset);
         if (!isAir(blockBelow)) {
             if (ySpeed < 0.0f) {
                 ySpeed = 0.0f;
                 onGround = true;
-                cameraPos.y =
-                    std::round(cameraPos.y - playerHeight) + playerHeight;
+                float floorPos = std::floor(cameraPos.y - playerHeight) + 0.5f;
+                cameraPos.y = floorPos + playerHeight - 1e-5;
                 break;
             }
         } else {
@@ -52,7 +57,7 @@ void Player::checkCollisions(glm::vec3 oldCameraPos) {
         }
     }
     // ABOVE
-    for (glm::vec3& dir : checkDirs) {
+    for (glm::vec3 const& dir : checkDirs) {
         float xPos = std::round(cameraPos.x + dir.x);
         float zPos = std::round(cameraPos.z + dir.z);
         ushort blockAbove = world->getBlock(xPos, std::ceil(cameraPos.y), zPos)
@@ -60,8 +65,9 @@ void Player::checkCollisions(glm::vec3 oldCameraPos) {
         if (!isAir(blockAbove)) {
             if (ySpeed > 0.0f) {
                 ySpeed = 0.0f;
-                float blockPos = std::round(cameraPos.y);
-                cameraPos.y = std::min(cameraPos.y, blockPos);
+                float ceilPos = std::ceil(cameraPos.y) - 0.5f;
+                cameraPos.y = std::min(cameraPos.y, ceilPos);
+                break;
             }
         }
     }
@@ -69,13 +75,13 @@ void Player::checkCollisions(glm::vec3 oldCameraPos) {
     glm::vec3 moveDir = cameraPos - oldCameraPos;
     for (float height = 0; height < playerHeight; height += 1.0f) {
         // HACK: Detect if we have two collisions per height and restore the
-        // oldCameraPos.{x,z}
+        //       oldCameraPos.{x,z}
         bool collidedHorizontally = false;
-        for (glm::vec3& checkDir : checkDirs) {
+        for (glm::vec3 const& checkDir : checkDirs) {
             float xPos = std::round(cameraPos.x + checkDir.x);
             float zPos = std::round(cameraPos.z + checkDir.z);
             ushort checkBlock =
-                world->getBlock(xPos, std::ceil(cameraPos.y) - height, zPos)
+                world->getBlock(xPos, std::round(cameraPos.y) - height, zPos)
                     .value_or(Block::Air << typeOffset);
             if (!isAir(checkBlock)) {
                 if (collidedHorizontally) {
@@ -83,16 +89,16 @@ void Player::checkCollisions(glm::vec3 oldCameraPos) {
                     return;
                 }
                 glm::vec3 normal;
-                if (checkDir.x && ((checkDir.x < 0) == (moveDir.x < 0))) {
+                if (checkDir.x != 0.0f &&
+                    (std::signbit(checkDir.x) == std::signbit(moveDir.x))) {
                     normal = { 1.0f, 0.0f, 0.0f };
-                } else if (checkDir.z &&
-                           ((checkDir.z < 0) == (moveDir.z < 0))) {
+                } else if (checkDir.z != 0.0f && (std::signbit(checkDir.z) ==
+                                                  std::signbit(moveDir.z))) {
                     normal = { 0.0f, 0.0f, 1.0f };
                 } else {
                     continue;
                 }
-                cameraPos =
-                    oldCameraPos + moveDir - glm::dot(moveDir, normal) * normal;
+                cameraPos -= glm::dot(moveDir, normal) * normal;
                 collidedHorizontally = true;
             }
         }
@@ -102,51 +108,86 @@ void Player::checkCollisions(glm::vec3 oldCameraPos) {
 void Player::movePlayer(GLFWwindow* window, float dt) {
     glm::vec3 oldCameraPos = cameraPos;
     const float cameraSpeed = 5.5f * dt;
-    const float sprintBoost = 1.8f*dt;
+    const float sprintBoost = 1.8f * dt;
 
-    const float gravitySpeed = 23.f*dt;
-    const float jumpBoost = gravitySpeed*22;
+    const float gravitySpeed = 23.f * dt;
+    const float jumpBoost = gravitySpeed * 22;
 
     glm::vec3 resultingSpeed = glm::vec3(0.0, 0.0, 0.0);
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        resultingSpeed += glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
+        resultingSpeed +=
+            glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        resultingSpeed -= glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
+        resultingSpeed -=
+            glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        resultingSpeed -= glm::normalize(glm::cross(glm::vec3(cameraFront.x, 0, cameraFront.z), cameraUp));
+        resultingSpeed -= glm::normalize(
+            glm::cross(glm::vec3(cameraFront.x, 0, cameraFront.z), cameraUp));
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        resultingSpeed += glm::normalize(glm::cross(glm::vec3(cameraFront.x, 0, cameraFront.z), cameraUp));
+        resultingSpeed += glm::normalize(
+            glm::cross(glm::vec3(cameraFront.x, 0, cameraFront.z), cameraUp));
     }
 
-    if(resultingSpeed.x != 0 || 
-       resultingSpeed.y != 0 || 
-       resultingSpeed.z != 0) {
+    if (resultingSpeed.x != 0 || resultingSpeed.y != 0 ||
+        resultingSpeed.z != 0) {
         resultingSpeed = glm::normalize(resultingSpeed);
-        cameraPos += resultingSpeed*cameraSpeed;
+        cameraPos += resultingSpeed * cameraSpeed;
     }
 
-    int isSprinting =((glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) && (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS));
+    int isSprinting =
+        ((glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) &&
+         (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS));
     if (isSprinting) {
-        cameraPos += glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z))*sprintBoost;
+        cameraPos +=
+            glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z)) *
+            sprintBoost;
     }
 
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-        if (onGround) {
-            ySpeed += jumpBoost;
-            onGround = false;
+        if (mode == Mode::survival) {
+            if (onGround) {
+                ySpeed += jumpBoost;
+                onGround = false;
+            }
+        } else {
+            cameraPos.y += cameraSpeed;
         }
     }
-
-    if (!onGround) {
-        ySpeed -= gravitySpeed;
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        if (mode == Mode::creative) {
+            cameraPos.y -= cameraSpeed;
+        }
+    }
+    auto modeswitchKey = glfwGetKey(window, GLFW_KEY_G);
+    if (modeswitchKey == GLFW_PRESS) {
+        if (!modeKeyPressed) {
+            modeKeyPressed = false;
+            ySpeed = 0.0f;
+            switch (mode) {
+            case survival: {
+                mode = creative;
+            }; break;
+            case creative: {
+                mode = survival;
+            } break;
+            }
+            modeKeyPressed = true;
+        }
+    } else if (modeswitchKey == GLFW_RELEASE) {
+        modeKeyPressed = false;
     }
 
-    checkCollisions(oldCameraPos);
+    if (mode == Mode::survival) {
+        checkCollisions(oldCameraPos);
+        if (!onGround) {
+            ySpeed -= 9.82 * dt;
+        }
+        cameraPos.y += ySpeed * dt;
+    }
 
-    cameraPos.y += ySpeed * dt;
     view();
 
     unsigned xChunk = (unsigned)cameraPos.x - ((unsigned)(cameraPos.x) % 16);
@@ -241,24 +282,31 @@ glm::mat4 Player::skyLook() {
     return skyCam.lookAt();
 }
 
-void Player::draw() {
+void Player::draw(std::string& fps) {
+    // FPS
+    hud.renderText(
+        fps, 5.0f, SCR_HEIGHT - 40.0f, 1.0f, glm::vec3{ 1.0f, 1.0f, 1.0f });
+    // Position
     std::string playerPosStr{};
-    playerPosStr += " x: ";
-    playerPosStr += std::to_string(static_cast<int>(cameraPos.x));
-    playerPosStr += " y: ";
+    playerPosStr += " x: " + std::to_string(static_cast<int>(cameraPos.x));
     playerPosStr +=
-        std::to_string(static_cast<int>(cameraPos.y - playerHeight));
-    playerPosStr += " z: ";
-    playerPosStr += std::to_string(static_cast<int>(cameraPos.z));
+        " y: " + std::to_string(static_cast<int>(cameraPos.y - playerHeight));
+    playerPosStr += " z: " + std::to_string(static_cast<int>(cameraPos.z));
     hud.renderText(
         playerPosStr, 5.0f, 0.0f, 0.5f, glm::vec3{ 1.0f, 1.0f, 1.0f });
-
+    // Selected block
     hud.renderText("Selected block: " + blockToString(selectedBlock),
                    5.0f,
                    20.0f,
                    0.5f,
                    glm::vec3{ 1.0f, 1.0f, 1.0f });
-
+    // Mode
+    hud.renderText(std::string{ "Mode: " } +
+                       (mode == Mode::survival ? "survival" : "creative"),
+                   5.0f,
+                   40.0f,
+                   0.5f,
+                   glm::vec3{ 1.0f, 1.0f, 1.0f });
     // Crosshair
     hud.renderText("*",
                    SCR_WIDTH / 2.0f,

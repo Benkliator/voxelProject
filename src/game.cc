@@ -64,7 +64,7 @@ Game::Game() {
     glm::vec3 startCoords{ 16 * offset + RENDER_DISTANCE * 8,
                            70,
                            16 * offset + RENDER_DISTANCE * 8 };
-    world = new World{ RENDER_DISTANCE, offset, startCoords };
+    world = new World{ RENDER_DISTANCE, startCoords };
     player = new Player{ world, startCoords };
 }
 
@@ -97,7 +97,8 @@ void Game::gameLoop() {
 
         view = player->skyLook();
         skybox->draw(view, currentFrame);
-        player->draw();
+        std::string fps = std::to_string(static_cast<int>(1 / deltaTime));
+        player->draw(fps);
 
         glfwPollEvents();
         glfwSwapBuffers(window);
@@ -132,7 +133,7 @@ void Game::mouseMotionCallback(double xposIn, double yposIn) {
     player->moveMouse(window, xoffset, yoffset);
 }
 
-void Game::mouseScrollCallback(double x, double y) {
+void Game::mouseScrollCallback(double, double y) {
     player->selectBlock(window, y);
 }
 

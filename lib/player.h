@@ -16,7 +16,7 @@ public:
     void selectBlock(GLFWwindow*, float);
     void breakBlock();
     void placeBlock();
-    void draw();
+    void draw(std::string&);
 
     glm::mat4 worldLook();
     glm::mat4 skyLook();
@@ -39,8 +39,14 @@ private:
     Block::BlockType selectedBlock = Block::Dirt;
     Block::BlockFace selectedFace = Block::Top;
 
-    // NOTE: Based on the center of the block below (effectively -0.5f)
-    const float playerHeight = 1.8f;
+    enum Mode : ushort {
+        survival,
+        creative,
+    };
+    enum Mode mode = survival;
+    bool modeKeyPressed = false;
+
+    const float playerHeight = 1.5f;
     // NOTE: (playerWidth / 2.0f) out to all four sides
     const float playerWidth = 0.6f;
 };
