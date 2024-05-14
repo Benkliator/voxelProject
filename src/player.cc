@@ -183,7 +183,7 @@ void Player::movePlayer(GLFWwindow* window, float dt) {
     if (mode == Mode::survival) {
         checkCollisions(oldCameraPos);
         if (!onGround) {
-            ySpeed -= 9.82 * dt;
+            ySpeed -= gravitySpeed;
         }
         cameraPos.y += ySpeed * dt;
     }

@@ -4,8 +4,7 @@
 #include <glm/vec2.hpp>
 
 glm::vec2 gradient(int ix, int iy) {
-    // No precomputed gradients mean this works for any number of grid
-    // coordinates
+    // No precomputed gradients mean this supports a grid of any size
     const unsigned w = 8 * sizeof(unsigned);
     const unsigned s = w / 2;
     unsigned a = ix, b = iy;
@@ -27,15 +26,13 @@ glm::vec2 gradient(int ix, int iy) {
 }
 
 float dotGradient(int ix, int iy, float fx, float fy) {
-    // Get gradient from integer coordinates
     glm::vec2 grad = gradient(ix, iy);
 
     // Compute the distance vector
     float dx = fx - static_cast<float>(ix);
     float dy = fy - static_cast<float>(iy);
 
-    // Compute the dot-product
-    return (dx * grad.x + dy * grad.y);
+    return glm::dot(glm::vec2(dx, dy), grad);
 }
 
 float interpolate(float a0, float a1, float w) {

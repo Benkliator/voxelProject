@@ -20,7 +20,7 @@ World::World(unsigned size, glm::vec3 center) {
     unsigned zChunk = (unsigned)center.z - ((unsigned)(center.z) % 16);
     worldCenter = glm::uvec3(xChunk, 0, zChunk);
 
-    textureMap = loadTexture("./res/textures/Blockmap2.png", GL_RGBA);
+    textureMap = loadTexture("./res/textures/Blockmap.png", GL_RGBA);
     shaderInit();
     projection = glm::perspective(glm::radians(60.0f), 1.8f, 0.1f, 1000.0f);
 
@@ -47,9 +47,10 @@ World::World(unsigned size, glm::vec3 center) {
     }
 
     std::cout << "Creating meshes..." << std::endl;
-    std::for_each(visibleChunks.begin(), visibleChunks.end(), [](Chunk& chunk) {
-        chunk.generateMesh();
-    });
+    std::for_each(visibleChunks.begin(), visibleChunks.end(), 
+        [](Chunk& chunk) {
+            chunk.generateMesh();
+        });
 
     std::cout << "Done!" << std::endl;
     std::cout << "Created " << visibleChunks.size() << " chunks!" << std::endl;
@@ -149,9 +150,9 @@ void World::reloadChunksAround(unsigned xChunk,
         }
     }
     /*
-     * Sort the remaining elements to the first element is centered,
-     * continue the spiral generation from the end. (Outdated comment but leave
-     * it for now)
+     * Sort the remaining elements with the first element centered,
+     * continue the spiral generation from the end. 
+     * (Outdated comment but leave it for now)
      */
 }
 
