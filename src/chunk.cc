@@ -194,6 +194,29 @@ bool Chunk::placeBlock(Block::BlockType bt,
         blockArray[ix] = bt << typeOffset;
         clearMesh();
         generateMesh();
+        if (x == 15) {
+            auto chunkOptRef = world->getChunk(pos.x + 16, 0, pos.z);
+            if (chunkOptRef.has_value()) {
+                chunkOptRef.value().get().generateMesh();
+            }
+        } else if (x == 0) {
+            auto chunkOptRef = world->getChunk(pos.x - 16, 0, pos.z);
+            if (chunkOptRef.has_value()) {
+                chunkOptRef.value().get().generateMesh();
+            }
+        }
+
+        if (z == 15) {
+            auto chunkOptRef = world->getChunk(pos.x, 0, pos.z + 16);
+            if (chunkOptRef.has_value()) {
+                chunkOptRef.value().get().generateMesh();
+            }
+        } else if (z == 0) {
+            auto chunkOptRef = world->getChunk(pos.x, 0, pos.z - 16);
+            if (chunkOptRef.has_value()) {
+                chunkOptRef.value().get().generateMesh();
+            }
+        }
         // reloadMesh(x, y, z);
         return true;
     };

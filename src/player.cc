@@ -324,7 +324,7 @@ void Player::view() {
 
     unsigned xChunk = xBlock - (xBlock % 16);
     unsigned zChunk = zBlock - (zBlock % 16);
-    float it = 0.02f;
+    float it = 0.1f;
     while (it <= 4.0f) {
         auto chunkOpt = world->getChunk(xChunk, 0, zChunk);
         if (chunkOpt.has_value()) {
@@ -333,7 +333,7 @@ void Player::view() {
                 break;
             }
         }
-        to = rayCast(0.02f + it);
+        to = rayCast(0.1f + it);
 
         xBlock = unsigned(std::round(to.x));
         yBlock = unsigned(std::round(to.y));
@@ -341,7 +341,7 @@ void Player::view() {
 
         xChunk = xBlock - (xBlock % 16);
         zChunk = zBlock - (zBlock % 16);
-        it += 0.02;
+        it += 0.1;
     }
     auto prevChunkOpt = world->getChunk(
         viewBlock.x - (viewBlock.x % 16), 0, viewBlock.z - (viewBlock.z % 16));
