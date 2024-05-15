@@ -46,7 +46,7 @@ private:
     enum Mode mode = survival;
     bool modeKeyPressed = false;
 
-    const float playerHeight = 1.5f;
+    const float playerHeight = 1.8f;
     // NOTE: (playerWidth / 2.0f) out to all four sides
     const float playerWidth = 0.6f;
 };

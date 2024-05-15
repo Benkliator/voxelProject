@@ -42,14 +42,14 @@ void Player::checkCollisions(glm::vec3 oldCameraPos) {
         float xPos = std::round(cameraPos.x + dir.x);
         float zPos = std::round(cameraPos.z + dir.z);
         ushort blockBelow =
-            world->getBlock(xPos, std::round(cameraPos.y - playerHeight), zPos)
+            world->getBlock(xPos, std::ceil(cameraPos.y - playerHeight), zPos)
                 .value_or(Block::Air << typeOffset);
         if (!isAir(blockBelow)) {
             if (ySpeed < 0.0f) {
                 ySpeed = 0.0f;
                 onGround = true;
-                float floorPos = std::floor(cameraPos.y - playerHeight) + 0.5f;
-                cameraPos.y = floorPos + playerHeight - 1e-5;
+                cameraPos.y =
+                    std::round(cameraPos.y - playerHeight) + playerHeight;
                 break;
             }
         } else {
@@ -66,12 +66,12 @@ void Player::checkCollisions(glm::vec3 oldCameraPos) {
             float xPos = std::round(cameraPos.x + checkDir.x);
             float zPos = std::round(cameraPos.z + checkDir.z);
             ushort checkBlock =
-                world->getBlock(xPos, std::round(cameraPos.y) - height, zPos)
+                world->getBlock(xPos, std::ceil(cameraPos.y) - height, zPos)
                     .value_or(Block::Air << typeOffset);
             if (!isAir(checkBlock)) {
                 if (collidedHorizontally) {
                     cameraPos = oldCameraPos;
-                    return;
+                    break;
                 }
                 glm::vec3 normal;
                 if (checkDir.x != 0.0f &&
@@ -97,8 +97,8 @@ void Player::checkCollisions(glm::vec3 oldCameraPos) {
         if (!isAir(blockAbove)) {
             if (ySpeed > 0.0f) {
                 ySpeed = 0.0f;
-                float ceilPos = std::ceil(cameraPos.y) - 0.5f;
-                cameraPos.y = std::min(cameraPos.y, ceilPos);
+                float blockPos = std::round(cameraPos.y);
+                cameraPos.y = std::min(cameraPos.y, blockPos);
                 break;
             }
         }
@@ -172,7 +172,7 @@ void Player::movePlayer(GLFWwindow* window, float dt) {
             }; break;
             case creative: {
                 mode = survival;
-            } break;
+            }; break;
             }
             modeKeyPressed = true;
         }
