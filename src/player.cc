@@ -111,7 +111,7 @@ void Player::movePlayer(GLFWwindow* window, float dt) {
     const float sprintBoost = 1.8f * dt;
 
     const float gravitySpeed = 23.f * dt;
-    const float jumpBoost = gravitySpeed * 22;
+    const float jumpBoost = 8;
 
     glm::vec3 resultingSpeed = glm::vec3(0.0, 0.0, 0.0);
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
