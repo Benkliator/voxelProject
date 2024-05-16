@@ -47,38 +47,53 @@ void Chunk::generateMesh(std::optional<std::vector<ushort>> blockAreaArray) {
             static_cast<ushort>((block & typeMask) >> typeOffset),
         };
 
-        // Top
-        if (isAir(getBlockGlobal(x, y + 1, z).value_or(obstruct))) {
+        bool top;
+        bool bottom;
+        bool back;
+        bool front;
+        bool left;
+        bool right;
+        if (x >= 1 && x <= 14 && z >= 1 && z <= 14) {
+            top = isAir(getBlock(x, y + 1, z));
+            bottom = isAir(getBlock(x, y - 1, z));
+            back = isAir(getBlock(x, y, z - 1));
+            front = isAir(getBlock(x, y, z + 1));
+            left = isAir(getBlock(x - 1, y, z));
+            right = isAir(getBlock(x + 1, y, z));
+        } else {
+            top = isAir(getBlockGlobal(x, y + 1, z).value_or(obstruct));
+            bottom = isAir(getBlockGlobal(x, y - 1, z).value_or(obstruct));
+            back = isAir(getBlockGlobal(x, y, z - 1).value_or(obstruct));
+            front = isAir(getBlockGlobal(x, y, z + 1).value_or(obstruct));
+            left = isAir(getBlockGlobal(x - 1, y, z).value_or(obstruct));
+            right = isAir(getBlockGlobal(x + 1, y, z).value_or(obstruct));
+        }
+        if (top) {
             blockArray[i] |= topMask;
             loadFace(&topMeshData, blockType.top, x, y, z, block & 1);
         }
 
-        // Bottom
-        if (isAir(getBlockGlobal(x, y - 1, z).value_or(obstruct))) {
+        if (bottom) {
             blockArray[i] |= bottomMask;
             loadFace(&bottomMeshData, blockType.bottom, x, y, z, block & 1);
         }
 
-        // Back
-        if (isAir(getBlockGlobal(x, y, z - 1).value_or(obstruct))) {
+        if (back) {
             blockArray[i] |= backMask;
             loadFace(&backMeshData, blockType.side, x, y, z, block & 1);
         }
 
-        // Front
-        if (isAir(getBlockGlobal(x, y, z + 1).value_or(obstruct))) {
+        if (front) {
             blockArray[i] |= frontMask;
             loadFace(&frontMeshData, blockType.side, x, y, z, block & 1);
         }
 
-        // Left
-        if (isAir(getBlockGlobal(x - 1, y, z).value_or(obstruct))) {
+        if (left) {
             blockArray[i] |= leftMask;
             loadFace(&leftMeshData, blockType.side, x, y, z, block & 1);
         }
 
-        // Right
-        if (isAir(getBlockGlobal(x + 1, y, z).value_or(obstruct))) {
+        if (right) {
             blockArray[i] |= rightMask;
             loadFace(&rightMeshData, blockType.side, x, y, z, block & 1);
         }
