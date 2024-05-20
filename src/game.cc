@@ -98,7 +98,7 @@ void Game::gameLoop() {
         view = player->skyLook();
         skybox->draw(view, currentFrame);
         std::string fps = std::to_string(static_cast<int>(1 / deltaTime));
-        player->draw(fps);
+        //player->draw(fps);
 
         glfwPollEvents();
         glfwSwapBuffers(window);
