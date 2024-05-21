@@ -35,6 +35,13 @@ public:
     bool hasLoaded();
     unsigned distanceFrom(glm::uvec3);
 
+    Chunk* getFrontChunk();
+    Chunk* getBackChunk();
+    Chunk* getLeftChunk();
+    Chunk* getRightChunk();
+
+    void findAdjacentChunks();
+
 private:
     void generateTerrain();
     void renderInit();

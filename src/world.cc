@@ -97,10 +97,9 @@ void World::reloadChunksAround(unsigned xChunk,
                              (visibleChunks[i].getPos().z / 16),
                              this };
                 visibleChunks[i] = chunk;
-                auto chunkOpt =
-                    getChunk(chunk.getPos().x + 16, 0, chunk.getPos().z);
-                if (chunkOpt.has_value()) {
-                    loadQueue.push(&chunkOpt.value().get());
+                chunk.findAdjacentChunks();
+                if (chunk.getRightChunk()) {
+                    loadQueue.push(chunk.getRightChunk());
                 }
                 loadQueue.push(&visibleChunks[i]);
                 continue;
@@ -111,10 +110,9 @@ void World::reloadChunksAround(unsigned xChunk,
                                  renderDistance,
                              this };
                 visibleChunks[i] = chunk;
-                auto chunkOpt =
-                    getChunk(chunk.getPos().x, 0, chunk.getPos().z + 16);
-                if (chunkOpt.has_value()) {
-                    loadQueue.push(&chunkOpt.value().get());
+                chunk.findAdjacentChunks();
+                if (chunk.getFrontChunk()) {
+                    loadQueue.push(chunk.getFrontChunk());
                 }
                 loadQueue.push(&visibleChunks[i]);
                 continue;
@@ -125,10 +123,9 @@ void World::reloadChunksAround(unsigned xChunk,
                              (visibleChunks[i].getPos().z / 16),
                              this };
                 visibleChunks[i] = chunk;
-                auto chunkOpt =
-                    getChunk(chunk.getPos().x - 16, 0, chunk.getPos().z);
-                if (chunkOpt.has_value()) {
-                    loadQueue.push(&chunkOpt.value().get());
+                chunk.findAdjacentChunks();
+                if (chunk.getLeftChunk()) {
+                    loadQueue.push(chunk.getLeftChunk());
                 }
                 loadQueue.push(&visibleChunks[i]);
                 continue;
@@ -139,10 +136,9 @@ void World::reloadChunksAround(unsigned xChunk,
                                  renderDistance,
                              this };
                 visibleChunks[i] = chunk;
-                auto chunkOpt =
-                    getChunk(chunk.getPos().x, 0, chunk.getPos().z - 16);
-                if (chunkOpt.has_value()) {
-                    loadQueue.push(&chunkOpt.value().get());
+                chunk.findAdjacentChunks();
+                if (chunk.getBackChunk()) {
+                    loadQueue.push(chunk.getBackChunk());
                 }
                 loadQueue.push(&visibleChunks[i]);
                 continue;

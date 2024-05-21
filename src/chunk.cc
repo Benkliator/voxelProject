@@ -35,30 +35,7 @@ bool Chunk::hasLoaded() {
 
 void Chunk::generateMesh(std::optional<std::vector<ushort>> blockAreaArray) {
     std::vector<ushort> blocks = blockAreaArray.value_or(this->blockArray);
-    if (!frontChunk) {
-        auto searchChunk = world->getChunk(pos.x, 0, pos.z + 16);
-        if (searchChunk.has_value()) {
-            frontChunk = &searchChunk.value().get();
-        }
-    }
-    if (!backChunk) {
-        auto searchChunk = world->getChunk(pos.x, 0, pos.z - 16);
-        if (searchChunk.has_value()) {
-            backChunk = &searchChunk.value().get();
-        }
-    }
-    if (!leftChunk) {
-        auto searchChunk = world->getChunk(pos.x - 16, 0, pos.z);
-        if (searchChunk.has_value()) {
-            leftChunk = &searchChunk.value().get();
-        }
-    }
-    if (!rightChunk) {
-        auto searchChunk = world->getChunk(pos.x + 16, 0, pos.z);
-        if (searchChunk.has_value()) {
-            rightChunk = &searchChunk.value().get();
-        }
-    }
+    findAdjacentChunks();
     const ushort obstruct = Block::Dirt << typeOffset;
     for (size_t i = 0; i < blocks.size(); i++) {
         ushort block = blocks[i];
@@ -169,18 +146,19 @@ std::optional<ushort> Chunk::getBlockGlobal(long dX, long dY, long dZ) {
         return getBlock(dX, dY, dZ);
     } else {
         // Try find an opt<block> in all chunks
+        
         if (frontChunk && dZ == 16 && dX < 16 && dX > -1) {
             return frontChunk->getBlock(dX, dY, 0);
-        }
-        if (backChunk && dZ == -1 && dX < 16 && dX > -1) {
+        } else if (backChunk && dZ == -1 && dX < 16 && dX > -1) {
             return backChunk->getBlock(dX, dY, 15);
         }
+
         if (leftChunk && dX == -1 && dZ < 16 && dZ > -1) {
             return leftChunk->getBlock(15, dY, dZ);
-        }
-        if (rightChunk && dX == 16 && dZ < 16 && dZ > -1) {
+        } else if (rightChunk && dX == 16 && dZ < 16 && dZ > -1) {
             return rightChunk->getBlock(0, dY, dZ);
         }
+
         return world->getBlock(pos.x + dX, pos.y + dY, pos.z + dZ);
     }
 }
@@ -194,28 +172,20 @@ bool Chunk::removeBlock(unsigned x, unsigned y, unsigned z) {
         blockArray[ix] = 0;
         clearMesh();
         generateMesh();
-        if (x == 15) {
-            auto chunkOptRef = world->getChunk(pos.x + 16, 0, pos.z);
-            if (chunkOptRef.has_value()) {
-                chunkOptRef.value().get().generateMesh();
-            }
-        } else if (x == 0) {
-            auto chunkOptRef = world->getChunk(pos.x - 16, 0, pos.z);
-            if (chunkOptRef.has_value()) {
-                chunkOptRef.value().get().generateMesh();
-            }
-        }
 
-        if (z == 15) {
-            auto chunkOptRef = world->getChunk(pos.x, 0, pos.z + 16);
-            if (chunkOptRef.has_value()) {
-                chunkOptRef.value().get().generateMesh();
-            }
-        } else if (z == 0) {
-            auto chunkOptRef = world->getChunk(pos.x, 0, pos.z - 16);
-            if (chunkOptRef.has_value()) {
-                chunkOptRef.value().get().generateMesh();
-            }
+        if (frontChunk && z == 15) {
+            frontChunk->clearMesh();
+            frontChunk->generateMesh();
+        } else if (backChunk && z == 0) {
+            backChunk->clearMesh();
+            backChunk->generateMesh();
+        }
+        if (rightChunk && x == 15) {
+            rightChunk->clearMesh();
+            rightChunk->generateMesh();
+        } else if (leftChunk && x == 0) {
+            leftChunk->clearMesh();
+            leftChunk->generateMesh();
         }
         // reloadMesh(x, y, z);
         return true;
@@ -245,28 +215,19 @@ bool Chunk::placeBlock(Block::BlockType bt,
         blockArray[ix] = bt << typeOffset;
         clearMesh();
         generateMesh();
-        if (x == 15) {
-            auto chunkOptRef = world->getChunk(pos.x + 16, 0, pos.z);
-            if (chunkOptRef.has_value()) {
-                chunkOptRef.value().get().generateMesh();
-            }
-        } else if (x == 0) {
-            auto chunkOptRef = world->getChunk(pos.x - 16, 0, pos.z);
-            if (chunkOptRef.has_value()) {
-                chunkOptRef.value().get().generateMesh();
-            }
+        if (frontChunk && z == 15) {
+            frontChunk->clearMesh();
+            frontChunk->generateMesh();
+        } else if (backChunk && z == 0) {
+            backChunk->clearMesh();
+            backChunk->generateMesh();
         }
-
-        if (z == 15) {
-            auto chunkOptRef = world->getChunk(pos.x, 0, pos.z + 16);
-            if (chunkOptRef.has_value()) {
-                chunkOptRef.value().get().generateMesh();
-            }
-        } else if (z == 0) {
-            auto chunkOptRef = world->getChunk(pos.x, 0, pos.z - 16);
-            if (chunkOptRef.has_value()) {
-                chunkOptRef.value().get().generateMesh();
-            }
+        if (rightChunk && x == 15) {
+            rightChunk->clearMesh();
+            rightChunk->generateMesh();
+        } else if (leftChunk && x == 0) {
+            leftChunk->clearMesh();
+            leftChunk->generateMesh();
         }
         // reloadMesh(x, y, z);
         return true;
@@ -482,4 +443,47 @@ Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, ushort face) {
 unsigned Chunk::distanceFrom(glm::uvec3 point) {
     return std::max(abs((int)point.x - (int)pos.x),
                     abs((int)point.z - (int)pos.z));
+}
+
+Chunk* Chunk::getFrontChunk() {
+    return frontChunk;
+}
+
+Chunk* Chunk::getBackChunk() {
+    return backChunk;
+}
+
+Chunk* Chunk::getLeftChunk() {
+    return leftChunk;
+}
+
+Chunk* Chunk::getRightChunk() {
+    return rightChunk;
+}
+
+void Chunk::findAdjacentChunks() {
+    if (!frontChunk) {
+        auto searchChunk = world->getChunk(pos.x, 0, pos.z + 16);
+        if (searchChunk.has_value()) {
+            frontChunk = &searchChunk.value().get();
+        }
+    }
+    if (!backChunk) {
+        auto searchChunk = world->getChunk(pos.x, 0, pos.z - 16);
+        if (searchChunk.has_value()) {
+            backChunk = &searchChunk.value().get();
+        }
+    }
+    if (!leftChunk) {
+        auto searchChunk = world->getChunk(pos.x - 16, 0, pos.z);
+        if (searchChunk.has_value()) {
+            leftChunk = &searchChunk.value().get();
+        }
+    }
+    if (!rightChunk) {
+        auto searchChunk = world->getChunk(pos.x + 16, 0, pos.z);
+        if (searchChunk.has_value()) {
+            rightChunk = &searchChunk.value().get();
+        }
+    }
 }
