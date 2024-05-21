@@ -145,11 +145,6 @@ void World::reloadChunksAround(unsigned xChunk,
             }
         }
     }
-    /*
-     * Sort the remaining elements with the first element centered,
-     * continue the spiral generation from the end. 
-     * (Outdated comment but leave it for now)
-     */
 }
 
 void World::meshCatchup() {

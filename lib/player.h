@@ -23,7 +23,7 @@ public:
 
 private:
     void view();
-    void checkCollisions(glm::vec3);
+    void checkCollisions(glm::vec3&);
 
     World* world;
     Hud hud{};

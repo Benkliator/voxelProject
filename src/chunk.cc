@@ -10,7 +10,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <optional>
 #include <sys/types.h>
-#include <iostream>
 
 // Generates buffers and VAO, creates terrain for chunk.
 Chunk::Chunk(unsigned x, unsigned z, World* w) : world{ w } {
@@ -145,8 +144,6 @@ std::optional<ushort> Chunk::getBlockGlobal(long dX, long dY, long dZ) {
         // Can use local version
         return getBlock(dX, dY, dZ);
     } else {
-        // Try find an opt<block> in all chunks
-        
         if (frontChunk && dZ == 16 && dX < 16 && dX > -1) {
             return frontChunk->getBlock(dX, dY, 0);
         } else if (backChunk && dZ == -1 && dX < 16 && dX > -1) {
@@ -159,6 +156,9 @@ std::optional<ushort> Chunk::getBlockGlobal(long dX, long dY, long dZ) {
             return rightChunk->getBlock(0, dY, dZ);
         }
 
+        // Assume that there will always be a configured adjacent chunk, else:
+        // Maybe not?
+        //return std::nullopt;
         return world->getBlock(pos.x + dX, pos.y + dY, pos.z + dZ);
     }
 }
