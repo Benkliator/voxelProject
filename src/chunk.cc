@@ -10,6 +10,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <optional>
 #include <sys/types.h>
+#include <iostream>
 
 // Generates buffers and VAO, creates terrain for chunk.
 Chunk::Chunk(unsigned x, unsigned z, World* w) : world{ w } {
@@ -34,6 +35,30 @@ bool Chunk::hasLoaded() {
 
 void Chunk::generateMesh(std::optional<std::vector<ushort>> blockAreaArray) {
     std::vector<ushort> blocks = blockAreaArray.value_or(this->blockArray);
+    if (!frontChunk) {
+        auto searchChunk = world->getChunk(pos.x, 0, pos.z + 16);
+        if (searchChunk.has_value()) {
+            frontChunk = &searchChunk.value().get();
+        }
+    }
+    if (!backChunk) {
+        auto searchChunk = world->getChunk(pos.x, 0, pos.z - 16);
+        if (searchChunk.has_value()) {
+            backChunk = &searchChunk.value().get();
+        }
+    }
+    if (!leftChunk) {
+        auto searchChunk = world->getChunk(pos.x - 16, 0, pos.z);
+        if (searchChunk.has_value()) {
+            leftChunk = &searchChunk.value().get();
+        }
+    }
+    if (!rightChunk) {
+        auto searchChunk = world->getChunk(pos.x + 16, 0, pos.z);
+        if (searchChunk.has_value()) {
+            rightChunk = &searchChunk.value().get();
+        }
+    }
     const ushort obstruct = Block::Dirt << typeOffset;
     for (size_t i = 0; i < blocks.size(); i++) {
         ushort block = blocks[i];
@@ -62,10 +87,10 @@ void Chunk::generateMesh(std::optional<std::vector<ushort>> blockAreaArray) {
             right = isAir(getBlock(x + 1, y, z));
         } else {
             top = isAir(getBlockGlobal(x, y + 1, z).value_or(obstruct));
-            bottom = isAir(getBlockGlobal(x, y - 1, z).value_or(obstruct));
-            back = isAir(getBlockGlobal(x, y, z - 1).value_or(obstruct));
+            bottom = isAir(getBlockGlobal(x, (long)y - 1, z).value_or(obstruct));
+            back = isAir(getBlockGlobal(x, y, (long)z - 1).value_or(obstruct));
             front = isAir(getBlockGlobal(x, y, z + 1).value_or(obstruct));
-            left = isAir(getBlockGlobal(x - 1, y, z).value_or(obstruct));
+            left = isAir(getBlockGlobal((long)x - 1, y, z).value_or(obstruct));
             right = isAir(getBlockGlobal(x + 1, y, z).value_or(obstruct));
         }
         if (top) {
@@ -87,7 +112,6 @@ void Chunk::generateMesh(std::optional<std::vector<ushort>> blockAreaArray) {
             blockArray[i] |= frontMask;
             loadFace(&frontMeshData, blockType.side, x, y, z, block & 1);
         }
-
         if (left) {
             blockArray[i] |= leftMask;
             loadFace(&leftMeshData, blockType.side, x, y, z, block & 1);
@@ -145,6 +169,18 @@ std::optional<ushort> Chunk::getBlockGlobal(long dX, long dY, long dZ) {
         return getBlock(dX, dY, dZ);
     } else {
         // Try find an opt<block> in all chunks
+        if (frontChunk && dZ == 16 && dX < 16 && dX > -1) {
+            return frontChunk->getBlock(dX, dY, 0);
+        }
+        if (backChunk && dZ == -1 && dX < 16 && dX > -1) {
+            return backChunk->getBlock(dX, dY, 15);
+        }
+        if (leftChunk && dX == -1 && dZ < 16 && dZ > -1) {
+            return leftChunk->getBlock(15, dY, dZ);
+        }
+        if (rightChunk && dX == 16 && dZ < 16 && dZ > -1) {
+            return rightChunk->getBlock(0, dY, dZ);
+        }
         return world->getBlock(pos.x + dX, pos.y + dY, pos.z + dZ);
     }
 }

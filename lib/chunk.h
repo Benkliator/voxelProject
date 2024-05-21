@@ -54,4 +54,9 @@ private:
 
     std::vector<GLuint> vertexMesh;
     std::vector<unsigned> indexMesh;
+
+    Chunk* frontChunk = nullptr;
+    Chunk* backChunk = nullptr;
+    Chunk* leftChunk = nullptr;
+    Chunk* rightChunk = nullptr;
 };
