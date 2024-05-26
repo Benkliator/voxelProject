@@ -118,5 +118,5 @@ std::string blockToString(Block::BlockType bt) {
 };
 
 bool isAir(unsigned block) {
-    return (block & typeMask) == Block::Air;
+    return (block & typeMask) >> typeOffset == Block::Air;
 }
