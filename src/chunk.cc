@@ -56,7 +56,11 @@ void Chunk::generateMesh(std::optional<std::vector<ushort>> blockAreaArray) {
         bool right;
         if (x >= 1 && x <= 14 && z >= 1 && z <= 14) {
             top = isAir(getBlock(x, y + 1, z));
-            bottom = isAir(getBlock(x, y - 1, z));
+            if (y != 0) {
+                bottom = isAir(getBlock(x, y - 1, z));
+            } else {
+                bottom = false;
+            }
             back = isAir(getBlock(x, y, z - 1));
             front = isAir(getBlock(x, y, z + 1));
             left = isAir(getBlock(x - 1, y, z));
