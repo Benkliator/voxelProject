@@ -12,8 +12,8 @@
 Player::Player(World* w, glm::vec3 pos) : world{ w } {
     cameraPos = pos;
 
-    unsigned xChunk = (unsigned)cameraPos.x - ((unsigned)(cameraPos.x) % 16);
-    unsigned zChunk = (unsigned)cameraPos.z - ((unsigned)(cameraPos.z) % 16);
+    unsigned xChunk = static_cast<unsigned>(cameraPos.x) - (static_cast<unsigned>(cameraPos.x) % 16);
+    unsigned zChunk = static_cast<unsigned>(cameraPos.z) - (static_cast<unsigned>(cameraPos.z) % 16);
     chunkPos = glm::uvec3(xChunk, 0, zChunk);
 }
 
@@ -203,8 +203,8 @@ void Player::movePlayer(GLFWwindow* window, float dt) {
 }
 
 void Player::checkChunk() {
-    unsigned xChunk = (unsigned)cameraPos.x - ((unsigned)(cameraPos.x) % 16);
-    unsigned zChunk = (unsigned)cameraPos.z - ((unsigned)(cameraPos.z) % 16);
+    unsigned xChunk = static_cast<unsigned>(cameraPos.x) - (static_cast<unsigned>(cameraPos.x) % 16);
+    unsigned zChunk = static_cast<unsigned>(cameraPos.z) - (static_cast<unsigned>(cameraPos.z) % 16);
     glm::uvec3 tempChunkPos = glm::uvec3(xChunk, 0, zChunk);
     if (tempChunkPos != chunkPos) {
         world->reloadChunksAround(xChunk, 0, zChunk);
@@ -338,9 +338,9 @@ void Player::draw(std::string& fps) {
 void Player::view() {
     glm::vec3 to = rayCast(0.02f);
 
-    unsigned xBlock = unsigned(std::round(to.x));
-    unsigned yBlock = unsigned(std::round(to.y));
-    unsigned zBlock = unsigned(std::round(to.z));
+    unsigned xBlock = static_cast<unsigned>(std::round(to.x));
+    unsigned yBlock = static_cast<unsigned>(std::round(to.y));
+    unsigned zBlock = static_cast<unsigned>(std::round(to.z));
 
     unsigned xChunk = xBlock - (xBlock % 16);
     unsigned zChunk = zBlock - (zBlock % 16);
@@ -355,9 +355,9 @@ void Player::view() {
         }
         to = rayCast(0.1f + it);
 
-        xBlock = unsigned(std::round(to.x));
-        yBlock = unsigned(std::round(to.y));
-        zBlock = unsigned(std::round(to.z));
+        xBlock = static_cast<unsigned>(std::round(to.x));
+        yBlock = static_cast<unsigned>(std::round(to.y));
+        zBlock = static_cast<unsigned>(std::round(to.z));
 
         xChunk = xBlock - (xBlock % 16);
         zChunk = zBlock - (zBlock % 16);

@@ -16,8 +16,8 @@ World::World(unsigned size, glm::vec3 center) {
         renderDistance = size;
     }
 
-    unsigned xChunk = (unsigned)center.x - ((unsigned)(center.x) % 16);
-    unsigned zChunk = (unsigned)center.z - ((unsigned)(center.z) % 16);
+    unsigned xChunk = static_cast<unsigned>(center.x) - (static_cast<unsigned>(center.x) % 16);
+    unsigned zChunk = static_cast<unsigned>(center.z) - (static_cast<unsigned>(center.z) % 16);
     worldCenter = glm::uvec3(xChunk, 0, zChunk);
 
     textureMap = loadTexture("./res/textures/Blockmap.png", GL_RGBA);

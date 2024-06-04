@@ -67,10 +67,10 @@ void Chunk::generateMesh(std::optional<std::vector<ushort>> blockAreaArray) {
             right = isAir(getBlock(x + 1, y, z));
         } else {
             top = isAir(getBlockGlobal(x, y + 1, z).value_or(obstruct));
-            bottom = isAir(getBlockGlobal(x, (long)y - 1, z).value_or(obstruct));
-            back = isAir(getBlockGlobal(x, y, (long)z - 1).value_or(obstruct));
+            bottom = isAir(getBlockGlobal(x, static_cast<long>(y) - 1, z).value_or(obstruct));
+            back = isAir(getBlockGlobal(x, y, static_cast<long>(z) - 1).value_or(obstruct));
             front = isAir(getBlockGlobal(x, y, z + 1).value_or(obstruct));
-            left = isAir(getBlockGlobal((long)x - 1, y, z).value_or(obstruct));
+            left = isAir(getBlockGlobal(static_cast<long>(x) - 1, y, z).value_or(obstruct));
             right = isAir(getBlockGlobal(x + 1, y, z).value_or(obstruct));
         }
         if (top) {
@@ -331,7 +331,7 @@ void Chunk::loadFace(const MeshData* data,
         GLuint yi = y + data->faceCoords[j++];
         GLuint zi = z + data->faceCoords[j++];
         GLuint vertex = xi | yi << 5 | zi << 13 | occlusionArray[i] << 18 |
-                        (unsigned)highlight << 20;
+                        static_cast<unsigned>(highlight) << 20;
 
         GLuint texX = data->texCoords[t++] + ((bt & zMask) >> zOffset);
         GLuint texY = data->texCoords[t++] + ((bt & xMask) >> xOffset);
@@ -445,8 +445,8 @@ Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, ushort face) {
 }
 
 unsigned Chunk::distanceFrom(glm::uvec3 point) {
-    return std::max(abs((int)point.x - (int)pos.x),
-                    abs((int)point.z - (int)pos.z));
+    return std::max(abs(static_cast<int>(point.x) - static_cast<int>(pos.x)),
+                    abs(static_cast<int>(point.z) - static_cast<int>(pos.z)));
 }
 
 Chunk* Chunk::getFrontChunk() {
