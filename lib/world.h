@@ -31,15 +31,15 @@ public:
     std::optional<std::reference_wrapper<Chunk>>
     getChunk(unsigned, unsigned, unsigned);
     void reloadChunksAround(unsigned, unsigned, unsigned);
-    void meshCatchup();
-    void threadsafeMeshCatchup();
+    bool meshCatchup();
+    void fullMeshCatchup();
 
 private:
     void shaderInit();
 
     std::vector<Chunk> visibleChunks;
-    //synchQueue<Chunk*> loadQueue;
-    std::queue<Chunk*> loadQueue;
+    synchQueue<Chunk*> loadQueue;
+    //std::queue<Chunk*> loadQueue;
     bool meshLoad = true;
 
     glm::uvec3 worldCenter;

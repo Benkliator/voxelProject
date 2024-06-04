@@ -122,7 +122,7 @@ void Player::movePlayer(GLFWwindow* window, float dt) {
     const float cameraSpeed = 5.5f * dt;
     const float sprintBoost = 1.8f * dt;
 
-    const float gravitySpeed = 23.f * dt;
+    const float gravitySpeed = 23.0f * dt;
     const float jumpBoost = 8;
 
     glm::vec3 resultingSpeed = glm::vec3(0.0, 0.0, 0.0);
@@ -200,9 +200,9 @@ void Player::movePlayer(GLFWwindow* window, float dt) {
         checkCollisions(newCameraPos);
     }
     cameraPos = newCameraPos;
+}
 
-    view();
-
+void Player::checkChunk() {
     unsigned xChunk = (unsigned)cameraPos.x - ((unsigned)(cameraPos.x) % 16);
     unsigned zChunk = (unsigned)cameraPos.z - ((unsigned)(cameraPos.z) % 16);
     glm::uvec3 tempChunkPos = glm::uvec3(xChunk, 0, zChunk);
@@ -210,6 +210,7 @@ void Player::movePlayer(GLFWwindow* window, float dt) {
         world->reloadChunksAround(xChunk, 0, zChunk);
     }
     chunkPos = tempChunkPos;
+    view();
 }
 
 void Player::selectBlock(GLFWwindow*, float yOffset) {

@@ -21,6 +21,7 @@ public:
     glm::mat4 worldLook();
     glm::mat4 skyLook();
 
+    void checkChunk();
 private:
     void view();
     void checkCollisions(glm::vec3&);

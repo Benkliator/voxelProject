@@ -147,7 +147,7 @@ void World::reloadChunksAround(unsigned xChunk,
     }
 }
 
-void World::meshCatchup() {
+bool World::meshCatchup() {
     if (!loadQueue.front()) {
         while (!loadQueue.front() && !loadQueue.empty()) {
             loadQueue.pop();
@@ -157,26 +157,19 @@ void World::meshCatchup() {
         loadQueue.front()->clearMesh();
         loadQueue.front()->generateMesh();
         loadQueue.pop();
+        return true;
     }
+    return false;
 }
 
-// in fact not yet threadsafe B)
-void World::threadsafeMeshCatchup() {
-    using namespace std::chrono_literals;
-    while (meshLoad) {
-        while (!loadQueue.empty()) {
-            if (loadQueue.front()) {
-                Chunk* chunk = loadQueue.front();
-                chunk->clearMesh();
-                chunk->generateMesh();
-            }
-            loadQueue.pop();
+void World::fullMeshCatchup() {
+    while (!loadQueue.empty()) {
+        if (loadQueue.front()) {
+            Chunk* chunk = loadQueue.front();
+            chunk->clearMesh();
+            chunk->generateMesh();
         }
-
-        const auto start = std::chrono::high_resolution_clock::now();
-        std::this_thread::sleep_for(500ms);
-        const auto end = std::chrono::high_resolution_clock::now();
-        const std::chrono::duration<double, std::milli> elapsed = end - start;
+        loadQueue.pop();
     }
 }
 

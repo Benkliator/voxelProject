@@ -80,9 +80,8 @@ Skybox::~Skybox() {
     glDeleteShader(shaderProgram);
 }
 
-void Skybox::draw(glm::mat4& view, float time) {
+void Skybox::draw(glm::mat4& view) {
     glUseProgram(shaderProgram);
-    float angle = glm::radians(time);
     if (sin(angle) < -0.1) {
         glBindTexture(GL_TEXTURE_CUBE_MAP, dayTexture);
     } else if (0.1 < sin(angle)) {
@@ -142,4 +141,8 @@ void Skybox::draw(glm::mat4& view, float time) {
 
     glCullFace(GL_BACK);
     glDepthMask(true);
+}
+
+void Skybox::update(double time) {
+    angle = glm::radians(time);
 }

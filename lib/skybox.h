@@ -8,7 +8,9 @@ public:
     ~Skybox();
 
     // Does what you think it does.
-    void draw(glm::mat4& view, float time);
+    void draw(glm::mat4&);
+
+    void update(double);
 
 private:
     unsigned VAO;
@@ -20,4 +22,6 @@ private:
     unsigned dayTexture;
     unsigned nightTexture;
     unsigned duskTexture;
+
+    float angle = 0;
 };

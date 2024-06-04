@@ -4,6 +4,11 @@
 #include "skybox.h"
 #include "world.h"
 
+#include <thread>
+#include <chrono>
+#include <mutex>
+#include <condition_variable>
+
 const unsigned SCR_WIDTH = 1620;
 const unsigned SCR_HEIGHT = 900;
 
@@ -18,6 +23,8 @@ public:
     void mouseMotionCallback(double, double);
     void mouseScrollCallback(double, double);
     void mouseClickCallback(int, int, int);
+
+    void tickUpdate();
 private:
     void processInput();
 
@@ -33,6 +40,12 @@ private:
 
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
+
+    unsigned tickRate = 60;
+    unsigned currentTick = 1;
+
+    std::mutex gameMutex;
+    std::condition_variable gameCV;
 };
 
 void framebufferSizeCallback(GLFWwindow*, int, int);

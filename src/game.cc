@@ -78,30 +78,56 @@ Game::~Game() {
 void Game::gameLoop() {
     float currentFrame = 0.0f;
     glfwSetTime(0);
+
+    std::jthread tickThread(&Game::tickUpdate, this);
+
     while (!glfwWindowShouldClose(window)) {
-        currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
-        if (deltaTime > 0.05) {
-            std::cout << " Skipping frame... "
-                      << "dt=" << deltaTime << std::endl;
-            continue;
+        {
+            currentFrame = glfwGetTime();
+            deltaTime = currentFrame - lastFrame;
+            lastFrame = currentFrame;
+
+            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            std::lock_guard<std::mutex> lock(gameMutex);
+
+            world->meshCatchup();
+
+            glm::mat4 view = player->worldLook();
+            world->draw(view);
+
+            view = player->skyLook();
+            skybox->draw(view);
+
+            std::string fps = std::to_string(static_cast<int>(1 / deltaTime));
+            player->draw(fps);
+
+            player->checkChunk();
         }
-        world->meshCatchup();
-        processInput();
-
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glm::mat4 view = player->worldLook();
-        world->draw(view);
-
-        view = player->skyLook();
-        skybox->draw(view, currentFrame);
-        std::string fps = std::to_string(static_cast<int>(1 / deltaTime));
-        player->draw(fps);
+        gameCV.notify_one();
 
         glfwPollEvents();
         glfwSwapBuffers(window);
+    }
+}
+
+void Game::tickUpdate() {
+    while (!glfwWindowShouldClose(window)) {
+        const auto start = std::chrono::high_resolution_clock::now();
+        {
+            std::unique_lock<std::mutex> lock(gameMutex);
+            gameCV.wait(lock);
+
+            processInput();
+            skybox->update(currentTick / static_cast<double>(tickRate));
+
+            ++currentTick;
+            gameCV.notify_one();
+        }
+        const auto end = std::chrono::high_resolution_clock::now();
+        std::this_thread::sleep_for(std::chrono::milliseconds((1000 / tickRate)) -
+                                    std::chrono::duration_cast<std::chrono::milliseconds>((end - start)));
     }
 }
 
@@ -110,7 +136,7 @@ void Game::processInput() {
         glfwSetWindowShouldClose(window, true);
     }
 
-    player->movePlayer(window, deltaTime);
+    player->movePlayer(window, 1 / static_cast<double>(tickRate));
 }
 
 void Game::mouseMotionCallback(double xposIn, double yposIn) {
@@ -130,6 +156,7 @@ void Game::mouseMotionCallback(double xposIn, double yposIn) {
     lastX = xpos;
     lastY = ypos;
 
+    std::unique_lock<std::mutex> lock(gameMutex);
     player->moveMouse(window, xoffset, yoffset);
 }
 
@@ -139,6 +166,7 @@ void Game::mouseScrollCallback(double, double y) {
 
 void Game::mouseClickCallback(int button, int action, int mods) {
     (void)mods;
+    std::unique_lock<std::mutex> lock(gameMutex);
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
         player->breakBlock();
     else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
