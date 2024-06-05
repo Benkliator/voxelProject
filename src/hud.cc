@@ -90,8 +90,7 @@ Hud::Hud() {
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
 }
 
-void Hud::renderText(
-    std::string text, float x, float y, float scale, glm::vec3 color) {
+void Hud::renderText(std::string text, float x, float y, float scale, glm::vec3 color) {
     // activate corresponding render state
     glUseProgram(shaderProgram);
     glUniform3f(glGetUniformLocation(shaderProgram, "textColor"),

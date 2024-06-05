@@ -467,25 +467,25 @@ Chunk* Chunk::getRightChunk() {
 
 void Chunk::findAdjacentChunks() {
     if (!frontChunk) {
-        auto searchChunk = world->getChunk(pos.x, 0, pos.z + 16);
+        auto searchChunk = world->getChunkSlow(pos.x, 0, pos.z + 16);
         if (searchChunk.has_value()) {
             frontChunk = &searchChunk.value().get();
         }
     }
     if (!backChunk) {
-        auto searchChunk = world->getChunk(pos.x, 0, pos.z - 16);
+        auto searchChunk = world->getChunkSlow(pos.x, 0, pos.z - 16);
         if (searchChunk.has_value()) {
             backChunk = &searchChunk.value().get();
         }
     }
     if (!leftChunk) {
-        auto searchChunk = world->getChunk(pos.x - 16, 0, pos.z);
+        auto searchChunk = world->getChunkSlow(pos.x - 16, 0, pos.z);
         if (searchChunk.has_value()) {
             leftChunk = &searchChunk.value().get();
         }
     }
     if (!rightChunk) {
-        auto searchChunk = world->getChunk(pos.x + 16, 0, pos.z);
+        auto searchChunk = world->getChunkSlow(pos.x + 16, 0, pos.z);
         if (searchChunk.has_value()) {
             rightChunk = &searchChunk.value().get();
         }

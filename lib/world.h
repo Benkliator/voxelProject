@@ -29,7 +29,10 @@ public:
     void draw(glm::mat4& view);
     std::optional<ushort> getBlock(long, long, long);
     std::optional<std::reference_wrapper<Chunk>>
-    getChunk(unsigned, unsigned, unsigned);
+    getChunkSlow(unsigned, unsigned, unsigned);
+    std::optional<std::reference_wrapper<Chunk>>
+    getChunkFast(unsigned, unsigned, unsigned);
+
     void reloadChunksAround(unsigned, unsigned, unsigned);
     bool meshCatchup();
     void fullMeshCatchup();

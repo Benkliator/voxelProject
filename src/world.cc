@@ -72,13 +72,64 @@ std::optional<ushort> World::getBlock(long x, long y, long z) {
 }
 
 std::optional<std::reference_wrapper<Chunk>>
-World::getChunk(unsigned x, unsigned y, unsigned z) {
+World::getChunkSlow(unsigned x, unsigned y, unsigned z) {
     glm::uvec3 findPos{ x, y, z };
     for (size_t i = 0; i < visibleChunks.size(); i++) {
         if (visibleChunks[i].getPos() == findPos) {
             return std::make_optional(std::ref(visibleChunks[i]));
         }
     }
+    return std::nullopt;
+}
+
+std::optional<std::reference_wrapper<Chunk>>
+World::getChunkFast(unsigned x, unsigned y, unsigned z) {
+    glm::uvec3 findPos{ x, y, z };
+    Chunk* searchChunk = &*visibleChunks.begin();
+    if (searchChunk->getPos().x > findPos.x) {
+        while (searchChunk->getPos().x != findPos.x) {
+            Chunk* next = searchChunk->getLeftChunk();
+            if (next) {
+                searchChunk = next;
+            } else {
+                break;
+            }
+        }
+    } else if (searchChunk->getPos().x < findPos.x) {
+        while (searchChunk->getPos().x != findPos.x) {
+            Chunk* next = searchChunk->getRightChunk();
+            if (next) {
+                searchChunk = next;
+            } else {
+                break;
+            }
+        }
+    }
+
+    if (searchChunk->getPos().z > findPos.z) {
+        while (searchChunk->getPos().z != findPos.z) {
+            Chunk* next = searchChunk->getBackChunk();
+            if (next) {
+                searchChunk = next;
+            } else {
+                break;
+            }
+        }
+    } else if (searchChunk->getPos().z < findPos.z) {
+        while (searchChunk->getPos().z != findPos.z) {
+            Chunk* next = searchChunk->getFrontChunk();
+            if (next) {
+                searchChunk = next;
+            } else {
+                break;
+            }
+        }
+    }
+
+    if (searchChunk->getPos() == findPos) {
+        return std::make_optional(std::ref(*searchChunk));
+    }
+
     return std::nullopt;
 }
 

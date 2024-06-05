@@ -30,88 +30,109 @@ void Player::moveMouse(GLFWwindow* window, float xi, float yi) {
 }
 
 void Player::checkCollision() {
-    const std::vector<glm::vec3> checkDirs = {
-        { 0.0f, 0.0f, -playerWidth / 2.0f },
-        { 0.0f, 0.0f, playerWidth / 2.0f },
-        { -playerWidth / 2.0f, 0.0f, 0.0f },
-        { playerWidth / 2.0f, 0.0f, 0.0f },
-        { playerWidth / 2.0f, 0.0f, playerWidth / 2.0f },
-        { -playerWidth / 2.0f, 0.0f, playerWidth / 2.0f },
-        { playerWidth / 2.0f, 0.0f, -playerWidth / 2.0f },
-        { -playerWidth / 2.0f, 0.0f, -playerWidth / 2.0f },
-    };
+
     // SIDES
-    for (float height = 0; height < playerHeight; height += 1.0f) {
-        // HACK: Detect if we have two collisions per height and restore the
-        //       oldCameraPos.{x,z}
-        bool collidedHorizontally = false;
-        for (glm::vec3 const& checkDir : checkDirs) {
-            float xPos = std::round(nextCameraPos.x + checkDir.x);
-            float zPos = std::round(nextCameraPos.z + checkDir.z);
-            ushort checkBlock =
-                world->getBlock(xPos, std::round(prevCameraPos.y) - height, zPos)
-                    .value_or(Block::Air << typeOffset);
-            if (!isAir(checkBlock)) {
-                if (collidedHorizontally) {
-                    nextCameraPos.x = prevCameraPos.x;
-                    nextCameraPos.z = prevCameraPos.z;
-                    break;
+    bool collision = false;
+    /*
+    for (int height = 0; height < playerHeight; ++height) {
+        ushort checkBlock;
+        const std::vector<float> checkBlocksX = {
+            std::round(nextCameraPos.x + playerWidth),
+            std::round(nextCameraPos.x - playerWidth)
+        };
+
+        const std::vector<float> checkBlocksZ = {
+            std::round(nextCameraPos.z + playerWidth),
+            std::round(nextCameraPos.z - playerWidth)
+        };
+
+        if (abs(velocity.x) > abs(velocity.z)) {
+            for (auto zPos : checkBlocksZ) {
+                if (velocity.x > 0) {
+                    int xPos = std::round(nextCameraPos.x + playerWidth);
+                    checkBlock = world->getBlock(xPos, std::round(nextCameraPos.y - height), zPos).value_or(Block::Air << typeOffset);
+                    if (!isAir(checkBlock)) {
+                        collision = true;
+                        velocity.x = 0;
+                        float wallPos = xPos - 0.5f - playerWidth;
+                        nextCameraPos.x = wallPos;
+                        break;
+                    }
+                } else if (velocity.x < 0) {
+                    int xPos = std::round(nextCameraPos.x - playerWidth);
+                    checkBlock = world->getBlock(xPos, std::round(nextCameraPos.y - height), zPos).value_or(Block::Air << typeOffset);
+                    if (!isAir(checkBlock)) {
+                        collision = true;
+                        velocity.x = 0;
+                        float wallPos = xPos + 0.5f + playerWidth;
+                        nextCameraPos.x = wallPos;
+                        break;
+                    }
                 }
-                glm::vec3 normal;
-                if (checkDir.x != 0.0f &&
-                    (std::signbit(checkDir.x) == std::signbit(velocity.x))) {
-                    normal = { 1.0f, 0.0f, 0.0f };
-                } else if (checkDir.z != 0.0f && (std::signbit(checkDir.z) ==
-                                                  std::signbit(velocity.z))) {
-                    normal = { 0.0f, 0.0f, 1.0f };
-                } else {
-                    continue;
-                }
-                nextCameraPos -= glm::dot(glm::vec3(velocity.x, 0, velocity.z), 
-                                glm::vec3(normal.x, 0, normal.z)) * normal;
-                collidedHorizontally = true;
             }
+        } else {
+            for (auto xPos : checkBlocksX) {
+                if (velocity.z > 0) {
+                    int zPos = std::round(nextCameraPos.z + playerWidth);
+                    checkBlock = world->getBlock(xPos, std::round(nextCameraPos.y - height), zPos).value_or(Block::Air << typeOffset);
+                    if (!isAir(checkBlock)) {
+                        collision = true;
+                        velocity.z = 0;
+                        float wallPos = zPos - 0.5f - playerWidth;
+                        nextCameraPos.z = wallPos;
+                        break;
+                    }
+                } else if (velocity.z < 0) {
+                    int zPos = std::round(nextCameraPos.z - playerWidth);
+                    checkBlock = world->getBlock(xPos, std::round(nextCameraPos.y - height), zPos).value_or(Block::Air << typeOffset);
+                    if (!isAir(checkBlock)) {
+                        collision = true;
+                        velocity.z = 0;
+                        float wallPos = zPos + 0.5f + playerWidth;
+                        nextCameraPos.z = wallPos;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (collision) {
+            break;
+        }
+        
+    }
+    */
+
+    const std::vector<glm::vec3> checkBlocks = {
+        {std::round(nextCameraPos.x - playerWidth), std::round(nextCameraPos.y - playerHeight), std::round(nextCameraPos.z - playerWidth)},
+        {std::round(nextCameraPos.x - playerWidth), std::round(nextCameraPos.y - playerHeight), std::round(nextCameraPos.z + playerWidth)},
+        {std::round(nextCameraPos.x + playerWidth), std::round(nextCameraPos.y - playerHeight), std::round(nextCameraPos.z + playerWidth)},
+        {std::round(nextCameraPos.x + playerWidth), std::round(nextCameraPos.y - playerHeight), std::round(nextCameraPos.z - playerWidth)},
+    };
+
+    // ABOVE
+    for (auto& blockPos : checkBlocks) {
+        ushort checkBlock;
+        checkBlock = world->getBlock(blockPos.x, std::ceil(blockPos.y + playerHeight), blockPos.z).value_or(Block::Air << typeOffset);
+        if (!isAir(checkBlock) && velocity.y > 0) {
+            velocity.y = 0;
+            float roofPos = blockPos.y;
+            nextCameraPos.y = roofPos + playerHeight;
+            break;
         }
     }
 
     // BELOW
-    ushort blockBelow =
-        world->getBlock(std::round(nextCameraPos.x),
-                        std::round(nextCameraPos.y - playerHeight),
-                        std::round(nextCameraPos.z))
-        .value_or(Block::Air << typeOffset);
-    for (glm::vec3 const& dir : checkDirs) {
-        float xPos = std::round(nextCameraPos.x + dir.x);
-        float zPos = std::round(nextCameraPos.z + dir.z);
-        ushort nextblockBelow =
-            world->getBlock(xPos, std::round(nextCameraPos.y - playerHeight), zPos)
-                .value_or(Block::Air << typeOffset);
-        if (!isAir(nextblockBelow) && !isAir(blockBelow)) {
-            if (velocity.y < 0.0f) {
-                velocity.y = 0.0f;
-                onGround = true;
-                float floorPos = std::floor(prevCameraPos.y - playerHeight) + 0.5f;
-                nextCameraPos.y = floorPos + playerHeight - 1e-5;
-                break;
-            }
-        } else if (isAir(blockBelow)){
-            onGround = false;
+    onGround = false;
+    for (auto& blockPos : checkBlocks) {
+        ushort checkBlock;
+        checkBlock = world->getBlock(blockPos.x, blockPos.y, blockPos.z).value_or(Block::Air << typeOffset);
+        if (!isAir(checkBlock)) {
+            velocity.y = 0;
+            onGround = true;
+            float floorPos = blockPos.y + 0.5f;
+            nextCameraPos.y = floorPos + playerHeight;
             break;
-        }
-    }
-    // ABOVE
-    for (glm::vec3 const& dir : checkDirs) {
-        float xPos = std::round(nextCameraPos.x + dir.x);
-        float zPos = std::round(nextCameraPos.z + dir.z);
-        ushort blockAbove = world->getBlock(xPos, std::ceil(cameraPos.y), zPos)
-                                .value_or(Block::Air << typeOffset);
-        if (!isAir(blockAbove)) {
-            if (velocity.y > 0.0f) {
-                velocity.y = 0.0f;
-                float ceilPos = std::ceil(prevCameraPos.y) - 0.5f;
-                nextCameraPos.y = std::min(prevCameraPos.y, ceilPos);
-                break;
-            }
         }
     }
 }
@@ -228,7 +249,7 @@ void Player::selectBlock(GLFWwindow*, float yOffset) {
 void Player::breakBlock() {
     unsigned xChunk = viewBlock.x - (viewBlock.x % 16);
     unsigned zChunk = viewBlock.z - (viewBlock.z % 16);
-    auto chunkOpt = world->getChunk(xChunk, 0, zChunk);
+    auto chunkOpt = world->getChunkFast(xChunk, 0, zChunk);
     if (chunkOpt.has_value()) {
         Chunk& chunk = chunkOpt.value().get();
         chunk.removeBlock(viewBlock.x % 16, viewBlock.y, viewBlock.z % 16);
@@ -243,7 +264,7 @@ void Player::placeBlock() {
     unsigned xChunk = viewBlock.x - (viewBlock.x % 16);
     unsigned zChunk = viewBlock.z - (viewBlock.z % 16);
 
-    auto tempChunkOpt = world->getChunk(xChunk, 0, zChunk);
+    auto tempChunkOpt = world->getChunkFast(xChunk, 0, zChunk);
     if (tempChunkOpt.has_value()) {
         Chunk& tempChunk = tempChunkOpt.value().get();
         if (isAir(tempChunk.getBlock(
@@ -283,7 +304,7 @@ void Player::placeBlock() {
         return;
     }
 
-    tempChunkOpt = world->getChunk(xChunk, 0, zChunk);
+    tempChunkOpt = world->getChunkFast(xChunk, 0, zChunk);
     if (tempChunkOpt.has_value()) {
         Chunk& tempChunk = tempChunkOpt.value().get();
         tempChunk.placeBlock(
@@ -345,7 +366,7 @@ void Player::view() {
     unsigned zChunk = zBlock - (zBlock % 16);
     float it = 0.1f;
     while (it <= 4.0f) {
-        auto chunkOpt = world->getChunk(xChunk, 0, zChunk);
+        auto chunkOpt = world->getChunkFast(xChunk, 0, zChunk);
         if (chunkOpt.has_value()) {
             Chunk& chunk = chunkOpt.value().get();
             if (!isAir(chunk.getBlock(xBlock % 16, yBlock, zBlock % 16))) {
@@ -362,7 +383,7 @@ void Player::view() {
         zChunk = zBlock - (zBlock % 16);
         it += 0.1;
     }
-    auto prevChunkOpt = world->getChunk(
+    auto prevChunkOpt = world->getChunkFast(
         viewBlock.x - (viewBlock.x % 16), 0, viewBlock.z - (viewBlock.z % 16));
     // Unhighlight viewblock
     if (prevChunkOpt.has_value()) {
@@ -372,7 +393,7 @@ void Player::view() {
         prevChunk.clearMesh();
         prevChunk.generateMesh();
     }
-    auto tempChunkOpt = world->getChunk(xChunk, 0, zChunk);
+    auto tempChunkOpt = world->getChunkFast(xChunk, 0, zChunk);
     if (tempChunkOpt.has_value()) {
         Chunk& tempChunk = tempChunkOpt.value().get();
         if (!isAir(tempChunk.getBlock(xBlock % 16, yBlock, zBlock % 16))) {
