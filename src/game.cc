@@ -118,7 +118,7 @@ void Game::tickUpdate() {
         const auto start = std::chrono::high_resolution_clock::now();
         {
             ++currentTick;
-            std::unique_lock<std::mutex> lock(gameMutex);
+            std::lock_guard<std::mutex> lock(gameMutex);
 
             processInput();
             skybox->update(currentTick / static_cast<double>(tickRate));

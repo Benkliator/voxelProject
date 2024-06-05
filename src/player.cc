@@ -366,7 +366,7 @@ void Player::view() {
     unsigned zChunk = zBlock - (zBlock % 16);
     float it = 0.1f;
     while (it <= 4.0f) {
-        auto chunkOpt = world->getChunkFast(xChunk, 0, zChunk);
+        auto chunkOpt = world->getChunkSlow(xChunk, 0, zChunk);
         if (chunkOpt.has_value()) {
             Chunk& chunk = chunkOpt.value().get();
             if (!isAir(chunk.getBlock(xBlock % 16, yBlock, zBlock % 16))) {
@@ -383,7 +383,7 @@ void Player::view() {
         zChunk = zBlock - (zBlock % 16);
         it += 0.1;
     }
-    auto prevChunkOpt = world->getChunkFast(
+    auto prevChunkOpt = world->getChunkSlow(
         viewBlock.x - (viewBlock.x % 16), 0, viewBlock.z - (viewBlock.z % 16));
     // Unhighlight viewblock
     if (prevChunkOpt.has_value()) {
