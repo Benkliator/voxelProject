@@ -184,11 +184,17 @@ void Player::movePlayer(GLFWwindow* window) {
             velocity.x /= 4.8;
             velocity.z /= 4.8;
         }
+    } else if (mode == Mode::creative) {
+        velocity.y /= 1.8;
+        velocity.x /= 2.8;
+        velocity.z /= 2.8;
     }
 
     prevCameraPos = nextCameraPos;
     nextCameraPos += velocity;
-    checkCollision();
+    if (mode == Mode::survival) {
+        checkCollision();
+    }
 }
 
 void Player::timeStep(float dt) {

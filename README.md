@@ -9,7 +9,7 @@ To run this program you will need:
 - GLM
 - STB Image
 - OpenGL 3.3
-- C++17
+- C++20
 - FreeType 2
 
 ## Compiling and running
