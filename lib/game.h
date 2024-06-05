@@ -41,7 +41,7 @@ private:
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
 
-    unsigned tickRate = 60;
+    unsigned tickRate = 20;
     unsigned currentTick = 1;
 
     std::mutex gameMutex;

@@ -11,10 +11,13 @@
 
 Player::Player(World* w, glm::vec3 pos) : world{ w } {
     cameraPos = pos;
+    prevCameraPos = pos;
+    nextCameraPos = pos;
 
     unsigned xChunk = static_cast<unsigned>(cameraPos.x) - (static_cast<unsigned>(cameraPos.x) % 16);
     unsigned zChunk = static_cast<unsigned>(cameraPos.z) - (static_cast<unsigned>(cameraPos.z) % 16);
     chunkPos = glm::uvec3(xChunk, 0, zChunk);
+    velocity = glm::vec3(0.0, 0.0, 0.0);
 }
 
 Player::~Player() {}
@@ -26,7 +29,7 @@ void Player::moveMouse(GLFWwindow* window, float xi, float yi) {
     view();
 }
 
-void Player::checkCollisions(glm::vec3& newCameraPos) {
+void Player::checkCollision() {
     const std::vector<glm::vec3> checkDirs = {
         { 0.0f, 0.0f, -playerWidth / 2.0f },
         { 0.0f, 0.0f, playerWidth / 2.0f },
@@ -38,35 +41,33 @@ void Player::checkCollisions(glm::vec3& newCameraPos) {
         { -playerWidth / 2.0f, 0.0f, -playerWidth / 2.0f },
     };
     // SIDES
-    glm::vec3 moveDir = glm::vec3(newCameraPos.x, 0, newCameraPos.z) -
-                        glm::vec3(cameraPos.x, 0, cameraPos.z);
     for (float height = 0; height < playerHeight; height += 1.0f) {
         // HACK: Detect if we have two collisions per height and restore the
         //       oldCameraPos.{x,z}
         bool collidedHorizontally = false;
         for (glm::vec3 const& checkDir : checkDirs) {
-            float xPos = std::round(newCameraPos.x + checkDir.x);
-            float zPos = std::round(newCameraPos.z + checkDir.z);
+            float xPos = std::round(nextCameraPos.x + checkDir.x);
+            float zPos = std::round(nextCameraPos.z + checkDir.z);
             ushort checkBlock =
-                world->getBlock(xPos, std::round(cameraPos.y) - height, zPos)
+                world->getBlock(xPos, std::round(prevCameraPos.y) - height, zPos)
                     .value_or(Block::Air << typeOffset);
             if (!isAir(checkBlock)) {
                 if (collidedHorizontally) {
-                    newCameraPos.x = cameraPos.x;
-                    newCameraPos.z = cameraPos.z;
+                    nextCameraPos.x = prevCameraPos.x;
+                    nextCameraPos.z = prevCameraPos.z;
                     break;
                 }
                 glm::vec3 normal;
                 if (checkDir.x != 0.0f &&
-                    (std::signbit(checkDir.x) == std::signbit(moveDir.x))) {
+                    (std::signbit(checkDir.x) == std::signbit(velocity.x))) {
                     normal = { 1.0f, 0.0f, 0.0f };
                 } else if (checkDir.z != 0.0f && (std::signbit(checkDir.z) ==
-                                                  std::signbit(moveDir.z))) {
+                                                  std::signbit(velocity.z))) {
                     normal = { 0.0f, 0.0f, 1.0f };
                 } else {
                     continue;
                 }
-                newCameraPos -= glm::dot(glm::vec3(moveDir.x, 0, moveDir.z), 
+                nextCameraPos -= glm::dot(glm::vec3(velocity.x, 0, velocity.z), 
                                 glm::vec3(normal.x, 0, normal.z)) * normal;
                 collidedHorizontally = true;
             }
@@ -75,109 +76,91 @@ void Player::checkCollisions(glm::vec3& newCameraPos) {
 
     // BELOW
     ushort blockBelow =
-        world->getBlock(std::round(newCameraPos.x),
-                        std::round(newCameraPos.y - playerHeight),
-                        std::round(newCameraPos.z))
+        world->getBlock(std::round(nextCameraPos.x),
+                        std::round(nextCameraPos.y - playerHeight),
+                        std::round(nextCameraPos.z))
         .value_or(Block::Air << typeOffset);
     for (glm::vec3 const& dir : checkDirs) {
-        float xPos = std::round(newCameraPos.x + dir.x);
-        float zPos = std::round(newCameraPos.z + dir.z);
+        float xPos = std::round(nextCameraPos.x + dir.x);
+        float zPos = std::round(nextCameraPos.z + dir.z);
         ushort nextblockBelow =
-            world->getBlock(xPos, std::round(newCameraPos.y - playerHeight), zPos)
+            world->getBlock(xPos, std::round(nextCameraPos.y - playerHeight), zPos)
                 .value_or(Block::Air << typeOffset);
         if (!isAir(nextblockBelow) && !isAir(blockBelow)) {
-            if (ySpeed < 0.0f) {
-                ySpeed = 0.0f;
+            if (velocity.y < 0.0f) {
+                velocity.y = 0.0f;
                 onGround = true;
-                float floorPos = std::floor(cameraPos.y - playerHeight) + 0.5f;
-                cameraPos.y = floorPos + playerHeight - 1e-5;
-                newCameraPos.y = cameraPos.y;
+                float floorPos = std::floor(prevCameraPos.y - playerHeight) + 0.5f;
+                nextCameraPos.y = floorPos + playerHeight - 1e-5;
                 break;
             }
         } else if (isAir(blockBelow)){
             onGround = false;
-            cameraPos.y = newCameraPos.y;
             break;
         }
     }
     // ABOVE
     for (glm::vec3 const& dir : checkDirs) {
-        float xPos = std::round(cameraPos.x + dir.x);
-        float zPos = std::round(cameraPos.z + dir.z);
+        float xPos = std::round(nextCameraPos.x + dir.x);
+        float zPos = std::round(nextCameraPos.z + dir.z);
         ushort blockAbove = world->getBlock(xPos, std::ceil(cameraPos.y), zPos)
                                 .value_or(Block::Air << typeOffset);
         if (!isAir(blockAbove)) {
-            if (ySpeed > 0.0f) {
-                ySpeed = 0.0f;
-                float ceilPos = std::ceil(cameraPos.y) - 0.5f;
-                cameraPos.y = std::min(cameraPos.y, ceilPos);
+            if (velocity.y > 0.0f) {
+                velocity.y = 0.0f;
+                float ceilPos = std::ceil(prevCameraPos.y) - 0.5f;
+                nextCameraPos.y = std::min(prevCameraPos.y, ceilPos);
                 break;
             }
         }
     }
 }
 
-void Player::movePlayer(GLFWwindow* window, float dt) {
-    glm::vec3 newCameraPos = cameraPos;
-    const float cameraSpeed = 5.5f * dt;
-    const float sprintBoost = 1.8f * dt;
+void Player::movePlayer(GLFWwindow* window) {
+    float horizontalSpeed = 1.0;
+    float verticalSpeed = 0.5;
 
-    const float gravitySpeed = 23.0f * dt;
-    const float jumpBoost = 8;
+    float sprintBoost = 0.3;
+    float gravitySpeed = 0.098;
 
-    glm::vec3 resultingSpeed = glm::vec3(0.0, 0.0, 0.0);
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        resultingSpeed +=
-            glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
+        velocity += glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        resultingSpeed -=
-            glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
+        velocity -= glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        resultingSpeed -= glm::normalize(
-            glm::cross(glm::vec3(cameraFront.x, 0, cameraFront.z), cameraUp));
+        velocity -= glm::normalize(glm::cross(glm::vec3(cameraFront.x, 0, cameraFront.z), cameraUp));
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        resultingSpeed += glm::normalize(
-            glm::cross(glm::vec3(cameraFront.x, 0, cameraFront.z), cameraUp));
-    }
-
-    if (resultingSpeed.x != 0 || resultingSpeed.y != 0 ||
-        resultingSpeed.z != 0) {
-        resultingSpeed = glm::normalize(resultingSpeed);
-        newCameraPos += resultingSpeed * cameraSpeed;
-    }
-
-    int isSprinting =
-        ((glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) &&
-         (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS));
-    if (isSprinting) {
-        newCameraPos +=
-            glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z)) *
-            sprintBoost;
+        velocity += glm::normalize(glm::cross(glm::vec3(cameraFront.x, 0, cameraFront.z), cameraUp));
     }
 
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-        if (mode == Mode::survival) {
-            if (onGround) {
-                ySpeed += jumpBoost;
-                onGround = false;
-            }
-        } else {
-            newCameraPos.y += cameraSpeed;
+        if (mode == Mode::survival && onGround) {
+            velocity.y += verticalSpeed;
+            onGround = false;
+        } else if (mode == Mode::creative) {
+            velocity.y += verticalSpeed;
+            onGround = false;
         }
     }
+
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
         if (mode == Mode::creative) {
-            newCameraPos.y -= cameraSpeed;
+            velocity.y -= verticalSpeed;
+        } else if (mode == Mode::survival && (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)) {
+            velocity +=
+                glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z)) *
+                sprintBoost;
         }
     }
+
     auto modeswitchKey = glfwGetKey(window, GLFW_KEY_G);
     if (modeswitchKey == GLFW_PRESS) {
         if (!modeKeyPressed) {
             modeKeyPressed = false;
-            ySpeed = 0.0f;
+            velocity.y = 0.0f;
             switch (mode) {
             case survival: {
                 mode = creative;
@@ -193,13 +176,23 @@ void Player::movePlayer(GLFWwindow* window, float dt) {
     }
 
     if (mode == Mode::survival) {
-        if (!onGround) {
-            ySpeed -= gravitySpeed;
+        if (onGround) {
+            velocity.x /= 5.0;
+            velocity.z /= 5.0;
+        } else {
+            velocity.y -= gravitySpeed;
+            velocity.x /= 4.8;
+            velocity.z /= 4.8;
         }
-        newCameraPos.y += ySpeed * dt;
-        checkCollisions(newCameraPos);
     }
-    cameraPos = newCameraPos;
+
+    prevCameraPos = nextCameraPos;
+    nextCameraPos += velocity;
+    checkCollision();
+}
+
+void Player::timeStep(float dt) {
+    cameraPos += (nextCameraPos - cameraPos) * dt;
 }
 
 void Player::checkChunk() {

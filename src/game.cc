@@ -103,6 +103,7 @@ void Game::gameLoop() {
             std::string fps = std::to_string(static_cast<int>(1 / deltaTime));
             player->draw(fps);
 
+            player->timeStep(deltaTime * static_cast<float>(tickRate));
             player->checkChunk();
         }
         gameCV.notify_one();
@@ -116,14 +117,14 @@ void Game::tickUpdate() {
     while (!glfwWindowShouldClose(window)) {
         const auto start = std::chrono::high_resolution_clock::now();
         {
+            ++currentTick;
             std::unique_lock<std::mutex> lock(gameMutex);
-            gameCV.wait(lock);
 
             processInput();
             skybox->update(currentTick / static_cast<double>(tickRate));
 
-            ++currentTick;
-            gameCV.notify_one();
+            //gameCV.wait(lock);
+            //gameCV.notify_one();
         }
         const auto end = std::chrono::high_resolution_clock::now();
         std::this_thread::sleep_for(std::chrono::milliseconds((1000 / tickRate)) -
@@ -136,7 +137,7 @@ void Game::processInput() {
         glfwSetWindowShouldClose(window, true);
     }
 
-    player->movePlayer(window, 1 / static_cast<double>(tickRate));
+    player->movePlayer(window);
 }
 
 void Game::mouseMotionCallback(double xposIn, double yposIn) {

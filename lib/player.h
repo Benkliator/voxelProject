@@ -12,7 +12,7 @@ public:
     ~Player();
 
     void moveMouse(GLFWwindow*, float, float);
-    void movePlayer(GLFWwindow*, float);
+    void movePlayer(GLFWwindow*);
     void selectBlock(GLFWwindow*, float);
     void breakBlock();
     void placeBlock();
@@ -22,18 +22,22 @@ public:
     glm::mat4 skyLook();
 
     void checkChunk();
+    void timeStep(float);
 private:
     void view();
-    void checkCollisions(glm::vec3&);
+    void checkCollision();
 
     World* world;
     Hud hud{};
 
     Camera skyCam;
 
+    glm::vec3 nextCameraPos;
+    glm::vec3 prevCameraPos;
+
     glm::uvec3 viewBlock;
     Block::BlockFace viewFace;
-    float ySpeed = 0.0f;
+    glm::vec3 velocity;
     bool onGround = false;
     glm::uvec3 chunkPos;
 
