@@ -58,5 +58,6 @@ struct Block {
 };
 
 // Helper functions
+Block::BlockType blockType(unsigned);
 bool isAir(unsigned);
 std::string blockToString(Block::BlockType);

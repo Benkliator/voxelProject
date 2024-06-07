@@ -60,12 +60,12 @@ std::optional<ushort> World::getBlock(long x, long y, long z) {
     const unsigned chunkMask = 0b1111;
     unsigned xChunk = x & ~chunkMask;
     unsigned zChunk = z & ~chunkMask;
-    unsigned xBlockOffset = x & chunkMask;
-    unsigned zBlockOffset = z & chunkMask;
+    unsigned xOff = x & chunkMask;
+    unsigned zOff = z & chunkMask;
     for (Chunk& chunk : visibleChunks) {
         glm::uvec3 chunkpos = chunk.getPos();
         if (chunkpos.x == xChunk && chunkpos.z == zChunk) {
-            return chunk.getBlock(xBlockOffset, y, zBlockOffset);
+            return chunk.getBlock(xOff, y, zOff);
         }
     }
     return std::nullopt;

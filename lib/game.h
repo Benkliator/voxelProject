@@ -25,10 +25,11 @@ public:
     void mouseClickCallback(int, int, int);
 
     void tickUpdate();
+
+    Player* player = nullptr;
 private:
     void processInput();
 
-    Player* player = nullptr;
     Skybox* skybox = nullptr;
     World* world = nullptr;
 

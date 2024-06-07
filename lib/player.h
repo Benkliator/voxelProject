@@ -1,6 +1,8 @@
 #pragma once
 
 #include <glm/fwd.hpp>
+#include <string>
+#include <vector>
 
 #include "hud.h"
 #include "input.h"
@@ -26,6 +28,8 @@ public:
 private:
     void view();
     void checkCollision();
+    void chatCallback(GLFWwindow*, uint);
+    void craft();
 
     World* world;
     Hud hud{};
@@ -44,12 +48,19 @@ private:
     Block::BlockType selectedBlock = Block::Dirt;
     Block::BlockFace selectedFace = Block::Top;
 
+    std::map<Block::BlockType, uint> inventory;
+
+    std::vector<std::string> chatLog;
+    std::string line;
+
     enum Mode : ushort {
         survival,
         creative,
     };
     enum Mode mode = survival;
     bool modeKeyPressed = false;
+    bool chatKeyPressed = false;
+    bool typing = false;
 
     const float playerHeight = 1.5f;
     // NOTE: (playerWidth / 2.0f) out to all four sides

@@ -6,6 +6,7 @@
 #include <glm/common.hpp>
 #include <glm/ext/scalar_constants.hpp>
 #include <glm/fwd.hpp>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -14,8 +15,10 @@ Player::Player(World* w, glm::vec3 pos) : world{ w } {
     prevCameraPos = pos;
     nextCameraPos = pos;
 
-    unsigned xChunk = static_cast<unsigned>(cameraPos.x) - (static_cast<unsigned>(cameraPos.x) % 16);
-    unsigned zChunk = static_cast<unsigned>(cameraPos.z) - (static_cast<unsigned>(cameraPos.z) % 16);
+    unsigned xChunk = static_cast<unsigned>(cameraPos.x) -
+                      (static_cast<unsigned>(cameraPos.x) % 16);
+    unsigned zChunk = static_cast<unsigned>(cameraPos.z) -
+                      (static_cast<unsigned>(cameraPos.z) % 16);
     chunkPos = glm::uvec3(xChunk, 0, zChunk);
     velocity = glm::vec3(0.0, 0.0, 0.0);
 }
@@ -50,20 +53,18 @@ void Player::checkCollision() {
             for (auto zPos : checkBlocksZ) {
                 if (velocity.x > 0) {
                     int xPos = std::round(nextCameraPos.x + playerWidth);
-                    checkBlock = world->getBlock(xPos, std::round(nextCameraPos.y - height), zPos).value_or(Block::Air << typeOffset);
-                    if (!isAir(checkBlock)) {
-                        collision = true;
-                        velocity.x = 0;
+                    checkBlock = world->getBlock(xPos,
+    std::round(nextCameraPos.y - height), zPos).value_or(Block::Air <<
+    typeOffset); if (!isAir(checkBlock)) { collision = true; velocity.x = 0;
                         float wallPos = xPos - 0.5f - playerWidth;
                         nextCameraPos.x = wallPos;
                         break;
                     }
                 } else if (velocity.x < 0) {
                     int xPos = std::round(nextCameraPos.x - playerWidth);
-                    checkBlock = world->getBlock(xPos, std::round(nextCameraPos.y - height), zPos).value_or(Block::Air << typeOffset);
-                    if (!isAir(checkBlock)) {
-                        collision = true;
-                        velocity.x = 0;
+                    checkBlock = world->getBlock(xPos,
+    std::round(nextCameraPos.y - height), zPos).value_or(Block::Air <<
+    typeOffset); if (!isAir(checkBlock)) { collision = true; velocity.x = 0;
                         float wallPos = xPos + 0.5f + playerWidth;
                         nextCameraPos.x = wallPos;
                         break;
@@ -74,20 +75,18 @@ void Player::checkCollision() {
             for (auto xPos : checkBlocksX) {
                 if (velocity.z > 0) {
                     int zPos = std::round(nextCameraPos.z + playerWidth);
-                    checkBlock = world->getBlock(xPos, std::round(nextCameraPos.y - height), zPos).value_or(Block::Air << typeOffset);
-                    if (!isAir(checkBlock)) {
-                        collision = true;
-                        velocity.z = 0;
+                    checkBlock = world->getBlock(xPos,
+    std::round(nextCameraPos.y - height), zPos).value_or(Block::Air <<
+    typeOffset); if (!isAir(checkBlock)) { collision = true; velocity.z = 0;
                         float wallPos = zPos - 0.5f - playerWidth;
                         nextCameraPos.z = wallPos;
                         break;
                     }
                 } else if (velocity.z < 0) {
                     int zPos = std::round(nextCameraPos.z - playerWidth);
-                    checkBlock = world->getBlock(xPos, std::round(nextCameraPos.y - height), zPos).value_or(Block::Air << typeOffset);
-                    if (!isAir(checkBlock)) {
-                        collision = true;
-                        velocity.z = 0;
+                    checkBlock = world->getBlock(xPos,
+    std::round(nextCameraPos.y - height), zPos).value_or(Block::Air <<
+    typeOffset); if (!isAir(checkBlock)) { collision = true; velocity.z = 0;
                         float wallPos = zPos + 0.5f + playerWidth;
                         nextCameraPos.z = wallPos;
                         break;
@@ -99,21 +98,33 @@ void Player::checkCollision() {
         if (collision) {
             break;
         }
-        
+
     }
     */
 
     const std::vector<glm::vec3> checkBlocks = {
-        {std::round(nextCameraPos.x - playerWidth), std::round(nextCameraPos.y - playerHeight), std::round(nextCameraPos.z - playerWidth)},
-        {std::round(nextCameraPos.x - playerWidth), std::round(nextCameraPos.y - playerHeight), std::round(nextCameraPos.z + playerWidth)},
-        {std::round(nextCameraPos.x + playerWidth), std::round(nextCameraPos.y - playerHeight), std::round(nextCameraPos.z + playerWidth)},
-        {std::round(nextCameraPos.x + playerWidth), std::round(nextCameraPos.y - playerHeight), std::round(nextCameraPos.z - playerWidth)},
+        { std::round(nextCameraPos.x - playerWidth),
+          std::round(nextCameraPos.y - playerHeight),
+          std::round(nextCameraPos.z - playerWidth) },
+        { std::round(nextCameraPos.x - playerWidth),
+          std::round(nextCameraPos.y - playerHeight),
+          std::round(nextCameraPos.z + playerWidth) },
+        { std::round(nextCameraPos.x + playerWidth),
+          std::round(nextCameraPos.y - playerHeight),
+          std::round(nextCameraPos.z + playerWidth) },
+        { std::round(nextCameraPos.x + playerWidth),
+          std::round(nextCameraPos.y - playerHeight),
+          std::round(nextCameraPos.z - playerWidth) },
     };
 
     // ABOVE
     for (auto& blockPos : checkBlocks) {
         ushort checkBlock;
-        checkBlock = world->getBlock(blockPos.x, std::ceil(blockPos.y + playerHeight), blockPos.z).value_or(Block::Air << typeOffset);
+        checkBlock = world
+                         ->getBlock(blockPos.x,
+                                    std::ceil(blockPos.y + playerHeight),
+                                    blockPos.z)
+                         .value_or(Block::Air << typeOffset);
         if (!isAir(checkBlock) && velocity.y > 0) {
             velocity.y = 0;
             float roofPos = blockPos.y;
@@ -126,7 +137,8 @@ void Player::checkCollision() {
     onGround = false;
     for (auto& blockPos : checkBlocks) {
         ushort checkBlock;
-        checkBlock = world->getBlock(blockPos.x, blockPos.y, blockPos.z).value_or(Block::Air << typeOffset);
+        checkBlock = world->getBlock(blockPos.x, blockPos.y, blockPos.z)
+                         .value_or(Block::Air << typeOffset);
         if (!isAir(checkBlock)) {
             velocity.y = 0;
             onGround = true;
@@ -137,12 +149,45 @@ void Player::checkCollision() {
     }
 }
 
+void Player::craft() {
+    std::string target = line.substr(7);
+    std::cout << "crafting: " << target << std::endl;
+}
+
+void Player::chatCallback(GLFWwindow* window, uint scancode) {
+    line += static_cast<char>(scancode);
+}
+
 void Player::movePlayer(GLFWwindow* window) {
     float horizontalSpeed = 1.0;
     float verticalSpeed = 0.5;
 
     float sprintBoost = 0.3;
     float gravitySpeed = 0.098;
+
+    auto enterKey = glfwGetKey(window, GLFW_KEY_ENTER);
+    if (enterKey == GLFW_PRESS) {
+        if (!chatKeyPressed) {
+            typing = !typing;
+            if (typing) {
+                auto chatCallback = [](GLFWwindow* w, uint k) {
+                    static_cast<Game*>(glfwGetWindowUserPointer(w))
+                        ->player->chatCallback(w, k);
+                };
+                glfwSetCharCallback(window, chatCallback);
+            } else {
+                glfwSetCharCallback(window, nullptr);
+                if (line.starts_with("/craft ")) {
+                    craft();
+                }
+                chatLog.emplace_back(std::move(line));
+                line = std::string{}; // reset
+            }
+            chatKeyPressed = true;
+        }
+    } else {
+        chatKeyPressed = false;
+    }
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         velocity += glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
@@ -151,29 +196,41 @@ void Player::movePlayer(GLFWwindow* window) {
         velocity -= glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        velocity -= glm::normalize(glm::cross(glm::vec3(cameraFront.x, 0, cameraFront.z), cameraUp));
+        velocity -= glm::normalize(
+            glm::cross(glm::vec3(cameraFront.x, 0, cameraFront.z), cameraUp));
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        velocity += glm::normalize(glm::cross(glm::vec3(cameraFront.x, 0, cameraFront.z), cameraUp));
+        velocity += glm::normalize(
+            glm::cross(glm::vec3(cameraFront.x, 0, cameraFront.z), cameraUp));
     }
 
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-        if (mode == Mode::survival && onGround) {
+        switch (mode) {
+        case survival: {
+            if (onGround) {
+                velocity.y += verticalSpeed;
+                onGround = false;
+            }
+        } break;
+        case creative: {
             velocity.y += verticalSpeed;
             onGround = false;
-        } else if (mode == Mode::creative) {
-            velocity.y += verticalSpeed;
-            onGround = false;
+        } break;
         }
     }
 
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-        if (mode == Mode::creative) {
+        switch (mode) {
+        case survival: {
+            if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+                velocity +=
+                    glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z)) *
+                    sprintBoost;
+            }
+        } break;
+        case creative: {
             velocity.y -= verticalSpeed;
-        } else if (mode == Mode::survival && (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)) {
-            velocity +=
-                glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z)) *
-                sprintBoost;
+        } break;
         }
     }
 
@@ -196,7 +253,8 @@ void Player::movePlayer(GLFWwindow* window) {
         modeKeyPressed = false;
     }
 
-    if (mode == Mode::survival) {
+    switch (mode) {
+    case survival: {
         if (onGround) {
             velocity.x /= 5.0;
             velocity.z /= 5.0;
@@ -205,16 +263,22 @@ void Player::movePlayer(GLFWwindow* window) {
             velocity.x /= 4.8;
             velocity.z /= 4.8;
         }
-    } else if (mode == Mode::creative) {
+    } break;
+    case creative: {
         velocity.y /= 1.8;
         velocity.x /= 2.8;
         velocity.z /= 2.8;
+    } break;
     }
 
     prevCameraPos = nextCameraPos;
     nextCameraPos += velocity;
-    if (mode == Mode::survival) {
+    switch (mode) {
+    case survival: {
         checkCollision();
+    } break;
+    case creative: {
+    } break;
     }
 }
 
@@ -223,8 +287,10 @@ void Player::timeStep(float dt) {
 }
 
 void Player::checkChunk() {
-    unsigned xChunk = static_cast<unsigned>(cameraPos.x) - (static_cast<unsigned>(cameraPos.x) % 16);
-    unsigned zChunk = static_cast<unsigned>(cameraPos.z) - (static_cast<unsigned>(cameraPos.z) % 16);
+    unsigned xChunk = static_cast<unsigned>(cameraPos.x) -
+                      (static_cast<unsigned>(cameraPos.x) % 16);
+    unsigned zChunk = static_cast<unsigned>(cameraPos.z) -
+                      (static_cast<unsigned>(cameraPos.z) % 16);
     glm::uvec3 tempChunkPos = glm::uvec3(xChunk, 0, zChunk);
     if (tempChunkPos != chunkPos) {
         world->reloadChunksAround(xChunk, 0, zChunk);
@@ -247,12 +313,24 @@ void Player::selectBlock(GLFWwindow*, float yOffset) {
 
 // Make less scuffed in future lol
 void Player::breakBlock() {
-    unsigned xChunk = viewBlock.x - (viewBlock.x % 16);
-    unsigned zChunk = viewBlock.z - (viewBlock.z % 16);
+    const unsigned chunkMask = 0b1111;
+    unsigned xChunk = viewBlock.x & ~chunkMask;
+    unsigned zChunk = viewBlock.z & ~chunkMask;
+    unsigned xOff = viewBlock.x & chunkMask;
+    unsigned zOff = viewBlock.z & chunkMask;
     auto chunkOpt = world->getChunkFast(xChunk, 0, zChunk);
     if (chunkOpt.has_value()) {
         Chunk& chunk = chunkOpt.value().get();
-        chunk.removeBlock(viewBlock.x % 16, viewBlock.y, viewBlock.z % 16);
+        unsigned block = chunk.getBlock(xOff, viewBlock.y, zOff);
+        if (!isAir(block)) {
+            inventory[blockType(block)]++;
+        }
+        chunk.removeBlock(xOff, viewBlock.y, zOff);
+    }
+
+    std::cout << "-- BLOCKS --" << std::endl;
+    for (auto& [k, v] : inventory) {
+        std::cout << blockToString(k) << ": " << v << std::endl;
     }
 
     view();
@@ -261,14 +339,16 @@ void Player::breakBlock() {
 // NOTE: this works but for future make the block face placig more intuitive
 // i.e somehow figure out which block is being looked at.
 void Player::placeBlock() {
-    unsigned xChunk = viewBlock.x - (viewBlock.x % 16);
-    unsigned zChunk = viewBlock.z - (viewBlock.z % 16);
+    const unsigned chunkMask = 0b1111;
+    unsigned xChunk = viewBlock.x & ~chunkMask;
+    unsigned zChunk = viewBlock.z & ~chunkMask;
+    unsigned xOff = viewBlock.x & chunkMask;
+    unsigned zOff = viewBlock.z & chunkMask;
 
     auto tempChunkOpt = world->getChunkFast(xChunk, 0, zChunk);
     if (tempChunkOpt.has_value()) {
         Chunk& tempChunk = tempChunkOpt.value().get();
-        if (isAir(tempChunk.getBlock(
-                viewBlock.x % 16, viewBlock.y, viewBlock.z % 16))) {
+        if (isAir(tempChunk.getBlock(xOff, viewBlock.y, zOff))) {
             return;
         }
     }
@@ -298,8 +378,10 @@ void Player::placeBlock() {
     xChunk = placePos.x - (placePos.x % 16);
     zChunk = placePos.z - (placePos.z % 16);
 
-    glm::uvec3 roundedPos = glm::uvec3(std::round(cameraPos.x), std::round(cameraPos.y), std::round(cameraPos.z));
-    if (placePos == roundedPos || 
+    glm::uvec3 roundedPos = glm::uvec3(std::round(cameraPos.x),
+                                       std::round(cameraPos.y),
+                                       std::round(cameraPos.z));
+    if (placePos == roundedPos ||
         placePos == glm::uvec3(roundedPos.x, roundedPos.y - 1, roundedPos.z)) {
         return;
     }
@@ -341,18 +423,36 @@ void Player::draw(std::string& fps) {
                    0.5f,
                    glm::vec3{ 1.0f, 1.0f, 1.0f });
     // Mode
-    hud.renderText(std::string{ "Mode: " } +
-                       (mode == Mode::survival ? "survival" : "creative"),
-                   5.0f,
-                   40.0f,
-                   0.5f,
-                   glm::vec3{ 1.0f, 1.0f, 1.0f });
+    std::string modeStr = "Mode: ";
+    switch (mode) {
+    case survival: {
+        modeStr += "survival";
+    } break;
+    case creative: {
+        modeStr += "creative";
+    } break;
+    }
+    hud.renderText(modeStr, 5.0f, 40.0f, 0.5f, glm::vec3{ 1.0f, 1.0f, 1.0f });
     // Crosshair
     hud.renderText("*",
                    SCR_WIDTH / 2.0f,
                    SCR_HEIGHT / 2.0f,
                    0.5f,
                    glm::vec3{ 1.0f, 1.0f, 1.0f });
+
+    // Chat log
+    // TODO: Trim beginning when log gets off screen
+    for (size_t i = 0; i < chatLog.size(); i++) {
+        hud.renderText(chatLog[i],
+                       0,
+                       SCR_HEIGHT / 2.0f + i * 20.0f,
+                       0.5f,
+                       glm::vec3{ 1.0f, 1.0f, 1.0f });
+    }
+
+    // Current chat line
+    hud.renderText(
+        line, SCR_WIDTH / 2.0f, 0, 0.5f, glm::vec3{ 1.0f, 1.0f, 1.0f });
 }
 
 void Player::view() {
