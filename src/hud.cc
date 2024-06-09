@@ -72,7 +72,7 @@ Hud::Hud() {
 
     glm::mat4 projection = glm::ortho(0.0f,
                                       static_cast<float>(SCR_WIDTH),
-                                      -1.0f,
+                                      0.0f,
                                       static_cast<float>(SCR_HEIGHT));
 
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"),

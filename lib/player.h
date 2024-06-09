@@ -27,6 +27,10 @@ private:
     void view();
     void checkCollision();
 
+    void xCollision(int);
+    void zCollision(int);
+    void yCollision();
+
     World* world;
     Hud hud{};
 
@@ -52,6 +56,6 @@ private:
     bool modeKeyPressed = false;
 
     const float playerHeight = 1.5f;
-    // NOTE: (playerWidth / 2.0f) out to all four sides
-    const float playerWidth = 0.25f;
+    // NOTE: (playerWidth) out to all four sides
+    const float playerWidth = 0.32f;
 };
