@@ -30,19 +30,25 @@ void Player::moveMouse(GLFWwindow* window, float xi, float yi) {
 }
 
 void Player::checkCollision() {
+
     // SIDES
     for (int height = 0; height < playerHeight; ++height) {
-        // xCollision(height);
-        zCollision(height);
+        if (abs(cameraFront.x) > abs(cameraFront.z)) {
+            checkCollisionX(height);
+            checkCollisionZ(height);
+        } else {
+            checkCollisionZ(height);
+            checkCollisionX(height);
+        }
     }
 
     // Y
-        yCollision();
+    yCollision();
 }
 
-void Player::xCollision(int height) {
+void Player::checkCollisionX(int height) {
     ushort checkBlock;
-
+    
     const std::vector<float> checkBlocksZ = {
         std::round(nextCameraPos.z + playerWidth),
         std::round(nextCameraPos.z - playerWidth)
@@ -56,7 +62,7 @@ void Player::xCollision(int height) {
                 velocity.x = 0;
                 float wallPos = xPos - 0.5f - playerWidth;
                 nextCameraPos.x = wallPos;
-                return;
+                break;
             }
         } else if (velocity.x < 0) {
             int xPos = std::round(nextCameraPos.x - playerWidth);
@@ -65,13 +71,13 @@ void Player::xCollision(int height) {
                 velocity.x = 0;
                 float wallPos = xPos + 0.5f + playerWidth;
                 nextCameraPos.x = wallPos;
-                return;
+                break;
             }
         }
     }
 }
 
-void Player::zCollision(int height) {
+void Player::checkCollisionZ(int height) {
     ushort checkBlock;
 
     const std::vector<float> checkBlocksX = {
@@ -87,7 +93,7 @@ void Player::zCollision(int height) {
                 velocity.z = 0;
                 float wallPos = zPos - 0.5f - playerWidth;
                 nextCameraPos.z = wallPos;
-                return;
+                break;
             }
         } else if (velocity.z < 0) {
             int zPos = std::round(nextCameraPos.z - playerWidth);
@@ -96,7 +102,7 @@ void Player::zCollision(int height) {
                 velocity.z = 0;
                 float wallPos = zPos + 0.5f + playerWidth;
                 nextCameraPos.z = wallPos;
-                return;
+                break;
             }
         }
     }
@@ -123,10 +129,11 @@ void Player::yCollision() {
     }
 
     // BELOW
+    onGround = false;
     if (velocity.y > 0) {
         return;
     }
-    onGround = false;
+
     for (auto& blockPos : checkBlocks) {
         ushort checkBlock;
         checkBlock = world->getBlock(blockPos.x, blockPos.y, blockPos.z).value_or(Block::Air << typeOffset);
@@ -146,7 +153,7 @@ void Player::yCollision() {
 
 void Player::movePlayer(GLFWwindow* window) {
     float horizontalSpeed = 1.0;
-    float verticalSpeed = 0.5;
+    float verticalSpeed = 0.4;
 
     float sprintBoost = 0.3;
     float gravitySpeed = 0.098;
@@ -167,10 +174,8 @@ void Player::movePlayer(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
         if (mode == Mode::survival && onGround) {
             velocity.y += verticalSpeed;
-            onGround = false;
         } else if (mode == Mode::creative) {
-            velocity.y += verticalSpeed;
-            onGround = false;
+            velocity.y += verticalSpeed * 3;
         }
     }
 

@@ -27,8 +27,8 @@ private:
     void view();
     void checkCollision();
 
-    void xCollision(int);
-    void zCollision(int);
+    void checkCollisionX(int);
+    void checkCollisionZ(int);
     void yCollision();
 
     World* world;
@@ -43,6 +43,7 @@ private:
     Block::BlockFace viewFace;
     glm::vec3 velocity;
     bool onGround = false;
+    bool collision = false;
     glm::uvec3 chunkPos;
 
     Block::BlockType selectedBlock = Block::Dirt;
@@ -57,5 +58,5 @@ private:
 
     const float playerHeight = 1.5f;
     // NOTE: (playerWidth) out to all four sides
-    const float playerWidth = 0.32f;
+    const float playerWidth = 0.33f;
 };
