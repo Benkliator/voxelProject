@@ -8,6 +8,7 @@
 #include <glm/fwd.hpp>
 #include <string>
 #include <vector>
+#include <iostream>
 
 Player::Player(World* w, glm::vec3 pos) : world{ w } {
     cameraPos = pos;
@@ -29,23 +30,6 @@ void Player::moveMouse(GLFWwindow* window, float xi, float yi) {
     view();
 }
 
-void Player::checkCollision() {
-
-    // SIDES
-    for (int height = 0; height < playerHeight; ++height) {
-        if (abs(cameraFront.x) > abs(cameraFront.z)) {
-            checkCollisionX(height);
-            checkCollisionZ(height);
-        } else {
-            checkCollisionZ(height);
-            checkCollisionX(height);
-        }
-    }
-
-    // Y
-    yCollision();
-}
-
 void Player::checkCollisionX(int height) {
     ushort checkBlock;
     
@@ -62,6 +46,7 @@ void Player::checkCollisionX(int height) {
                 velocity.x = 0;
                 float wallPos = xPos - 0.5f - playerWidth;
                 nextCameraPos.x = wallPos;
+                collision = true;
                 break;
             }
         } else if (velocity.x < 0) {
@@ -71,6 +56,7 @@ void Player::checkCollisionX(int height) {
                 velocity.x = 0;
                 float wallPos = xPos + 0.5f + playerWidth;
                 nextCameraPos.x = wallPos;
+                collision = true;
                 break;
             }
         }
@@ -93,6 +79,7 @@ void Player::checkCollisionZ(int height) {
                 velocity.z = 0;
                 float wallPos = zPos - 0.5f - playerWidth;
                 nextCameraPos.z = wallPos;
+                collision = true;
                 break;
             }
         } else if (velocity.z < 0) {
@@ -102,6 +89,7 @@ void Player::checkCollisionZ(int height) {
                 velocity.z = 0;
                 float wallPos = zPos + 0.5f + playerWidth;
                 nextCameraPos.z = wallPos;
+                collision = true;
                 break;
             }
         }
@@ -210,23 +198,47 @@ void Player::movePlayer(GLFWwindow* window) {
 
     if (mode == Mode::survival) {
         if (onGround) {
+            prevCameraPos.y = nextCameraPos.y;
+            nextCameraPos.y += velocity.y;
+            yCollision();
+
             velocity.x /= 5.0;
+            prevCameraPos.x = nextCameraPos.x;
+            nextCameraPos.x += velocity.x;
+            for (int height = 0; height < playerHeight; ++height) {
+                checkCollisionX(height);
+            }
+
             velocity.z /= 5.0;
+            prevCameraPos.z = nextCameraPos.z;
+            nextCameraPos.z += velocity.z;
+            for (int height = 0; height < playerHeight; ++height) {
+                checkCollisionZ(height);
+            }
         } else {
             velocity.y -= gravitySpeed;
+            prevCameraPos.y = nextCameraPos.y;
+            nextCameraPos.y += velocity.y;
+            yCollision();
+
             velocity.x /= 4.8;
+            prevCameraPos.x = nextCameraPos.x;
+            nextCameraPos.x += velocity.x;
+            for (int height = 0; height < playerHeight; ++height) {
+                checkCollisionX(height);
+            }
+
             velocity.z /= 4.8;
+            prevCameraPos.z = nextCameraPos.z;
+            nextCameraPos.z += velocity.z;
+            for (int height = 0; height < playerHeight; ++height) {
+                checkCollisionZ(height);
+            }
         }
     } else if (mode == Mode::creative) {
         velocity.y /= 1.8;
         velocity.x /= 2.8;
         velocity.z /= 2.8;
-    }
-
-    prevCameraPos = nextCameraPos;
-    nextCameraPos += velocity;
-    if (mode == Mode::survival) {
-        checkCollision();
     }
 }
 

@@ -25,7 +25,6 @@ public:
     void timeStep(float);
 private:
     void view();
-    void checkCollision();
 
     void checkCollisionX(int);
     void checkCollisionZ(int);
@@ -58,5 +57,5 @@ private:
 
     const float playerHeight = 1.5f;
     // NOTE: (playerWidth) out to all four sides
-    const float playerWidth = 0.33f;
+    const float playerWidth = 0.20;
 };

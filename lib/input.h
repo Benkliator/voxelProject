@@ -19,7 +19,7 @@ public:
                               GLboolean = true);
 
     glm::vec3 rayCast(float);
-    glm::vec3 rayCast(float, glm::vec3);
+    glm::vec3 rayCast(float, glm::vec3, glm::vec3);
 
 protected:
     glm::vec3 cameraPos = glm::vec3(32.0f, 45.0f, 32.0f);

@@ -35,6 +35,6 @@ glm::vec3 Camera::rayCast(float length) {
     return cameraPos + (cameraFront * length);
 }
 
-glm::vec3 Camera::rayCast(float length, glm::vec3 pos) {
-    return pos - (cameraFront * length);
+glm::vec3 Camera::rayCast(float length, glm::vec3 pos, glm::vec3 dir) {
+    return pos + (dir * length);
 }
