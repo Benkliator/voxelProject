@@ -150,9 +150,9 @@ void World::reloadChunksAround(unsigned xChunk,
                 visibleChunks[i] = chunk;
                 chunk.findAdjacentChunks();
                 if (chunk.getRightChunk()) {
-                    loadQueue.push(chunk.getRightChunk());
+                    loadQueue.push_back(chunk.getRightChunk());
                 }
-                loadQueue.push(&visibleChunks[i]);
+                loadQueue.push_back(&visibleChunks[i]);
                 continue;
             } else if (visibleChunks[i].getPos().z >
                        zChunk + ((renderDistance) * 8)) { // -z
@@ -163,9 +163,9 @@ void World::reloadChunksAround(unsigned xChunk,
                 visibleChunks[i] = chunk;
                 chunk.findAdjacentChunks();
                 if (chunk.getFrontChunk()) {
-                    loadQueue.push(chunk.getFrontChunk());
+                    loadQueue.push_back(chunk.getFrontChunk());
                 }
-                loadQueue.push(&visibleChunks[i]);
+                loadQueue.push_back(&visibleChunks[i]);
                 continue;
             } else if (visibleChunks[i].getPos().x <
                        xChunk - ((renderDistance) * 8)) { // +x
@@ -176,9 +176,9 @@ void World::reloadChunksAround(unsigned xChunk,
                 visibleChunks[i] = chunk;
                 chunk.findAdjacentChunks();
                 if (chunk.getLeftChunk()) {
-                    loadQueue.push(chunk.getLeftChunk());
+                    loadQueue.push_back(chunk.getLeftChunk());
                 }
-                loadQueue.push(&visibleChunks[i]);
+                loadQueue.push_back(&visibleChunks[i]);
                 continue;
             } else if (visibleChunks[i].getPos().z <
                        zChunk - ((renderDistance) * 8)) { // +z
@@ -189,31 +189,37 @@ void World::reloadChunksAround(unsigned xChunk,
                 visibleChunks[i] = chunk;
                 chunk.findAdjacentChunks();
                 if (chunk.getBackChunk()) {
-                    loadQueue.push(chunk.getBackChunk());
+                    loadQueue.push_back(chunk.getBackChunk());
                 }
-                loadQueue.push(&visibleChunks[i]);
+                loadQueue.push_back(&visibleChunks[i]);
                 continue;
             }
         }
     }
+
+    std::sort(loadQueue.begin(), loadQueue.end(), 
+              [c=worldCenter](Chunk* chunkA, Chunk* chunkB) {
+                return(chunkB->distanceFrom(c) > chunkA->distanceFrom(c));
+              });
 }
 
 bool World::meshCatchup() {
     if (!loadQueue.front()) {
         while (!loadQueue.front() && !loadQueue.empty()) {
-            loadQueue.pop();
+            loadQueue.pop_front();
         }
     }
     if (!loadQueue.empty()) {
         loadQueue.front()->clearMesh();
         loadQueue.front()->generateMesh();
-        loadQueue.pop();
+        loadQueue.pop_front();
         return true;
     }
     return false;
 }
 
 void World::fullMeshCatchup() {
+    /*
     while (!loadQueue.empty()) {
         if (loadQueue.front()) {
             Chunk* chunk = loadQueue.front();
@@ -222,6 +228,7 @@ void World::fullMeshCatchup() {
         }
         loadQueue.pop();
     }
+    */
 }
 
 World::~World() {}

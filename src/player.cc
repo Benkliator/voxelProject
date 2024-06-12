@@ -143,16 +143,16 @@ void Player::movePlayer(GLFWwindow* window) {
     float gravitySpeed = 0.098;
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        velocity += glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
+        velocity += glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z)) * horizontalSpeed;
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        velocity -= glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z));
+        velocity -= glm::normalize(glm::vec3(cameraFront.x, 0, cameraFront.z)) * horizontalSpeed;
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        velocity -= glm::normalize(glm::cross(glm::vec3(cameraFront.x, 0, cameraFront.z), cameraUp));
+        velocity -= glm::normalize(glm::cross(glm::vec3(cameraFront.x, 0, cameraFront.z), cameraUp)) * horizontalSpeed;
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        velocity += glm::normalize(glm::cross(glm::vec3(cameraFront.x, 0, cameraFront.z), cameraUp));
+        velocity += glm::normalize(glm::cross(glm::vec3(cameraFront.x, 0, cameraFront.z), cameraUp)) * horizontalSpeed;
     }
 
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
@@ -235,6 +235,9 @@ void Player::movePlayer(GLFWwindow* window) {
         velocity.y /= 1.8;
         velocity.x /= 2.8;
         velocity.z /= 2.8;
+
+        prevCameraPos = nextCameraPos;
+        nextCameraPos += velocity;
     }
 }
 

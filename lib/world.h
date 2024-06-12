@@ -12,6 +12,7 @@
 #include <vector>
 #include <thread>
 #include <chrono>
+#include <deque>
 
 const unsigned worldHeight = 254;
 //////////////////////////////////////////////////////////////////
@@ -41,8 +42,11 @@ private:
     void shaderInit();
 
     std::vector<Chunk> visibleChunks;
-    synchQueue<Chunk*> loadQueue;
+    //synchQueue<Chunk*> loadQueue;
     //std::queue<Chunk*> loadQueue;
+
+    std::deque<Chunk*> loadQueue;
+
     bool meshLoad = true;
 
     glm::uvec3 worldCenter;
