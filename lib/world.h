@@ -10,8 +10,6 @@
 #include <glm/vec3.hpp>
 #include <optional>
 #include <vector>
-#include <thread>
-#include <chrono>
 #include <deque>
 
 const unsigned worldHeight = 254;

@@ -197,6 +197,7 @@ bool Chunk::removeBlock(unsigned x, unsigned y, unsigned z) {
     return false;
 }
 
+// NOTE: NOT USED OR IMPLEMENTED
 bool Chunk::removeBlockMesh(unsigned x, unsigned y, unsigned z) {
     // TODO: Implement, for implement:
     // How can we know where a blocks mesh data
@@ -272,21 +273,48 @@ void Chunk::generateTerrain() {
                 // Using the following line in an if or switch case
                 // can let you dynamically decide block generations at
                 // different (x, y, z) values.
+                unsigned treeHeight = 0;
                 enum Block::BlockType bt;
                 if (y <= 1 + yIntercept && !(y < height)) {
                     bt = Block::Water;
                 } else if (y > height && y < height + 1) {
                     bt = Block::Grass;
-                } else if (y < height) {
+                    treeHeight = placeTree();
+                } else if (y > (height - 3) && y < height) {
                     bt = Block::Dirt;
+                } else if (y <= height - 3){
+                    bt = Block::Stone;
                 } else {
                     bt = Block::Air;
                 }
-                unsigned val = bt << typeOffset;
-                blockArray.push_back(val);
+                unsigned block = bt << typeOffset;
+                blockArray.push_back(block);
+
+                if (treeHeight) {
+                    bt = Block::Log;
+                    block = bt << typeOffset;
+                    for (int i = 0; i < treeHeight; ++i) {
+                        blockArray.push_back(block);
+                    }
+                    y += treeHeight;
+                }
             }
         }
     }
+}
+
+unsigned Chunk::placeTree() {
+    std::random_device rd; // Seed for "random" number generation.
+    std::mt19937 gen( rd() );
+    std::uniform_int_distribution<> treeRoll(1, 150);
+
+    unsigned treeResult = treeRoll(gen);
+
+    if (treeResult == 1) {
+        std::uniform_int_distribution<> treeLength(2, 5);
+        return treeLength(gen);
+    }
+    return 0;
 }
 
 void Chunk::renderInit() {
@@ -448,6 +476,13 @@ unsigned Chunk::distanceFrom(glm::uvec3 point) {
     return std::max(abs(static_cast<int>(point.x) - static_cast<int>(pos.x)),
                     abs(static_cast<int>(point.z) - static_cast<int>(pos.z)));
 }
+
+unsigned Chunk::minDistanceFrom(glm::uvec3 point) {
+    return std::min(abs(static_cast<int>(point.x) - static_cast<int>(pos.x)),
+                    abs(static_cast<int>(point.z) - static_cast<int>(pos.z)));
+}
+
+
 
 Chunk* Chunk::getFrontChunk() {
     return frontChunk;

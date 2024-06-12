@@ -199,7 +199,7 @@ void World::reloadChunksAround(unsigned xChunk,
 
     std::sort(loadQueue.begin(), loadQueue.end(), 
               [c=worldCenter](Chunk* chunkA, Chunk* chunkB) {
-                return(chunkB->distanceFrom(c) > chunkA->distanceFrom(c));
+                return(chunkB->minDistanceFrom(c) > chunkA->minDistanceFrom(c));
               });
 }
 

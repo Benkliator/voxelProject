@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <vector>
 #include <cmath>
+#include <random>
 
 class World;
 
@@ -34,6 +35,9 @@ public:
     glm::uvec3 getPos();
     bool hasLoaded();
     unsigned distanceFrom(glm::uvec3);
+    unsigned minDistanceFrom(glm::uvec3);
+
+    unsigned placeTree();
 
     Chunk* getFrontChunk();
     Chunk* getBackChunk();
