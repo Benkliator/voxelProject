@@ -44,9 +44,8 @@ void Player::checkCollisionX(int height) {
             checkBlock = world->getBlock(xPos, std::round(nextCameraPos.y - height), zPos).value_or(Block::Air << typeOffset);
             if (!isAir(checkBlock)) {
                 velocity.x = 0;
-                float wallPos = xPos - 0.5f - playerWidth;
+                float wallPos = xPos - 0.5f - playerWidth - 0.001;
                 nextCameraPos.x = wallPos;
-                collision = true;
                 break;
             }
         } else if (velocity.x < 0) {
@@ -54,9 +53,8 @@ void Player::checkCollisionX(int height) {
             checkBlock = world->getBlock(xPos, std::round(nextCameraPos.y - height), zPos).value_or(Block::Air << typeOffset);
             if (!isAir(checkBlock)) {
                 velocity.x = 0;
-                float wallPos = xPos + 0.5f + playerWidth;
+                float wallPos = xPos + 0.5f + playerWidth + 0.001;
                 nextCameraPos.x = wallPos;
-                collision = true;
                 break;
             }
         }
@@ -77,9 +75,8 @@ void Player::checkCollisionZ(int height) {
             checkBlock = world->getBlock(xPos, std::round(nextCameraPos.y - height), zPos).value_or(Block::Air << typeOffset);
             if (!isAir(checkBlock)) {
                 velocity.z = 0;
-                float wallPos = zPos - 0.5f - playerWidth;
+                float wallPos = zPos - 0.5f - playerWidth - 0.001;
                 nextCameraPos.z = wallPos;
-                collision = true;
                 break;
             }
         } else if (velocity.z < 0) {
@@ -87,9 +84,8 @@ void Player::checkCollisionZ(int height) {
             checkBlock = world->getBlock(xPos, std::round(nextCameraPos.y - height), zPos).value_or(Block::Air << typeOffset);
             if (!isAir(checkBlock)) {
                 velocity.z = 0;
-                float wallPos = zPos + 0.5f + playerWidth;
+                float wallPos = zPos + 0.5f + playerWidth + 0.001;
                 nextCameraPos.z = wallPos;
-                collision = true;
                 break;
             }
         }

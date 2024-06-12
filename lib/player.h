@@ -42,7 +42,6 @@ private:
     Block::BlockFace viewFace;
     glm::vec3 velocity;
     bool onGround = false;
-    bool collision = false;
     glm::uvec3 chunkPos;
 
     Block::BlockType selectedBlock = Block::Dirt;
@@ -57,5 +56,5 @@ private:
 
     const float playerHeight = 1.5f;
     // NOTE: (playerWidth) out to all four sides
-    const float playerWidth = 0.20;
+    const float playerWidth = 0.200;
 };
