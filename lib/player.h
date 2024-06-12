@@ -56,5 +56,5 @@ private:
 
     const float playerHeight = 1.5f;
     // NOTE: (playerWidth) out to all four sides
-    const float playerWidth = 0.200;
+    const float playerWidth = 0.300;
 };
