@@ -149,13 +149,11 @@ void Player::checkCollision() {
     }
 }
 
-void Player::craft() {
-    std::string target = line.substr(7);
-    std::cout << "crafting: " << target << std::endl;
-}
-
-void Player::chatCallback(GLFWwindow* window, uint scancode) {
-    line += static_cast<char>(scancode);
+void Player::commandHandler() {
+    if (line.starts_with("/craft ")) {
+        std::string target = line.substr(7);
+        std::cout << "crafting: " << target << std::endl;
+    }
 }
 
 void Player::movePlayer(GLFWwindow* window) {
@@ -172,14 +170,12 @@ void Player::movePlayer(GLFWwindow* window) {
             if (typing) {
                 auto chatCallback = [](GLFWwindow* w, uint k) {
                     static_cast<Game*>(glfwGetWindowUserPointer(w))
-                        ->player->chatCallback(w, k);
+                        ->player->line += k;
                 };
                 glfwSetCharCallback(window, chatCallback);
             } else {
                 glfwSetCharCallback(window, nullptr);
-                if (line.starts_with("/craft ")) {
-                    craft();
-                }
+                commandHandler();
                 chatLog.emplace_back(std::move(line));
                 line = std::string{}; // reset
             }

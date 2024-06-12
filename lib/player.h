@@ -28,8 +28,7 @@ public:
 private:
     void view();
     void checkCollision();
-    void chatCallback(GLFWwindow*, uint);
-    void craft();
+    void commandHandler();
 
     World* world;
     Hud hud{};
