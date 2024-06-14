@@ -45,7 +45,7 @@ public:
     Chunk* getRightChunk();
 
     void findAdjacentChunks();
-    void transferData(std::vector<std::pair<glm::uvec3, enum Block::BlockType>>);
+    void transferData(std::vector<std::pair<glm::ivec3, enum Block::BlockType>>);
 
 private:
     void generateTerrain();
@@ -71,8 +71,8 @@ private:
     Chunk* backChunk = nullptr;
     Chunk* leftChunk = nullptr;
     Chunk* rightChunk = nullptr;
-    std::vector<std::pair<glm::uvec3, enum Block::BlockType>> frontChunkUpdates;
-    std::vector<std::pair<glm::uvec3, enum Block::BlockType>> backChunkUpdates;
-    std::vector<std::pair<glm::uvec3, enum Block::BlockType>> leftChunkUpdates;
-    std::vector<std::pair<glm::uvec3, enum Block::BlockType>> rightChunkUpdates;
+    std::vector<std::pair<glm::ivec3, enum Block::BlockType>> frontChunkUpdates;
+    std::vector<std::pair<glm::ivec3, enum Block::BlockType>> backChunkUpdates;
+    std::vector<std::pair<glm::ivec3, enum Block::BlockType>> leftChunkUpdates;
+    std::vector<std::pair<glm::ivec3, enum Block::BlockType>> rightChunkUpdates;
 };

@@ -287,13 +287,13 @@ void Chunk::loadStructure(const StructureData* structure, unsigned x, unsigned y
         int ny = updatePos.y + y;
         int nz = updatePos.z + z;
         if (nx > 15) {
-            rightChunkUpdates.emplace_back(glm::uvec3(nx - 15, ny, nz), bt);
+            rightChunkUpdates.emplace_back(glm::ivec3(nx - 16, ny, nz), bt);
         } else if (nx < 0) {
-            leftChunkUpdates.emplace_back(glm::uvec3(nx + 15, ny, nz), bt);
+            leftChunkUpdates.emplace_back(glm::ivec3(nx + 16, ny, nz), bt);
         } else if (nz > 15) {
-            frontChunkUpdates.emplace_back(glm::uvec3(nx, ny, nz - 15), bt);
+            frontChunkUpdates.emplace_back(glm::ivec3(nx, ny, nz - 16), bt);
         } else if (nz < 0) {
-            backChunkUpdates.emplace_back(glm::uvec3(nx, ny, nz + 15), bt);
+            backChunkUpdates.emplace_back(glm::ivec3(nx, ny, nz + 16), bt);
         } else {
             size_t ix = ny + (nz * 16 * worldHeight) + (nx * worldHeight);
             unsigned block = bt << typeOffset;
@@ -514,6 +514,7 @@ void Chunk::findAdjacentChunks() {
             frontChunk = &searchChunk.value().get();
             if (!frontChunkUpdates.empty()) {
                 frontChunk->transferData(frontChunkUpdates);
+                frontChunk->generateMesh();
             }
         }
     } else {
@@ -527,12 +528,13 @@ void Chunk::findAdjacentChunks() {
         if (searchChunk.has_value()) {
             backChunk = &searchChunk.value().get();
             if (!backChunkUpdates.empty()) {
-                backChunk->transferData(frontChunkUpdates);
+                backChunk->transferData(backChunkUpdates);
+                backChunk->generateMesh();
             }
         }
     } else {
         if (!backChunkUpdates.empty()) {
-            backChunk->transferData(frontChunkUpdates);
+            backChunk->transferData(backChunkUpdates);
         }
     }
 
@@ -541,12 +543,13 @@ void Chunk::findAdjacentChunks() {
         if (searchChunk.has_value()) {
             leftChunk = &searchChunk.value().get();
             if (!leftChunkUpdates.empty()) {
-                leftChunk->transferData(frontChunkUpdates);
+                leftChunk->transferData(leftChunkUpdates);
+                leftChunk->generateMesh();
             }
         }
     } else {
         if (!leftChunkUpdates.empty()) {
-            leftChunk->transferData(frontChunkUpdates);
+            leftChunk->transferData(leftChunkUpdates);
         }
     }
 
@@ -555,17 +558,18 @@ void Chunk::findAdjacentChunks() {
         if (searchChunk.has_value()) {
             rightChunk = &searchChunk.value().get();
             if (!rightChunkUpdates.empty()) {
-                rightChunk->transferData(frontChunkUpdates);
+                rightChunk->transferData(rightChunkUpdates);
+                rightChunk->generateMesh();
             }
         }
     } else {
         if (!rightChunkUpdates.empty()) {
-            rightChunk->transferData(frontChunkUpdates);
+            rightChunk->transferData(rightChunkUpdates);
         }
     }
 }
 
-void Chunk::transferData(std::vector<std::pair<glm::uvec3, enum Block::BlockType>> receivedUpdate) {
+void Chunk::transferData(std::vector<std::pair<glm::ivec3, enum Block::BlockType>> receivedUpdate) {
     const StructureData temp {receivedUpdate};
     loadStructure(&temp, 0, 0, 0);
 }
