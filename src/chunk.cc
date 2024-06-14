@@ -514,12 +514,14 @@ void Chunk::findAdjacentChunks() {
             frontChunk = &searchChunk.value().get();
             if (!frontChunkUpdates.empty()) {
                 frontChunk->transferData(frontChunkUpdates);
+                frontChunkUpdates.clear();
                 frontChunk->generateMesh();
             }
         }
     } else {
         if (!frontChunkUpdates.empty()) {
             frontChunk->transferData(frontChunkUpdates);
+            frontChunkUpdates.clear();
         }
     }
 
@@ -529,12 +531,14 @@ void Chunk::findAdjacentChunks() {
             backChunk = &searchChunk.value().get();
             if (!backChunkUpdates.empty()) {
                 backChunk->transferData(backChunkUpdates);
+                backChunkUpdates.clear();
                 backChunk->generateMesh();
             }
         }
     } else {
         if (!backChunkUpdates.empty()) {
             backChunk->transferData(backChunkUpdates);
+            backChunkUpdates.clear();
         }
     }
 
@@ -544,12 +548,14 @@ void Chunk::findAdjacentChunks() {
             leftChunk = &searchChunk.value().get();
             if (!leftChunkUpdates.empty()) {
                 leftChunk->transferData(leftChunkUpdates);
+                leftChunkUpdates.clear();
                 leftChunk->generateMesh();
             }
         }
     } else {
         if (!leftChunkUpdates.empty()) {
             leftChunk->transferData(leftChunkUpdates);
+            leftChunkUpdates.clear();
         }
     }
 
@@ -559,12 +565,14 @@ void Chunk::findAdjacentChunks() {
             rightChunk = &searchChunk.value().get();
             if (!rightChunkUpdates.empty()) {
                 rightChunk->transferData(rightChunkUpdates);
+                rightChunkUpdates.clear();
                 rightChunk->generateMesh();
             }
         }
     } else {
         if (!rightChunkUpdates.empty()) {
             rightChunk->transferData(rightChunkUpdates);
+            rightChunkUpdates.clear();
         }
     }
 }
