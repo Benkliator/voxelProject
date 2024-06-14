@@ -10,6 +10,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <optional>
 #include <sys/types.h>
+#include <iostream>
 
 // Generates buffers and VAO, creates terrain for chunk.
 Chunk::Chunk(unsigned x, unsigned z, World* w) : world{ w } {
@@ -106,28 +107,6 @@ void Chunk::generateMesh(std::optional<std::vector<ushort>> blockAreaArray) {
     loaded = true;
 }
 
-// NOTE: not currently used.
-void Chunk::reloadMesh(unsigned x, unsigned y, unsigned z) {
-    size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
-    std::vector<ushort> tempBlockArray;
-    tempBlockArray.push_back(blockArray[ix]);
-    if (y > 0) {
-        tempBlockArray.push_back(blockArray[ix - 1]);
-    }
-    if (y < worldHeight) {
-        tempBlockArray.push_back(blockArray[ix + 1]);
-    }
-    /*  HUGE MASSIVE NOTE:
-     *  This will need to update the meshes of adjacent CHUNKS!!!!
-     */
-    tempBlockArray.push_back(getBlockGlobal(x + 1, y, z).value_or(0)); // FIXME
-    tempBlockArray.push_back(getBlockGlobal(x - 1, y, z).value_or(0)); // FIXME
-    tempBlockArray.push_back(getBlockGlobal(x, y, z + 1).value_or(0)); // FIXME
-    tempBlockArray.push_back(getBlockGlobal(x, y, z - 1).value_or(0)); // FIXME
-    /* removeMeshArea(); */
-    generateMesh(tempBlockArray);
-}
-
 void Chunk::draw(unsigned shader) {
     glBindVertexArray(VAO);
     glUniform3uiv(
@@ -162,8 +141,8 @@ std::optional<ushort> Chunk::getBlockGlobal(long dX, long dY, long dZ) {
 
         // Assume that there will always be a configured adjacent chunk, else:
         // Maybe not?
-        //return std::nullopt;
-        return world->getBlock(pos.x + dX, pos.y + dY, pos.z + dZ);
+        return std::nullopt;
+        //return world->getBlock(pos.x + dX, pos.y + dY, pos.z + dZ);
     }
 }
 
@@ -195,19 +174,6 @@ bool Chunk::removeBlock(unsigned x, unsigned y, unsigned z) {
         return true;
     };
     return false;
-}
-
-// NOTE: NOT USED OR IMPLEMENTED
-bool Chunk::removeBlockMesh(unsigned x, unsigned y, unsigned z) {
-    // TODO: Implement, for implement:
-    // How can we know where a blocks mesh data
-    // is in the vertex and index mesh?
-    size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
-    unsigned block = blockArray[ix];
-    if (isAir(block)) {
-        return false;
-    }
-    return true;
 }
 
 bool Chunk::placeBlock(Block::BlockType bt,
@@ -263,23 +229,24 @@ void Chunk::generateTerrain() {
     float yIntercept = 30.0f;
     float freq = 0.8396323343; // Frequency
     float amp = 1.35;          // Amplifier
-    for (int x = 0; x < 16; x++) {
-        for (int z = 0; z < 16; z++) {
+    std::vector<int> heightmap;
+    for (int x = 0; x < 16; ++x) {
+        for (int z = 0; z < 16; ++z) {
             // Uses perlin function to calculate height for xz position
             float noise =
                 perlin(((z + pos.x) * freq) / 16, ((x + pos.z) * freq) / 16);
             float height = noise * amp + yIntercept;
-            for (unsigned y = 0; y < worldHeight; y++) {
+            for (unsigned y = 0; y < worldHeight; ++y) {
                 // Using the following line in an if or switch case
                 // can let you dynamically decide block generations at
                 // different (x, y, z) values.
-                unsigned treeHeight = 0;
                 enum Block::BlockType bt;
                 if (y <= 1 + yIntercept && !(y < height)) {
                     bt = Block::Water;
+                    heightmap.push_back(-1);
                 } else if (y > height && y < height + 1) {
                     bt = Block::Grass;
-                    treeHeight = placeTree();
+                    heightmap.push_back(y);
                 } else if (y > (height - 3) && y < height) {
                     bt = Block::Dirt;
                 } else if (y <= height - 3){
@@ -289,32 +256,72 @@ void Chunk::generateTerrain() {
                 }
                 unsigned block = bt << typeOffset;
                 blockArray.push_back(block);
+            }
+        }
+    }
 
-                if (treeHeight) {
-                    bt = Block::Log;
-                    block = bt << typeOffset;
-                    for (int i = 0; i < treeHeight; ++i) {
-                        blockArray.push_back(block);
-                    }
-                    y += treeHeight;
+    std::vector<unsigned> treeHeight = placeTree();
+    unsigned i = 0;
+    for (unsigned z = 0; z < 16; ++z) {
+        for (unsigned x = 0; x < 16; ++x) {
+            enum Block::BlockType bt = Block::Log;
+            if ((heightmap[i] != -1)) {
+                int y = heightmap[i];
+                int ix = y + 1 + (z * 16 * worldHeight) + (x * worldHeight);
+                for (int j = 0; j < treeHeight[i]; ++j) {
+                    unsigned block = bt << typeOffset;
+                    blockArray[ix + j] = block;
+                }
+                if (treeHeight[i]) {
+                    loadStructure(&treeLeaves, x, treeHeight[i] + y, z);
                 }
             }
+            ++i;
         }
     }
 }
 
-unsigned Chunk::placeTree() {
+void Chunk::loadStructure(const StructureData* structure, unsigned x, unsigned y, unsigned z) {
+    for (auto [updatePos, bt] : structure->data) {
+        int nx = updatePos.x + x;
+        int ny = updatePos.y + y;
+        int nz = updatePos.z + z;
+        if (nx > 15) {
+            rightChunkUpdates.emplace_back(glm::uvec3(nx - 15, ny, nz), bt);
+        } else if (nx < 0) {
+            leftChunkUpdates.emplace_back(glm::uvec3(nx + 15, ny, nz), bt);
+        } else if (nz > 15) {
+            frontChunkUpdates.emplace_back(glm::uvec3(nx, ny, nz - 15), bt);
+        } else if (nz < 0) {
+            backChunkUpdates.emplace_back(glm::uvec3(nx, ny, nz + 15), bt);
+        } else {
+            size_t ix = ny + (nz * 16 * worldHeight) + (nx * worldHeight);
+            unsigned block = bt << typeOffset;
+            blockArray[ix] = block;
+        }
+    }
+    //generateMesh();
+}
+
+std::vector<unsigned> Chunk::placeTree() {
     std::random_device rd; // Seed for "random" number generation.
     std::mt19937 gen( rd() );
-    std::uniform_int_distribution<> treeRoll(1, 150);
+    std::uniform_int_distribution<> treeRoll(0, 100);
+    std::uniform_int_distribution<> treeLength(3, 4);
 
-    unsigned treeResult = treeRoll(gen);
-
-    if (treeResult == 1) {
-        std::uniform_int_distribution<> treeLength(2, 5);
-        return treeLength(gen);
+    std::vector<unsigned> result;
+    
+    for (int x = 0; x < 16; ++x) {
+        for (int z = 0; z < 16; ++z) {
+            unsigned treeResult = treeRoll(gen);
+            if (treeResult == 1) {
+                 result.push_back(treeLength(gen));
+            } else {
+                result.push_back(0);
+            }
+        }
     }
-    return 0;
+    return result;
 }
 
 void Chunk::renderInit() {
@@ -505,24 +512,60 @@ void Chunk::findAdjacentChunks() {
         auto searchChunk = world->getChunkSlow(pos.x, 0, pos.z + 16);
         if (searchChunk.has_value()) {
             frontChunk = &searchChunk.value().get();
+            if (!frontChunkUpdates.empty()) {
+                frontChunk->transferData(frontChunkUpdates);
+            }
+        }
+    } else {
+        if (!frontChunkUpdates.empty()) {
+            frontChunk->transferData(frontChunkUpdates);
         }
     }
+
     if (!backChunk) {
         auto searchChunk = world->getChunkSlow(pos.x, 0, pos.z - 16);
         if (searchChunk.has_value()) {
             backChunk = &searchChunk.value().get();
+            if (!backChunkUpdates.empty()) {
+                backChunk->transferData(frontChunkUpdates);
+            }
+        }
+    } else {
+        if (!backChunkUpdates.empty()) {
+            backChunk->transferData(frontChunkUpdates);
         }
     }
+
     if (!leftChunk) {
         auto searchChunk = world->getChunkSlow(pos.x - 16, 0, pos.z);
         if (searchChunk.has_value()) {
             leftChunk = &searchChunk.value().get();
+            if (!leftChunkUpdates.empty()) {
+                leftChunk->transferData(frontChunkUpdates);
+            }
+        }
+    } else {
+        if (!leftChunkUpdates.empty()) {
+            leftChunk->transferData(frontChunkUpdates);
         }
     }
+
     if (!rightChunk) {
         auto searchChunk = world->getChunkSlow(pos.x + 16, 0, pos.z);
         if (searchChunk.has_value()) {
             rightChunk = &searchChunk.value().get();
+            if (!rightChunkUpdates.empty()) {
+                rightChunk->transferData(frontChunkUpdates);
+            }
+        }
+    } else {
+        if (!rightChunkUpdates.empty()) {
+            rightChunk->transferData(frontChunkUpdates);
         }
     }
+}
+
+void Chunk::transferData(std::vector<std::pair<glm::uvec3, enum Block::BlockType>> receivedUpdate) {
+    const StructureData temp {receivedUpdate};
+    loadStructure(&temp, 0, 0, 0);
 }

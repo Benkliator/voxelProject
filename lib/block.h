@@ -40,6 +40,7 @@ struct Block {
         FlowerWall,
         Brick,
         Sand,
+        Leaf,
         NUM_BLOCKTYPES,
     };
 

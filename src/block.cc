@@ -80,6 +80,13 @@ Block::Block(ushort blockType) {
         bottom  = 0b01000000;
         side    = 0b01000000;
     } break;
+
+    case Block::Leaf: {
+        top     = 0b00010010;
+        bottom  = 0b00010010;
+        side    = 0b00010010;
+    } break;
+
     }
 }
 
@@ -110,6 +117,8 @@ std::string blockToString(Block::BlockType bt) {
     case Block::Brick:
         return "Brick";
     case Block::Sand:
+        return "Sand";
+    case Block::Leaf:
         return "Sand";
     case Block::NUM_BLOCKTYPES:
         break;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mesh.h"
+#include "structures.h"
 #include "world.h"
 
 #include <GL/gl.h>
@@ -21,13 +22,11 @@ public:
     ~Chunk();
 
     void generateMesh(std::optional<std::vector<ushort>> = std::nullopt);
-    void reloadMesh(unsigned, unsigned, unsigned);
     void draw(unsigned);
 
     ushort getBlock(unsigned, unsigned, unsigned);
     std::optional<ushort> getBlockGlobal(long, long, long);
     bool removeBlock(unsigned, unsigned, unsigned);
-    bool removeBlockMesh(unsigned, unsigned, unsigned);
     bool placeBlock(Block::BlockType, unsigned, unsigned, unsigned);
     void clearMesh();
     void unhighlightBlock(unsigned, unsigned, unsigned);
@@ -37,7 +36,8 @@ public:
     unsigned distanceFrom(glm::uvec3);
     unsigned minDistanceFrom(glm::uvec3);
 
-    unsigned placeTree();
+    std::vector<unsigned> placeTree();
+    void loadStructure(const StructureData*, unsigned, unsigned, unsigned);
 
     Chunk* getFrontChunk();
     Chunk* getBackChunk();
@@ -45,6 +45,7 @@ public:
     Chunk* getRightChunk();
 
     void findAdjacentChunks();
+    void transferData(std::vector<std::pair<glm::uvec3, enum Block::BlockType>>);
 
 private:
     void generateTerrain();
@@ -70,4 +71,8 @@ private:
     Chunk* backChunk = nullptr;
     Chunk* leftChunk = nullptr;
     Chunk* rightChunk = nullptr;
+    std::vector<std::pair<glm::uvec3, enum Block::BlockType>> frontChunkUpdates;
+    std::vector<std::pair<glm::uvec3, enum Block::BlockType>> backChunkUpdates;
+    std::vector<std::pair<glm::uvec3, enum Block::BlockType>> leftChunkUpdates;
+    std::vector<std::pair<glm::uvec3, enum Block::BlockType>> rightChunkUpdates;
 };
