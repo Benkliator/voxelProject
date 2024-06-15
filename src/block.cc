@@ -37,6 +37,8 @@ Block::Block(ushort blockType) {
         top     = 0b00000011;
         bottom  = 0b00000011;
         side    = 0b00000011;
+        transparency = 1;
+        isTransparent = true;
     } break;
 
     case Block::Plank: {
@@ -85,6 +87,14 @@ Block::Block(ushort blockType) {
         top     = 0b00010010;
         bottom  = 0b00010010;
         side    = 0b00010010;
+        isTransparent = true;
+    } break;
+
+    case Block::Glass: {
+        top     = 0b00000010;
+        bottom  = 0b00000010;
+        side    = 0b00000010;
+        isTransparent = true;
     } break;
 
     }
@@ -119,13 +129,31 @@ std::string blockToString(Block::BlockType bt) {
     case Block::Sand:
         return "Sand";
     case Block::Leaf:
-        return "Sand";
+        return "Leaf";
+    case Block::Glass:
+        return "Glass";
     case Block::NUM_BLOCKTYPES:
         break;
     }
     __builtin_unreachable();
 };
 
+bool operator==(const Block& lhs, const Block& rhs) {
+    return (lhs.top == rhs.top) && (lhs.side == rhs.side) && (lhs.bottom == rhs.bottom);
+}
+
 bool isAir(unsigned block) {
     return (block & typeMask) >> typeOffset == Block::Air;
+}
+
+bool isTransparent(ushort block, ushort compare) {
+    Block blockType{
+        static_cast<ushort>((block & typeMask) >> typeOffset),
+    };
+
+    Block compBlockType{
+        static_cast<ushort>((compare & typeMask) >> typeOffset),
+    };
+
+    return ((blockType.isTransparent) || isAir(block)) && (blockType != compBlockType);
 }

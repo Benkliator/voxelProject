@@ -35,6 +35,7 @@ public:
     void reloadChunksAround(unsigned, unsigned, unsigned);
     bool meshCatchup();
     void fullMeshCatchup();
+    void sortVisibleChunks();
 
 private:
     void shaderInit();

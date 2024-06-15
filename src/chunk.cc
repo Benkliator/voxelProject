@@ -56,51 +56,51 @@ void Chunk::generateMesh(std::optional<std::vector<ushort>> blockAreaArray) {
         bool left;
         bool right;
         if (x >= 1 && x <= 14 && z >= 1 && z <= 14) {
-            top = isAir(getBlock(x, y + 1, z));
+            top = isTransparent(getBlock(x, y + 1, z), block);
             if (y != 0) {
-                bottom = isAir(getBlock(x, y - 1, z));
+                bottom = isTransparent(getBlock(x, y - 1, z), block);
             } else {
                 bottom = false;
             }
-            back = isAir(getBlock(x, y, z - 1));
-            front = isAir(getBlock(x, y, z + 1));
-            left = isAir(getBlock(x - 1, y, z));
-            right = isAir(getBlock(x + 1, y, z));
+            back =  isTransparent(getBlock(x, y, z - 1), block);
+            front = isTransparent(getBlock(x, y, z + 1), block);
+            left =  isTransparent(getBlock(x - 1, y, z), block);
+            right = isTransparent(getBlock(x + 1, y, z), block);
         } else {
-            top = isAir(getBlockGlobal(x, y + 1, z).value_or(obstruct));
-            bottom = isAir(getBlockGlobal(x, static_cast<long>(y) - 1, z).value_or(obstruct));
-            back = isAir(getBlockGlobal(x, y, static_cast<long>(z) - 1).value_or(obstruct));
-            front = isAir(getBlockGlobal(x, y, z + 1).value_or(obstruct));
-            left = isAir(getBlockGlobal(static_cast<long>(x) - 1, y, z).value_or(obstruct));
-            right = isAir(getBlockGlobal(x + 1, y, z).value_or(obstruct));
+            top =    isTransparent(getBlockGlobal(x, y + 1, z).value_or(obstruct), block);
+            bottom = isTransparent(getBlockGlobal(x, static_cast<long>(y) - 1, z).value_or(obstruct), block);
+            back =   isTransparent(getBlockGlobal(x, y, static_cast<long>(z) - 1).value_or(obstruct), block);
+            front =  isTransparent(getBlockGlobal(x, y, z + 1).value_or(obstruct), block);
+            left =   isTransparent(getBlockGlobal(static_cast<long>(x) - 1, y, z).value_or(obstruct), block);
+            right =  isTransparent(getBlockGlobal(x + 1, y, z).value_or(obstruct), block);
         }
         if (top) {
             blockArray[i] |= topMask;
-            loadFace(&topMeshData, blockType.top, x, y, z, block & 1);
+            loadFace(&topMeshData, blockType.top, x, y, z, blockType.transparency, block & 1);
         }
 
         if (bottom) {
             blockArray[i] |= bottomMask;
-            loadFace(&bottomMeshData, blockType.bottom, x, y, z, block & 1);
+            loadFace(&bottomMeshData, blockType.bottom, x, y, z, blockType.transparency, block & 1);
         }
 
         if (back) {
             blockArray[i] |= backMask;
-            loadFace(&backMeshData, blockType.side, x, y, z, block & 1);
+            loadFace(&backMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
         }
 
         if (front) {
             blockArray[i] |= frontMask;
-            loadFace(&frontMeshData, blockType.side, x, y, z, block & 1);
+            loadFace(&frontMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
         }
         if (left) {
             blockArray[i] |= leftMask;
-            loadFace(&leftMeshData, blockType.side, x, y, z, block & 1);
+            loadFace(&leftMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
         }
 
         if (right) {
             blockArray[i] |= rightMask;
-            loadFace(&rightMeshData, blockType.side, x, y, z, block & 1);
+            loadFace(&rightMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
         }
     }
     renderInit();
@@ -350,6 +350,7 @@ void Chunk::loadFace(const MeshData* data,
                      unsigned x,
                      unsigned y,
                      unsigned z,
+                     unsigned transparency,
                      bool highlight) {
     indexMesh.push_back((vertexMesh.size() / 2) + 0);
     indexMesh.push_back((vertexMesh.size() / 2) + 3);
@@ -370,7 +371,7 @@ void Chunk::loadFace(const MeshData* data,
 
         GLuint texX = data->texCoords[t++] + ((bt & zMask) >> zOffset);
         GLuint texY = data->texCoords[t++] + ((bt & xMask) >> xOffset);
-        GLuint texData = texX | texY << 8;
+        GLuint texData = texX | texY << 8 | transparency << 16;
 
         vertexMesh.push_back(vertex);
         vertexMesh.push_back(texData);

@@ -7,7 +7,7 @@ uniform mat4 projection;
 uniform uvec3 chunkPos;
 
 out vec2 texCoord;
-out vec3 color;
+out vec4 color;
 
 void main(void)
 {
@@ -18,23 +18,28 @@ void main(void)
     uint highlight = (vertex.x & 1048576u) >> 20u;
     switch (occlusion) {
         case 0u:
-            color = vec3(1.0, 1.0, 1.0);
+            color = vec4(1.0, 1.0, 1.0, 1.0);
             break;
         case 1u:
-            color = vec3(0.68, 0.68, 0.68);
+            color = vec4(0.68, 0.68, 0.68, 1.0);
             break;
         case 2u:
-            color = vec3(0.55, 0.55, 0.55);
+            color = vec4(0.55, 0.55, 0.55, 1.0);
             break;
         case 3u:
-            color = vec3(0.45, 0.45, 0.45);
+            color = vec4(0.45, 0.45, 0.45, 1.0);
             break;
     }
     if (highlight == 1u) {
-        color = vec3(0.5, 0.5, 0.5);
+        color = vec4(0.5, 0.5, 0.5, 1.0);
     }
     gl_Position = projection * view * vec4(x, y, z, 1.0);
 
     texCoord.x = float(vertex.y & 255u) / 16;
     texCoord.y = float((vertex.y >> 8u) & 255u) / 16;
+
+    float trans = (float((vertex.y >> 16u) & 3u) * 0.3);
+    if (trans != 0) {
+        color.a = trans;
+    }
 }

@@ -50,7 +50,7 @@ public:
 private:
     void generateTerrain();
     void renderInit();
-    void loadFace(const MeshData*, unsigned, unsigned, unsigned, unsigned, bool);
+    void loadFace(const MeshData*, unsigned, unsigned, unsigned, unsigned, unsigned, bool);
 
     std::array<ushort, 4> getOcclusion(unsigned, unsigned, unsigned, ushort);
     std::vector<ushort> blockArray;
@@ -58,14 +58,19 @@ private:
 
     World* world;
 
+    std::vector<unsigned> indexMesh;
+    std::vector<GLuint> vertexMesh;
+
+    std::vector<unsigned> transparentIndexMesh;
+    std::vector<GLuint> transparentVertexMesh;
+
     unsigned VAO;
     unsigned VBO;
     unsigned EBO;
     unsigned indexSize;
-    bool loaded = false;
 
-    std::vector<GLuint> vertexMesh;
-    std::vector<unsigned> indexMesh;
+
+    bool loaded = false;
 
     Chunk* frontChunk = nullptr;
     Chunk* backChunk = nullptr;

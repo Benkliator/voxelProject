@@ -41,6 +41,7 @@ struct Block {
         Brick,
         Sand,
         Leaf,
+        Glass,
         NUM_BLOCKTYPES,
     };
 
@@ -56,8 +57,16 @@ struct Block {
     ushort top;
     ushort bottom;
     ushort side;
+
+    // 0-3
+    unsigned transparency = 0;
+    bool isTransparent = 0;
 };
 
 // Helper functions
+
+bool operator==(const Block& lhs, const Block& rhs);
+
 bool isAir(unsigned);
+bool isTransparent(ushort, ushort);
 std::string blockToString(Block::BlockType);

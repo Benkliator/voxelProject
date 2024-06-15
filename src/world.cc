@@ -46,6 +46,9 @@ World::World(unsigned size, glm::vec3 center) {
         }
     }
 
+    // This makes the spiral redundant lol
+    sortVisibleChunks();
+
     std::cout << "Creating meshes..." << std::endl;
     std::for_each(visibleChunks.begin(), visibleChunks.end(), 
         [](Chunk& chunk) {
@@ -218,6 +221,13 @@ bool World::meshCatchup() {
     return false;
 }
 
+void World::sortVisibleChunks() {
+    std::sort(visibleChunks.begin(), visibleChunks.end(), 
+              [c=worldCenter](Chunk& chunkA, Chunk& chunkB) {
+                return(chunkB.minDistanceFrom(c) == chunkA.minDistanceFrom(c));
+              });
+}
+
 void World::fullMeshCatchup() {
     /*
     while (!loadQueue.empty()) {
@@ -234,6 +244,8 @@ void World::fullMeshCatchup() {
 World::~World() {}
 
 void World::draw(glm::mat4& view) {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glUseProgram(shaderProgram);
     glBindTexture(GL_TEXTURE_2D, textureMap);
 
