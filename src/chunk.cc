@@ -15,9 +15,13 @@
 // Generates buffers and VAO, creates terrain for chunk.
 Chunk::Chunk(unsigned x, unsigned z, World* w) : world{ w } {
     // Chunk offset
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+    glGenVertexArrays(1, &oVAO);
+    glGenBuffers     (1, &oVBO);
+    glGenBuffers     (1, &oEBO);
+
+    glGenVertexArrays(1, &tVAO);
+    glGenBuffers     (1, &tVBO);
+    glGenBuffers     (1, &tEBO);
 
     pos = {
         x * 16,
@@ -76,42 +80,71 @@ void Chunk::generateMesh(std::optional<std::vector<ushort>> blockAreaArray) {
         }
         if (top) {
             blockArray[i] |= topMask;
-            loadFace(&topMeshData, blockType.top, x, y, z, blockType.transparency, block & 1);
+            if (blockType.transparency) {
+                loadTransparentFace(&topMeshData, blockType.top, x, y, z, blockType.transparency, block & 1);
+            } else {
+                loadOpaqueFace(&topMeshData, blockType.top, x, y, z, blockType.transparency, block & 1);
+            }
         }
 
         if (bottom) {
             blockArray[i] |= bottomMask;
-            loadFace(&bottomMeshData, blockType.bottom, x, y, z, blockType.transparency, block & 1);
+            if (blockType.transparency) {
+                loadTransparentFace(&bottomMeshData, blockType.bottom, x, y, z, blockType.transparency, block & 1);
+            } else {
+                loadOpaqueFace(&bottomMeshData, blockType.bottom, x, y, z, blockType.transparency, block & 1);
+            }
         }
 
         if (back) {
             blockArray[i] |= backMask;
-            loadFace(&backMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
+            if (blockType.transparency) {
+                loadTransparentFace(&backMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
+            } else {
+                loadOpaqueFace(&backMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
+            }
         }
 
         if (front) {
             blockArray[i] |= frontMask;
-            loadFace(&frontMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
+            if (blockType.transparency) {
+                loadTransparentFace(&frontMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
+            } else {
+                loadOpaqueFace(&frontMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
+            }
         }
         if (left) {
             blockArray[i] |= leftMask;
-            loadFace(&leftMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
+            if (blockType.transparency) {
+                loadTransparentFace(&leftMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
+            } else {
+                loadOpaqueFace(&leftMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
+            }
         }
 
         if (right) {
             blockArray[i] |= rightMask;
-            loadFace(&rightMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
+            if (blockType.transparency) {
+                loadTransparentFace(&rightMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
+            } else {
+                loadOpaqueFace(&rightMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
+            }
         }
     }
-    renderInit();
+    opaqueRenderInit();
+    transparentRenderInit();
     loaded = true;
 }
 
 void Chunk::draw(unsigned shader) {
-    glBindVertexArray(VAO);
+    glBindVertexArray(oVAO);
     glUniform3uiv(
         glGetUniformLocation(shader, "chunkPos"), 1, glm::value_ptr(pos));
-    glDrawElements(GL_TRIANGLES, indexSize, GL_UNSIGNED_INT, 0);
+
+    glDrawElements(GL_TRIANGLES, oIndexMesh.size(), GL_UNSIGNED_INT, 0);
+
+    glBindVertexArray(tVAO);
+    glDrawElements(GL_TRIANGLES, tIndexMesh.size(), GL_UNSIGNED_INT, 0);
 }
 
 ushort Chunk::getBlock(unsigned x, unsigned y, unsigned z) {
@@ -141,8 +174,8 @@ std::optional<ushort> Chunk::getBlockGlobal(long dX, long dY, long dZ) {
 
         // Assume that there will always be a configured adjacent chunk, else:
         // Maybe not?
-        return std::nullopt;
-        //return world->getBlock(pos.x + dX, pos.y + dY, pos.z + dZ);
+        //return std::nullopt;
+        return world->getBlock(pos.x + dX, pos.y + dY, pos.z + dZ);
     }
 }
 
@@ -207,8 +240,11 @@ bool Chunk::placeBlock(Block::BlockType bt,
 }
 
 void Chunk::clearMesh() {
-    vertexMesh.clear();
-    indexMesh.clear();
+    oVertexMesh.clear();
+    oIndexMesh.clear();
+
+    tVertexMesh.clear();
+    tIndexMesh.clear();
 }
 
 void Chunk::unhighlightBlock(unsigned x, unsigned y, unsigned z) {
@@ -324,20 +360,44 @@ std::vector<unsigned> Chunk::placeTree() {
     return result;
 }
 
-void Chunk::renderInit() {
-    indexSize = indexMesh.size();
-    glBindVertexArray(VAO);
+void Chunk::opaqueRenderInit() {
+    // Opaque rendering
+    oIndexSize = oIndexMesh.size();
+    glBindVertexArray(oVAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, oVBO);
     glBufferData(GL_ARRAY_BUFFER,
-                 vertexMesh.size() * sizeof(GLuint),
-                 vertexMesh.data(),
+                 oVertexMesh.size() * sizeof(GLuint),
+                 oVertexMesh.data(),
                  GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, oEBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 indexMesh.size() * sizeof(unsigned),
-                 indexMesh.data(),
+                 oIndexMesh.size() * sizeof(unsigned),
+                 oIndexMesh.data(),
+                 GL_STATIC_DRAW);
+
+    glVertexAttribIPointer(
+        0, 2, GL_UNSIGNED_INT, 2 * sizeof(GLuint), (void*)(0));
+    glEnableVertexAttribArray(0);
+    
+}
+
+void Chunk::transparentRenderInit() {
+    // Transparent rendering
+    oIndexSize = oIndexMesh.size();
+    glBindVertexArray(tVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, tVBO);
+    glBufferData(GL_ARRAY_BUFFER,
+                 tVertexMesh.size() * sizeof(GLuint),
+                 tVertexMesh.data(),
+                 GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 tIndexMesh.size() * sizeof(unsigned),
+                 tIndexMesh.data(),
                  GL_STATIC_DRAW);
 
     glVertexAttribIPointer(
@@ -345,19 +405,19 @@ void Chunk::renderInit() {
     glEnableVertexAttribArray(0);
 }
 
-void Chunk::loadFace(const MeshData* data,
+void Chunk::loadOpaqueFace(const MeshData* data,
                      unsigned bt,
                      unsigned x,
                      unsigned y,
                      unsigned z,
                      unsigned transparency,
                      bool highlight) {
-    indexMesh.push_back((vertexMesh.size() / 2) + 0);
-    indexMesh.push_back((vertexMesh.size() / 2) + 3);
-    indexMesh.push_back((vertexMesh.size() / 2) + 1);
-    indexMesh.push_back((vertexMesh.size() / 2) + 2);
-    indexMesh.push_back((vertexMesh.size() / 2) + 1);
-    indexMesh.push_back((vertexMesh.size() / 2) + 3);
+    oIndexMesh.push_back((oVertexMesh.size() / 2) + 0);
+    oIndexMesh.push_back((oVertexMesh.size() / 2) + 3);
+    oIndexMesh.push_back((oVertexMesh.size() / 2) + 1);
+    oIndexMesh.push_back((oVertexMesh.size() / 2) + 2);
+    oIndexMesh.push_back((oVertexMesh.size() / 2) + 1);
+    oIndexMesh.push_back((oVertexMesh.size() / 2) + 3);
     std::array<ushort, 4> occlusionArray =
         getOcclusion(x, y, z, data->blockFace);
     size_t j = 0;
@@ -373,8 +433,41 @@ void Chunk::loadFace(const MeshData* data,
         GLuint texY = data->texCoords[t++] + ((bt & xMask) >> xOffset);
         GLuint texData = texX | texY << 8 | transparency << 16;
 
-        vertexMesh.push_back(vertex);
-        vertexMesh.push_back(texData);
+        oVertexMesh.push_back(vertex);
+        oVertexMesh.push_back(texData);
+    }
+}
+
+void Chunk::loadTransparentFace(const MeshData* data,
+                     unsigned bt,
+                     unsigned x,
+                     unsigned y,
+                     unsigned z,
+                     unsigned transparency,
+                     bool highlight) {
+    tIndexMesh.push_back((tVertexMesh.size() / 2) + 0);
+    tIndexMesh.push_back((tVertexMesh.size() / 2) + 3);
+    tIndexMesh.push_back((tVertexMesh.size() / 2) + 1);
+    tIndexMesh.push_back((tVertexMesh.size() / 2) + 2);
+    tIndexMesh.push_back((tVertexMesh.size() / 2) + 1);
+    tIndexMesh.push_back((tVertexMesh.size() / 2) + 3);
+    std::array<ushort, 4> occlusionArray =
+        getOcclusion(x, y, z, data->blockFace);
+    size_t j = 0;
+    size_t t = 0;
+    for (size_t i = 0; i < 4; i++) {
+        GLuint xi = x + data->faceCoords[j++];
+        GLuint yi = y + data->faceCoords[j++];
+        GLuint zi = z + data->faceCoords[j++];
+        GLuint vertex = xi | yi << 5 | zi << 13 | occlusionArray[i] << 18 |
+                        static_cast<unsigned>(highlight) << 20;
+
+        GLuint texX = data->texCoords[t++] + ((bt & zMask) >> zOffset);
+        GLuint texY = data->texCoords[t++] + ((bt & xMask) >> xOffset);
+        GLuint texData = texX | texY << 8 | transparency << 16;
+
+        tVertexMesh.push_back(vertex);
+        tVertexMesh.push_back(texData);
     }
 }
 

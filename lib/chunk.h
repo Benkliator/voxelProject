@@ -49,8 +49,11 @@ public:
 
 private:
     void generateTerrain();
-    void renderInit();
-    void loadFace(const MeshData*, unsigned, unsigned, unsigned, unsigned, unsigned, bool);
+    void opaqueRenderInit();
+    void transparentRenderInit();
+
+    void loadOpaqueFace(const MeshData*, unsigned, unsigned, unsigned, unsigned, unsigned, bool);
+    void loadTransparentFace(const MeshData*, unsigned, unsigned, unsigned, unsigned, unsigned, bool);
 
     std::array<ushort, 4> getOcclusion(unsigned, unsigned, unsigned, ushort);
     std::vector<ushort> blockArray;
@@ -58,17 +61,22 @@ private:
 
     World* world;
 
-    std::vector<unsigned> indexMesh;
-    std::vector<GLuint> vertexMesh;
+    std::vector<unsigned> oIndexMesh;
+    std::vector<GLuint> oVertexMesh;
 
-    std::vector<unsigned> transparentIndexMesh;
-    std::vector<GLuint> transparentVertexMesh;
+    std::vector<unsigned> tIndexMesh;
+    std::vector<GLuint> tVertexMesh;
 
-    unsigned VAO;
-    unsigned VBO;
-    unsigned EBO;
-    unsigned indexSize;
+    unsigned oVAO;
+    unsigned oVBO;
+    unsigned oEBO;
+    
+    unsigned tVAO;
+    unsigned tVBO;
+    unsigned tEBO;
 
+    unsigned oIndexSize;
+    unsigned tIndexSize;
 
     bool loaded = false;
 
