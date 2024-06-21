@@ -33,7 +33,8 @@ public:
     void highlightBlock(unsigned, unsigned, unsigned);
     glm::uvec3 getPos();
     bool hasLoaded();
-    unsigned distanceFrom(glm::uvec3);
+    float distanceFrom(glm::uvec3);
+    unsigned maxDistanceFrom(glm::uvec3);
     unsigned minDistanceFrom(glm::uvec3);
 
     std::vector<unsigned> placeTree();

@@ -281,8 +281,6 @@ void Player::breakBlock() {
     view();
 }
 
-// NOTE: this works but for future make the block face placig more intuitive
-// i.e somehow figure out which block is being looked at.
 void Player::placeBlock() {
     unsigned xChunk = viewBlock.x - (viewBlock.x % 16);
     unsigned zChunk = viewBlock.z - (viewBlock.z % 16);

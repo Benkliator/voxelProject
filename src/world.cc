@@ -142,7 +142,7 @@ void World::reloadChunksAround(unsigned xChunk,
     worldCenter = glm::uvec3(xChunk, yChunk, zChunk);
     size_t size = visibleChunks.size();
     for (size_t i = 0; i < size; i++) {
-        if (visibleChunks[i].distanceFrom(worldCenter) >
+        if (visibleChunks[i].maxDistanceFrom(worldCenter) >
             (renderDistance * 8) /* RD / 2 * 16 */) {
             if (visibleChunks[i].getPos().x >
                 xChunk + ((renderDistance) * 8)) { // -x
@@ -202,8 +202,16 @@ void World::reloadChunksAround(unsigned xChunk,
 
     std::sort(loadQueue.begin(), loadQueue.end(), 
               [c=worldCenter](Chunk* chunkA, Chunk* chunkB) {
-                return(chunkB->minDistanceFrom(c) > chunkA->minDistanceFrom(c));
+                return(chunkB->distanceFrom(c) > chunkA->distanceFrom(c));
               });
+}
+
+void World::sortVisibleChunks() {
+    std::sort(visibleChunks.begin(), visibleChunks.end(), 
+              [c=worldCenter](Chunk& chunkA, Chunk& chunkB) {
+                return(chunkB.distanceFrom(c) < chunkA.distanceFrom(c));
+              });
+
 }
 
 bool World::meshCatchup() {
@@ -221,12 +229,6 @@ bool World::meshCatchup() {
     return false;
 }
 
-void World::sortVisibleChunks() {
-    std::sort(visibleChunks.begin(), visibleChunks.end(), 
-              [c=worldCenter](Chunk& chunkA, Chunk& chunkB) {
-                return(chunkB.minDistanceFrom(c) == chunkA.minDistanceFrom(c));
-              });
-}
 
 void World::fullMeshCatchup() {
     /*

@@ -508,6 +508,10 @@ Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, ushort face) {
         }
     } break;
     case Block::Back: {
+        vertexOcclusion[0] = 1;
+        vertexOcclusion[1] = 1;
+        vertexOcclusion[2] = 1;
+        vertexOcclusion[3] = 1;
         if (!isAir(getBlock(x, y - 1, z))) {
             vertexOcclusion[0] = 1;
             vertexOcclusion[3] = 1;
@@ -522,6 +526,10 @@ Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, ushort face) {
         }
     } break;
     case Block::Front: {
+        vertexOcclusion[0] = 1;
+        vertexOcclusion[1] = 1;
+        vertexOcclusion[2] = 1;
+        vertexOcclusion[3] = 1;
         if (!isAir(getBlock(x, y - 1, z))) {
             vertexOcclusion[1] = 1;
             vertexOcclusion[2] = 1;
@@ -564,16 +572,20 @@ Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, ushort face) {
         }
     } break;
     case Block::Bottom: {
-        vertexOcclusion[0] = 3;
-        vertexOcclusion[1] = 3;
-        vertexOcclusion[2] = 3;
-        vertexOcclusion[3] = 3;
+        vertexOcclusion[0] = 2;
+        vertexOcclusion[1] = 2;
+        vertexOcclusion[2] = 2;
+        vertexOcclusion[3] = 2;
     }
     }
     return vertexOcclusion;
 }
 
-unsigned Chunk::distanceFrom(glm::uvec3 point) {
+float Chunk::distanceFrom(glm::uvec3 point) {
+    return std::sqrt(std::pow(static_cast<int>(point.x) - static_cast<int>(pos.x), 2) + std::pow(static_cast<int>(point.z) - static_cast<int>(pos.z), 2));
+}
+
+unsigned Chunk::maxDistanceFrom(glm::uvec3 point) {
     return std::max(abs(static_cast<int>(point.x) - static_cast<int>(pos.x)),
                     abs(static_cast<int>(point.z) - static_cast<int>(pos.z)));
 }

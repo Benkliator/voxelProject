@@ -123,7 +123,6 @@ void Game::tickUpdate() {
             processInput();
             skybox->update(currentTick / static_cast<double>(tickRate));
 
-            //gameCV.wait(lock);
             //gameCV.notify_one();
         }
         const auto end = std::chrono::high_resolution_clock::now();
