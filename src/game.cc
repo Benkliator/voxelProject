@@ -90,7 +90,7 @@ void Game::gameLoop() {
             glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            std::lock_guard<std::mutex> lock(gameMutex);
+            std::unique_lock<std::mutex> lock(gameMutex);
 
             world->meshCatchup();
 
@@ -106,7 +106,7 @@ void Game::gameLoop() {
             player->timeStep(deltaTime * static_cast<float>(tickRate));
             player->checkChunk();
         }
-        gameCV.notify_one();
+        gameCV.notify_all();
 
         glfwPollEvents();
         glfwSwapBuffers(window);
@@ -118,13 +118,13 @@ void Game::tickUpdate() {
         const auto start = std::chrono::high_resolution_clock::now();
         {
             ++currentTick;
-            std::lock_guard<std::mutex> lock(gameMutex);
+            std::unique_lock<std::mutex> lock(gameMutex);
+            gameCV.wait(lock);
 
             processInput();
             skybox->update(currentTick / static_cast<double>(tickRate));
-
-            //gameCV.notify_one();
         }
+        gameCV.notify_all();
         const auto end = std::chrono::high_resolution_clock::now();
         std::this_thread::sleep_for(std::chrono::milliseconds((1000 / tickRate)) -
                                     std::chrono::duration_cast<std::chrono::milliseconds>((end - start)));

@@ -41,12 +41,14 @@ private:
     void shaderInit();
 
     std::vector<Chunk> visibleChunks;
+    std::vector<int> renderOrder;
     //synchQueue<Chunk*> loadQueue;
     //std::queue<Chunk*> loadQueue;
 
     std::deque<Chunk*> loadQueue;
 
     bool meshLoad = true;
+    bool shouldSort = false;
 
     glm::uvec3 worldCenter;
     unsigned renderDistance;

@@ -246,8 +246,10 @@ void Player::timeStep(float dt) {
 }
 
 void Player::checkChunk() {
-    unsigned xChunk = static_cast<unsigned>(cameraPos.x) - (static_cast<unsigned>(cameraPos.x) % 16);
-    unsigned zChunk = static_cast<unsigned>(cameraPos.z) - (static_cast<unsigned>(cameraPos.z) % 16);
+    unsigned xChunk = static_cast<unsigned>(std::round(nextCameraPos.x)) 
+                    - (static_cast<unsigned>(std::round(nextCameraPos.x)) % 16);
+    unsigned zChunk = static_cast<unsigned>(std::round(nextCameraPos.z)) 
+                    - (static_cast<unsigned>(std::round(nextCameraPos.z)) % 16);
     glm::uvec3 tempChunkPos = glm::uvec3(xChunk, 0, zChunk);
     if (tempChunkPos != chunkPos) {
         world->reloadChunksAround(xChunk, 0, zChunk);
@@ -325,7 +327,7 @@ void Player::placeBlock() {
         return;
     }
 
-    tempChunkOpt = world->getChunkFast(xChunk, 0, zChunk);
+    tempChunkOpt = world->getChunkSlow(xChunk, 0, zChunk);
     if (tempChunkOpt.has_value()) {
         Chunk& tempChunk = tempChunkOpt.value().get();
         tempChunk.placeBlock(

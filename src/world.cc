@@ -8,6 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <optional>
+#include <numeric>
 
 World::World(unsigned size, glm::vec3 center) {
     if (!(size % 2)) {
@@ -45,6 +46,9 @@ World::World(unsigned size, glm::vec3 center) {
             z += ((x >= 0) ? -1 : 1);
         }
     }
+
+    renderOrder = std::vector<int>(visibleChunks.size());
+    std::iota(renderOrder.begin(), renderOrder.end(), 0);
 
     // This makes the spiral redundant lol
     sortVisibleChunks();
@@ -88,51 +92,11 @@ World::getChunkSlow(unsigned x, unsigned y, unsigned z) {
 std::optional<std::reference_wrapper<Chunk>>
 World::getChunkFast(unsigned x, unsigned y, unsigned z) {
     glm::uvec3 findPos{ x, y, z };
-    Chunk* searchChunk = &*visibleChunks.begin();
-    if (searchChunk->getPos().x > findPos.x) {
-        while (searchChunk->getPos().x != findPos.x) {
-            Chunk* next = searchChunk->getLeftChunk();
-            if (next) {
-                searchChunk = next;
-            } else {
-                break;
-            }
-        }
-    } else if (searchChunk->getPos().x < findPos.x) {
-        while (searchChunk->getPos().x != findPos.x) {
-            Chunk* next = searchChunk->getRightChunk();
-            if (next) {
-                searchChunk = next;
-            } else {
-                break;
-            }
+    for (size_t i = 0; i < visibleChunks.size(); i++) {
+        if (visibleChunks[i].getPos() == findPos) {
+            return std::make_optional(std::ref(visibleChunks[i]));
         }
     }
-
-    if (searchChunk->getPos().z > findPos.z) {
-        while (searchChunk->getPos().z != findPos.z) {
-            Chunk* next = searchChunk->getBackChunk();
-            if (next) {
-                searchChunk = next;
-            } else {
-                break;
-            }
-        }
-    } else if (searchChunk->getPos().z < findPos.z) {
-        while (searchChunk->getPos().z != findPos.z) {
-            Chunk* next = searchChunk->getFrontChunk();
-            if (next) {
-                searchChunk = next;
-            } else {
-                break;
-            }
-        }
-    }
-
-    if (searchChunk->getPos() == findPos) {
-        return std::make_optional(std::ref(*searchChunk));
-    }
-
     return std::nullopt;
 }
 
@@ -151,9 +115,9 @@ void World::reloadChunksAround(unsigned xChunk,
                              (visibleChunks[i].getPos().z / 16),
                              this };
                 visibleChunks[i] = chunk;
-                chunk.findAdjacentChunks();
-                if (chunk.getRightChunk()) {
-                    loadQueue.push_back(chunk.getRightChunk());
+                visibleChunks[i].findAdjacentChunks();
+                if (visibleChunks[i].getRightChunk()) {
+                    loadQueue.push_back(visibleChunks[i].getRightChunk());
                 }
                 loadQueue.push_back(&visibleChunks[i]);
                 continue;
@@ -164,9 +128,9 @@ void World::reloadChunksAround(unsigned xChunk,
                                  renderDistance,
                              this };
                 visibleChunks[i] = chunk;
-                chunk.findAdjacentChunks();
-                if (chunk.getFrontChunk()) {
-                    loadQueue.push_back(chunk.getFrontChunk());
+                visibleChunks[i].findAdjacentChunks();
+                if (visibleChunks[i].getFrontChunk()) {
+                    loadQueue.push_back(visibleChunks[i].getFrontChunk());
                 }
                 loadQueue.push_back(&visibleChunks[i]);
                 continue;
@@ -177,9 +141,9 @@ void World::reloadChunksAround(unsigned xChunk,
                              (visibleChunks[i].getPos().z / 16),
                              this };
                 visibleChunks[i] = chunk;
-                chunk.findAdjacentChunks();
-                if (chunk.getLeftChunk()) {
-                    loadQueue.push_back(chunk.getLeftChunk());
+                visibleChunks[i].findAdjacentChunks();
+                if (visibleChunks[i].getLeftChunk()) {
+                    loadQueue.push_back(visibleChunks[i].getLeftChunk());
                 }
                 loadQueue.push_back(&visibleChunks[i]);
                 continue;
@@ -190,9 +154,9 @@ void World::reloadChunksAround(unsigned xChunk,
                                  renderDistance,
                              this };
                 visibleChunks[i] = chunk;
-                chunk.findAdjacentChunks();
-                if (chunk.getBackChunk()) {
-                    loadQueue.push_back(chunk.getBackChunk());
+                visibleChunks[i].findAdjacentChunks();
+                if (visibleChunks[i].getBackChunk()) {
+                    loadQueue.push_back(visibleChunks[i].getBackChunk());
                 }
                 loadQueue.push_back(&visibleChunks[i]);
                 continue;
@@ -201,17 +165,17 @@ void World::reloadChunksAround(unsigned xChunk,
     }
 
     std::sort(loadQueue.begin(), loadQueue.end(), 
-              [c=worldCenter](Chunk* chunkA, Chunk* chunkB) {
-                return(chunkB->distanceFrom(c) > chunkA->distanceFrom(c));
+              [&](Chunk* chunkA, Chunk* chunkB) {
+                return(chunkB->distanceFrom(worldCenter) > chunkA->distanceFrom(worldCenter));
               });
+
+    sortVisibleChunks();
 }
 
 void World::sortVisibleChunks() {
-    std::sort(visibleChunks.begin(), visibleChunks.end(), 
-              [c=worldCenter](Chunk& chunkA, Chunk& chunkB) {
-                return(chunkB.distanceFrom(c) < chunkA.distanceFrom(c));
-              });
-
+    std::sort(renderOrder.begin(), renderOrder.end(), [&](int n1, int n2)
+            { return visibleChunks[n1].distanceFrom(worldCenter) > 
+                     visibleChunks[n2].distanceFrom(worldCenter); });
 }
 
 bool World::meshCatchup() {
@@ -261,9 +225,9 @@ void World::draw(glm::mat4& view) {
                        GL_FALSE,
                        glm::value_ptr(view));
 
-    for (Chunk& chunk : visibleChunks) {
-        if (chunk.hasLoaded())
-            chunk.draw(shaderProgram);
+    for (auto i : renderOrder) {
+        if (visibleChunks[i].hasLoaded())
+            visibleChunks[i].draw(shaderProgram);
     }
 }
 
