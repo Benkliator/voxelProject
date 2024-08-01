@@ -61,6 +61,9 @@ struct Block {
     // 0-3
     unsigned transparency = 0;
     bool isTransparent = 0;
+
+    // 0-15
+    unsigned glowValue = 0;
 };
 
 // Helper functions

@@ -44,6 +44,9 @@ private:
     unsigned tickRate = 20;
     unsigned currentTick = 1;
 
+    // Corresponds to hour (Military Time)
+    unsigned time = 0;
+
     std::mutex gameMutex;
     std::condition_variable gameCV;
 };

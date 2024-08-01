@@ -16,16 +16,31 @@
 
 class World;
 
+// Fix later lol, cba rn
+/*
+struct BlockFaceData { 
+    const MeshData*,
+
+    unsigned x,
+    unsigned y,
+    unsigned z,
+
+    unsigned transparency,
+    unsigned light,
+    unsigned isHighlighted
+};
+*/
+
 class Chunk {
 public:
     Chunk(unsigned, unsigned, World*);
     ~Chunk();
 
-    void generateMesh(std::optional<std::vector<ushort>> = std::nullopt);
+    void generateMesh(std::optional<std::vector<unsigned>> = std::nullopt);
     void draw(unsigned);
 
-    ushort getBlock(unsigned, unsigned, unsigned);
-    std::optional<ushort> getBlockGlobal(long, long, long);
+    unsigned getBlock(unsigned, unsigned, unsigned);
+    std::optional<unsigned> getBlockGlobal(long, long, long);
     bool removeBlock(unsigned, unsigned, unsigned);
     bool placeBlock(Block::BlockType, unsigned, unsigned, unsigned);
     void clearMesh();
@@ -53,11 +68,13 @@ private:
     void opaqueRenderInit();
     void transparentRenderInit();
 
-    void loadOpaqueFace(const MeshData*, unsigned, unsigned, unsigned, unsigned, unsigned, bool);
-    void loadTransparentFace(const MeshData*, unsigned, unsigned, unsigned, unsigned, unsigned, bool);
+    void loadOpaqueFace(const MeshData*, unsigned, unsigned, unsigned, unsigned, unsigned, unsigned, bool);
+    void loadTransparentFace(const MeshData*, unsigned, unsigned, unsigned, unsigned, unsigned, unsigned, bool);
+
+    void calculateLight();
 
     std::array<ushort, 4> getOcclusion(unsigned, unsigned, unsigned, ushort);
-    std::vector<ushort> blockArray;
+    std::vector<unsigned> blockArray;
     glm::uvec3 pos;
 
     World* world;

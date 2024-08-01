@@ -29,6 +29,6 @@ make run
 - [ ] Player animations.
 - [x] Procedurally generated terrain.
 - [ ] Loading / unloading of world data to improve performance.
-- [ ] Procedurally placed structures.
+- [x] Procedurally placed structures. (i.e Trees)
 - [ ] Sound.
 - [x] Ambient Occlusion

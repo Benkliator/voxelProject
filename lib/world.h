@@ -25,7 +25,7 @@ public:
     ~World();
 
     // Draws out every chunk in visibleChunks
-    void draw(glm::mat4& view);
+    void draw(glm::mat4&);
     std::optional<ushort> getBlock(long, long, long);
     std::optional<std::reference_wrapper<Chunk>>
     getChunkSlow(unsigned, unsigned, unsigned);

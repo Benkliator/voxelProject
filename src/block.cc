@@ -81,13 +81,13 @@ Block::Block(ushort blockType) {
         top     = 0b01000000;
         bottom  = 0b01000000;
         side    = 0b01000000;
+        glowValue = 15;
     } break;
 
     case Block::Leaf: {
         top     = 0b00010010;
         bottom  = 0b00010010;
         side    = 0b00010010;
-        isTransparent = true;
     } break;
 
     case Block::Glass: {

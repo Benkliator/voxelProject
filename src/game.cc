@@ -94,11 +94,11 @@ void Game::gameLoop() {
 
             world->meshCatchup();
 
-            glm::mat4 view = player->worldLook();
-            world->draw(view);
-
-            view = player->skyLook();
+            glm::mat4 view = player->skyLook();
             skybox->draw(view);
+
+            view = player->worldLook();
+            world->draw(view);
 
             std::string fps = std::to_string(static_cast<int>(1 / deltaTime));
             player->draw(fps);

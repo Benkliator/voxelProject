@@ -37,12 +37,13 @@ bool Chunk::hasLoaded() {
     return loaded;
 }
 
-void Chunk::generateMesh(std::optional<std::vector<ushort>> blockAreaArray) {
-    std::vector<ushort> blocks = blockAreaArray.value_or(this->blockArray);
+void Chunk::generateMesh(std::optional<std::vector<unsigned>> blockAreaArray) {
+    calculateLight();
+    std::vector<unsigned> blocks = blockAreaArray.value_or(this->blockArray);
     findAdjacentChunks();
-    const ushort obstruct = Block::Dirt << typeOffset;
+    const unsigned obstruct = Block::Dirt << typeOffset;
     for (size_t i = 0; i < blocks.size(); i++) {
-        ushort block = blocks[i];
+        unsigned block = blocks[i];
         if (isAir(block)) {
             continue;
         }
@@ -52,6 +53,7 @@ void Chunk::generateMesh(std::optional<std::vector<ushort>> blockAreaArray) {
         Block blockType{
             static_cast<ushort>((block & typeMask) >> typeOffset),
         };
+        unsigned light = ((block >> 16) & 15);
 
         bool top;
         bool bottom;
@@ -81,78 +83,85 @@ void Chunk::generateMesh(std::optional<std::vector<ushort>> blockAreaArray) {
         if (top) {
             blockArray[i] |= topMask;
             if (blockType.transparency) {
-                loadTransparentFace(&topMeshData, blockType.top, x, y, z, blockType.transparency, block & 1);
+                loadTransparentFace(&topMeshData, blockType.top, x, y, z, blockType.transparency, light, block & 1);
             } else {
-                loadOpaqueFace(&topMeshData, blockType.top, x, y, z, blockType.transparency, block & 1);
+                loadOpaqueFace(&topMeshData, blockType.top, x, y, z, blockType.transparency, light, block & 1);
             }
         }
 
         if (bottom) {
             blockArray[i] |= bottomMask;
             if (blockType.transparency) {
-                loadTransparentFace(&bottomMeshData, blockType.bottom, x, y, z, blockType.transparency, block & 1);
+                loadTransparentFace(&bottomMeshData, blockType.bottom, x, y, z, blockType.transparency, light, block & 1);
             } else {
-                loadOpaqueFace(&bottomMeshData, blockType.bottom, x, y, z, blockType.transparency, block & 1);
+                loadOpaqueFace(&bottomMeshData, blockType.bottom, x, y, z, blockType.transparency, light, block & 1);
             }
         }
 
         if (back) {
             blockArray[i] |= backMask;
             if (blockType.transparency) {
-                loadTransparentFace(&backMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
+                loadTransparentFace(&backMeshData, blockType.side, x, y, z, blockType.transparency, light, block & 1);
             } else {
-                loadOpaqueFace(&backMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
+                loadOpaqueFace(&backMeshData, blockType.side, x, y, z, blockType.transparency, light, block & 1);
             }
         }
 
         if (front) {
             blockArray[i] |= frontMask;
             if (blockType.transparency) {
-                loadTransparentFace(&frontMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
+                loadTransparentFace(&frontMeshData, blockType.side, x, y, z, blockType.transparency, light, block & 1);
             } else {
-                loadOpaqueFace(&frontMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
+                loadOpaqueFace(&frontMeshData, blockType.side, x, y, z, blockType.transparency, light, block & 1);
             }
         }
         if (left) {
             blockArray[i] |= leftMask;
             if (blockType.transparency) {
-                loadTransparentFace(&leftMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
+                loadTransparentFace(&leftMeshData, blockType.side, x, y, z, blockType.transparency, light, block & 1);
             } else {
-                loadOpaqueFace(&leftMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
+                loadOpaqueFace(&leftMeshData, blockType.side, x, y, z, blockType.transparency, light, block & 1);
             }
         }
 
         if (right) {
             blockArray[i] |= rightMask;
             if (blockType.transparency) {
-                loadTransparentFace(&rightMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
+                loadTransparentFace(&rightMeshData, blockType.side, x, y, z, blockType.transparency, light, block & 1);
             } else {
-                loadOpaqueFace(&rightMeshData, blockType.side, x, y, z, blockType.transparency, block & 1);
+                loadOpaqueFace(&rightMeshData, blockType.side, x, y, z, blockType.transparency, light, block & 1);
             }
         }
     }
-    opaqueRenderInit();
-    transparentRenderInit();
+    if (!oIndexMesh.empty()) {
+        opaqueRenderInit();
+    }
+    if (!tIndexMesh.empty()) {
+        transparentRenderInit();
+    }
     loaded = true;
 }
 
 void Chunk::draw(unsigned shader) {
-    glBindVertexArray(oVAO);
     glUniform3uiv(
         glGetUniformLocation(shader, "chunkPos"), 1, glm::value_ptr(pos));
 
-    glDrawElements(GL_TRIANGLES, oIndexMesh.size(), GL_UNSIGNED_INT, 0);
-
-    glBindVertexArray(tVAO);
-    glDrawElements(GL_TRIANGLES, tIndexMesh.size(), GL_UNSIGNED_INT, 0);
+    if (!oIndexMesh.empty()) {
+        glBindVertexArray(oVAO);
+        glDrawElements(GL_TRIANGLES, oIndexMesh.size(), GL_UNSIGNED_INT, 0);
+    }
+    if (!tIndexMesh.empty()) {
+        glBindVertexArray(tVAO);
+        glDrawElements(GL_TRIANGLES, tIndexMesh.size(), GL_UNSIGNED_INT, 0);
+    }
 }
 
-ushort Chunk::getBlock(unsigned x, unsigned y, unsigned z) {
+unsigned Chunk::getBlock(unsigned x, unsigned y, unsigned z) {
     size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
     return blockArray[ix];
 }
 
-std::optional<ushort> Chunk::getBlockGlobal(long dX, long dY, long dZ) {
+std::optional<unsigned> Chunk::getBlockGlobal(long dX, long dY, long dZ) {
     if (dY < 0 || dY >= worldHeight) {
         return std::nullopt;
     }
@@ -173,8 +182,8 @@ std::optional<ushort> Chunk::getBlockGlobal(long dX, long dY, long dZ) {
         }
 
         // Assume that there will always be a configured adjacent chunk, else:
-        // Maybe not?
         //return std::nullopt;
+        // Maybe not?
         return world->getBlock(pos.x + dX, pos.y + dY, pos.z + dZ);
     }
 }
@@ -411,6 +420,7 @@ void Chunk::loadOpaqueFace(const MeshData* data,
                      unsigned y,
                      unsigned z,
                      unsigned transparency,
+                     unsigned light,
                      bool highlight) {
     oIndexMesh.push_back((oVertexMesh.size() / 2) + 0);
     oIndexMesh.push_back((oVertexMesh.size() / 2) + 3);
@@ -431,7 +441,7 @@ void Chunk::loadOpaqueFace(const MeshData* data,
 
         GLuint texX = data->texCoords[t++] + ((bt & zMask) >> zOffset);
         GLuint texY = data->texCoords[t++] + ((bt & xMask) >> xOffset);
-        GLuint texData = texX | texY << 8 | transparency << 16;
+        GLuint texData = texX | texY << 8 | transparency << 16 | light << 18;
 
         oVertexMesh.push_back(vertex);
         oVertexMesh.push_back(texData);
@@ -444,6 +454,7 @@ void Chunk::loadTransparentFace(const MeshData* data,
                      unsigned y,
                      unsigned z,
                      unsigned transparency,
+                     unsigned light,
                      bool highlight) {
     tIndexMesh.push_back((tVertexMesh.size() / 2) + 0);
     tIndexMesh.push_back((tVertexMesh.size() / 2) + 3);
@@ -464,7 +475,7 @@ void Chunk::loadTransparentFace(const MeshData* data,
 
         GLuint texX = data->texCoords[t++] + ((bt & zMask) >> zOffset);
         GLuint texY = data->texCoords[t++] + ((bt & xMask) >> xOffset);
-        GLuint texData = texX | texY << 8 | transparency << 16;
+        GLuint texData = texX | texY << 8 | transparency << 16 | light << 18;
 
         tVertexMesh.push_back(vertex);
         tVertexMesh.push_back(texData);
@@ -686,4 +697,34 @@ void Chunk::findAdjacentChunks() {
 void Chunk::transferData(std::vector<std::pair<glm::ivec3, enum Block::BlockType>> receivedUpdate) {
     const StructureData temp {receivedUpdate};
     loadStructure(&temp, 0, 0, 0);
+}
+
+// TODO:
+// Do some sort of BFS to determine the light of surrounding blocks,
+// each block away should have -1 light value of the prior.
+//
+// Also make sure light emitted from a block is removed whenever
+// that block is destroyed.
+void Chunk::calculateLight() {
+    unsigned size = blockArray.size();
+    for (size_t i = 0; i < size; ++i) {
+        unsigned block = blockArray[i];
+        Block blockType{
+            static_cast<ushort>((block & typeMask) >> typeOffset),
+        };
+
+        if (blockType.glowValue) {
+            blockArray[i] |= (blockType.glowValue << 16);
+
+            // size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
+            size_t ix = i + (16 * worldHeight) - 1;
+            blockArray[ix] |= ((blockType.glowValue - 4) << 16);
+            ix += (16 * worldHeight);
+            blockArray[ix] |= ((blockType.glowValue - 8) << 16);
+            ix += (16 * worldHeight);
+            blockArray[ix] |= ((blockType.glowValue - 15) << 16);
+        } else {
+            blockArray[i] |= (5 << 16);
+        }
+    }
 }
