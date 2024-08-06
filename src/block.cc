@@ -157,3 +157,11 @@ bool isTransparent(ushort block, ushort compare) {
 
     return ((blockType.isTransparent) || isAir(block)) && (blockType != compBlockType);
 }
+
+bool isTransparent(ushort block) {
+    Block blockType{
+        static_cast<ushort>((block & typeMask) >> typeOffset),
+    };
+
+    return (blockType.isTransparent) || isAir(block);
+}

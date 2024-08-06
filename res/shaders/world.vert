@@ -11,7 +11,8 @@ out vec4 light;
 
 void main(void)
 {
-    float lightValue = float((vertex.y >> 18u) & 15u) / 15.0;
+    float lightValue = float((vertex.y >> 18u) & 15u) / 15.0;    
+
     light = vec4(lightValue, lightValue, lightValue, 1.0);
     float x = float((vertex.x  & 31u)             + chunkPos.x) - 0.5;
     float y = float(((vertex.x & 8160u)    >> 5u) + chunkPos.y) - 0.5;

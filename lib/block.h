@@ -27,7 +27,7 @@ struct Block {
     ~Block() = default;
 
     enum BlockType : ushort {
-        Air,
+        Air = 0,
         Dirt,
         Grass,
         FlowerGrass,
@@ -72,4 +72,5 @@ bool operator==(const Block& lhs, const Block& rhs);
 
 bool isAir(unsigned);
 bool isTransparent(ushort, ushort);
+bool isTransparent(ushort);
 std::string blockToString(Block::BlockType);

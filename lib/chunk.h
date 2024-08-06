@@ -62,6 +62,7 @@ public:
 
     void findAdjacentChunks();
     void transferData(std::vector<std::pair<glm::ivec3, enum Block::BlockType>>);
+    void lightTraverse(size_t, unsigned, bool = false);
 
 private:
     void generateTerrain();

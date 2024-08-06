@@ -705,6 +705,9 @@ void Chunk::transferData(std::vector<std::pair<glm::ivec3, enum Block::BlockType
 //
 // Also make sure light emitted from a block is removed whenever
 // that block is destroyed.
+//
+//
+// NOTE: make it work cross chunks lol
 void Chunk::calculateLight() {
     unsigned size = blockArray.size();
     for (size_t i = 0; i < size; ++i) {
@@ -712,19 +715,109 @@ void Chunk::calculateLight() {
         Block blockType{
             static_cast<ushort>((block & typeMask) >> typeOffset),
         };
-
         if (blockType.glowValue) {
-            blockArray[i] |= (blockType.glowValue << 16);
-
-            // size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
-            size_t ix = i + (16 * worldHeight) - 1;
-            blockArray[ix] |= ((blockType.glowValue - 4) << 16);
-            ix += (16 * worldHeight);
-            blockArray[ix] |= ((blockType.glowValue - 8) << 16);
-            ix += (16 * worldHeight);
-            blockArray[ix] |= ((blockType.glowValue - 15) << 16);
+            lightTraverse(i, blockType.glowValue, true);
         } else {
-            blockArray[i] |= (5 << 16);
+            blockArray[i] |= (2 << 16);
         }
+
+    }
+}
+
+void Chunk::lightTraverse(size_t startIndex, unsigned initialGlow, bool source) {
+    blockArray[startIndex] |= (initialGlow << 16);
+    if (!source && !isTransparent(blockArray[startIndex])) {
+        return;
+    }
+    std::queue<std::pair<size_t, unsigned>> visitQueue;
+    visitQueue.emplace(startIndex, initialGlow);
+
+    while (!visitQueue.empty()) {
+        // size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
+        auto [index, glow] = visitQueue.front();
+        visitQueue.pop();
+
+        if (!glow) {
+            continue;
+        }
+
+        // Go one step in -x
+        int tempIndex = index - worldHeight;
+        unsigned currentBlock;
+        if (index % (worldHeight * 16) >= worldHeight) {
+            currentBlock = blockArray[tempIndex];
+            if (((currentBlock >> 16) & 15) < glow){
+                blockArray[tempIndex] |= (glow - 1 << 16);
+                if (isTransparent(currentBlock)) {
+                    visitQueue.emplace(tempIndex, glow - 1);
+                }
+            } 
+        } else {
+            leftChunk->lightTraverse(index + worldHeight * 15, glow - 1);
+        }
+
+        // Go one step in +x
+        tempIndex = index + worldHeight;
+        if (index % (worldHeight * 16) <= (worldHeight * 15)) {
+            currentBlock = blockArray[tempIndex];
+            if (((currentBlock >> 16) & 15) < glow){
+                blockArray[tempIndex] |= (glow - 1 << 16);
+                if (isTransparent(currentBlock)) {
+                    visitQueue.emplace(tempIndex, glow - 1);
+                }
+            } 
+        } else {
+            rightChunk->lightTraverse(index - worldHeight * 15, glow - 1);
+        }
+
+        // Go one step in -z
+        tempIndex = index - worldHeight * 16;
+        if (index > (worldHeight * 16)) {
+            currentBlock = blockArray[tempIndex];
+            if (((currentBlock >> 16) & 15) < glow){
+                blockArray[tempIndex] |= (glow - 1 << 16);
+                if (isTransparent(currentBlock)) {
+                    visitQueue.emplace(tempIndex, glow - 1);
+                }
+            } 
+        } else {
+            backChunk->lightTraverse(index + worldHeight * 16 * 15, glow - 1);
+            //backChunk->clearMesh();
+        }
+
+        // Go one step in +z
+        tempIndex = index + worldHeight * 16;
+        if (index < (worldHeight * 16 * 15)) {
+            currentBlock = blockArray[tempIndex];
+            if (((currentBlock >> 16) & 15) < glow){
+                blockArray[tempIndex] |= (glow - 1 << 16);
+                if (isTransparent(currentBlock)) {
+                    visitQueue.emplace(tempIndex, glow - 1);
+                }
+            } 
+        } else {
+            frontChunk->lightTraverse(index - worldHeight * 16 * 15, glow - 1);
+            //backChunk->clearMesh();
+        } 
+
+        // Go one step in -y
+        tempIndex = index - 1;
+        currentBlock = blockArray[tempIndex];
+        if (((currentBlock >> 16) & 15) < glow){
+            blockArray[tempIndex] |= (glow - 1 << 16);
+            if (isTransparent(currentBlock)) {
+                visitQueue.emplace(tempIndex, glow - 1);
+            }
+        } 
+
+        // Go one step in +y
+        tempIndex = index + 1;
+        currentBlock = blockArray[tempIndex];
+        if (((currentBlock >> 16) & 15) < glow){
+            blockArray[tempIndex] |= (glow - 1 << 16);
+            if (isTransparent(currentBlock)) {
+                visitQueue.emplace(tempIndex, glow - 1);
+            }
+        } 
     }
 }
