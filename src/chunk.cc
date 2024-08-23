@@ -718,7 +718,7 @@ void Chunk::calculateLight() {
         if (blockType.glowValue) {
             lightTraverse(i, blockType.glowValue, true);
         } else {
-            blockArray[i] |= (2 << 16);
+            blockArray[i] |= (12 << 16);
         }
 
     }
@@ -782,7 +782,6 @@ void Chunk::lightTraverse(size_t startIndex, unsigned initialGlow, bool source) 
             } 
         } else {
             backChunk->lightTraverse(index + worldHeight * 16 * 15, glow - 1);
-            //backChunk->clearMesh();
         }
 
         // Go one step in +z
@@ -797,7 +796,6 @@ void Chunk::lightTraverse(size_t startIndex, unsigned initialGlow, bool source) 
             } 
         } else {
             frontChunk->lightTraverse(index - worldHeight * 16 * 15, glow - 1);
-            //backChunk->clearMesh();
         } 
 
         // Go one step in -y
