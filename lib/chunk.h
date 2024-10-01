@@ -36,7 +36,7 @@ public:
     Chunk(unsigned, unsigned, World*);
     ~Chunk();
 
-    void generateMesh(std::optional<std::vector<unsigned>> = std::nullopt);
+    void generateMesh();
     void draw(unsigned);
 
     unsigned getBlock(unsigned, unsigned, unsigned);
@@ -62,7 +62,7 @@ public:
 
     void findAdjacentChunks();
     void transferData(std::vector<std::pair<glm::ivec3, enum Block::BlockType>>);
-    void lightTraverse(size_t, unsigned, bool = false);
+    void lightTraverse(size_t, unsigned char, bool = false);
 
 private:
     void generateTerrain();
@@ -75,7 +75,10 @@ private:
     void calculateLight();
 
     std::array<ushort, 4> getOcclusion(unsigned, unsigned, unsigned, ushort);
-    std::vector<unsigned> blockArray;
+    std::array<unsigned, 16 * 16 * 254> blockArray;
+    // Light values for each face of a block,
+    // Top, Bottom, Left, Right, Front, Back
+    std::array<std::array<unsigned char, 6>, 16 * 16 * 254> lightingFaces;
     glm::uvec3 pos;
 
     World* world;

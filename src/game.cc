@@ -100,6 +100,7 @@ void Game::gameLoop() {
             view = player->worldLook();
             world->draw(view);
 
+
             std::string fps = std::to_string(static_cast<int>(1 / deltaTime));
             player->draw(fps);
 

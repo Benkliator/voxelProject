@@ -81,7 +81,7 @@ Block::Block(ushort blockType) {
         top     = 0b01000000;
         bottom  = 0b01000000;
         side    = 0b01000000;
-        glowValue = 15;
+        glowValue = 10;
     } break;
 
     case Block::Leaf: {

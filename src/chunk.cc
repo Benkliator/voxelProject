@@ -37,13 +37,20 @@ bool Chunk::hasLoaded() {
     return loaded;
 }
 
-void Chunk::generateMesh(std::optional<std::vector<unsigned>> blockAreaArray) {
+void Chunk::generateMesh() {
+    // Im going insane 
+    for (auto& blocks : lightingFaces) {
+        for (auto& face : blocks) {
+            if (!((face >> 16) & 15)) {
+                face = 3;
+            }
+        }
+    }
     calculateLight();
-    std::vector<unsigned> blocks = blockAreaArray.value_or(this->blockArray);
     findAdjacentChunks();
     const unsigned obstruct = Block::Dirt << typeOffset;
-    for (size_t i = 0; i < blocks.size(); i++) {
-        unsigned block = blocks[i];
+    for (size_t i = 0; i < blockArray.size(); i++) {
+        unsigned block = blockArray[i];
         if (isAir(block)) {
             continue;
         }
@@ -53,7 +60,6 @@ void Chunk::generateMesh(std::optional<std::vector<unsigned>> blockAreaArray) {
         Block blockType{
             static_cast<ushort>((block & typeMask) >> typeOffset),
         };
-        unsigned light = ((block >> 16) & 15);
 
         bool top;
         bool bottom;
@@ -83,53 +89,53 @@ void Chunk::generateMesh(std::optional<std::vector<unsigned>> blockAreaArray) {
         if (top) {
             blockArray[i] |= topMask;
             if (blockType.transparency) {
-                loadTransparentFace(&topMeshData, blockType.top, x, y, z, blockType.transparency, light, block & 1);
+                loadTransparentFace(&topMeshData, blockType.top, x, y, z, blockType.transparency, lightingFaces[i][0], block & 1);
             } else {
-                loadOpaqueFace(&topMeshData, blockType.top, x, y, z, blockType.transparency, light, block & 1);
+                loadOpaqueFace(&topMeshData, blockType.top, x, y, z, blockType.transparency, lightingFaces[i][0], block & 1);
             }
         }
 
         if (bottom) {
             blockArray[i] |= bottomMask;
             if (blockType.transparency) {
-                loadTransparentFace(&bottomMeshData, blockType.bottom, x, y, z, blockType.transparency, light, block & 1);
+                loadTransparentFace(&bottomMeshData, blockType.bottom, x, y, z, blockType.transparency, lightingFaces[i][1], block & 1);
             } else {
-                loadOpaqueFace(&bottomMeshData, blockType.bottom, x, y, z, blockType.transparency, light, block & 1);
+                loadOpaqueFace(&bottomMeshData, blockType.bottom, x, y, z, blockType.transparency, lightingFaces[i][1], block & 1);
             }
         }
 
         if (back) {
             blockArray[i] |= backMask;
             if (blockType.transparency) {
-                loadTransparentFace(&backMeshData, blockType.side, x, y, z, blockType.transparency, light, block & 1);
+                loadTransparentFace(&backMeshData, blockType.side, x, y, z, blockType.transparency, lightingFaces[i][5], block & 1);
             } else {
-                loadOpaqueFace(&backMeshData, blockType.side, x, y, z, blockType.transparency, light, block & 1);
+                loadOpaqueFace(&backMeshData, blockType.side, x, y, z, blockType.transparency, lightingFaces[i][5], block & 1);
             }
         }
 
         if (front) {
             blockArray[i] |= frontMask;
             if (blockType.transparency) {
-                loadTransparentFace(&frontMeshData, blockType.side, x, y, z, blockType.transparency, light, block & 1);
+                loadTransparentFace(&frontMeshData, blockType.side, x, y, z, blockType.transparency, lightingFaces[i][4], block & 1);
             } else {
-                loadOpaqueFace(&frontMeshData, blockType.side, x, y, z, blockType.transparency, light, block & 1);
+                loadOpaqueFace(&frontMeshData, blockType.side, x, y, z, blockType.transparency, lightingFaces[i][4], block & 1);
             }
         }
         if (left) {
             blockArray[i] |= leftMask;
             if (blockType.transparency) {
-                loadTransparentFace(&leftMeshData, blockType.side, x, y, z, blockType.transparency, light, block & 1);
+                loadTransparentFace(&leftMeshData, blockType.side, x, y, z, blockType.transparency, lightingFaces[i][2], block & 1);
             } else {
-                loadOpaqueFace(&leftMeshData, blockType.side, x, y, z, blockType.transparency, light, block & 1);
+                loadOpaqueFace(&leftMeshData, blockType.side, x, y, z, blockType.transparency, lightingFaces[i][2], block & 1);
             }
         }
 
         if (right) {
             blockArray[i] |= rightMask;
             if (blockType.transparency) {
-                loadTransparentFace(&rightMeshData, blockType.side, x, y, z, blockType.transparency, light, block & 1);
+                loadTransparentFace(&rightMeshData, blockType.side, x, y, z, blockType.transparency, lightingFaces[i][3], block & 1);
             } else {
-                loadOpaqueFace(&rightMeshData, blockType.side, x, y, z, blockType.transparency, light, block & 1);
+                loadOpaqueFace(&rightMeshData, blockType.side, x, y, z, blockType.transparency, lightingFaces[i][3], block & 1);
             }
         }
     }
@@ -271,7 +277,7 @@ glm::uvec3 Chunk::getPos() {
 }
 
 void Chunk::generateTerrain() {
-    float yIntercept = 30.0f;
+    float yIntercept = 10.0f;
     float freq = 0.8396323343; // Frequency
     float amp = 1.35;          // Amplifier
     std::vector<int> heightmap;
@@ -279,7 +285,7 @@ void Chunk::generateTerrain() {
         for (int z = 0; z < 16; ++z) {
             // Uses perlin function to calculate height for xz position
             float noise =
-                perlin(((z + pos.x) * freq) / 16, ((x + pos.z) * freq) / 16);
+                perlin(((x + pos.x) * freq) / 16, ((z + pos.z) * freq) / 16);
             float height = noise * amp + yIntercept;
             for (unsigned y = 0; y < worldHeight; ++y) {
                 // Using the following line in an if or switch case
@@ -289,10 +295,10 @@ void Chunk::generateTerrain() {
                 if (y <= 1 + yIntercept && !(y < height)) {
                     bt = Block::Water;
                     heightmap.push_back(-1);
-                } else if (y > height && y < height + 1) {
+                } else if  (y > height && y < height + 1) {
                     bt = Block::Grass;
                     heightmap.push_back(y);
-                } else if (y > (height - 3) && y < height) {
+                } else  if (y > (height - 3) && y < height) {
                     bt = Block::Dirt;
                 } else if (y <= height - 3){
                     bt = Block::Stone;
@@ -300,15 +306,16 @@ void Chunk::generateTerrain() {
                     bt = Block::Air;
                 }
                 unsigned block = bt << typeOffset;
-                blockArray.push_back(block);
+                size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
+                blockArray[ix] = block;
             }
         }
     }
 
     std::vector<unsigned> treeHeight = placeTree();
     unsigned i = 0;
-    for (unsigned z = 0; z < 16; ++z) {
-        for (unsigned x = 0; x < 16; ++x) {
+    for (unsigned x = 0; x < 16; ++x) {
+        for (unsigned z = 0; z < 16; ++z) {
             enum Block::BlockType bt = Block::Log;
             if ((heightmap[i] != -1)) {
                 int y = heightmap[i];
@@ -606,8 +613,6 @@ unsigned Chunk::minDistanceFrom(glm::uvec3 point) {
                     abs(static_cast<int>(point.z) - static_cast<int>(pos.z)));
 }
 
-
-
 Chunk* Chunk::getFrontChunk() {
     return frontChunk;
 }
@@ -699,15 +704,6 @@ void Chunk::transferData(std::vector<std::pair<glm::ivec3, enum Block::BlockType
     loadStructure(&temp, 0, 0, 0);
 }
 
-// TODO:
-// Do some sort of BFS to determine the light of surrounding blocks,
-// each block away should have -1 light value of the prior.
-//
-// Also make sure light emitted from a block is removed whenever
-// that block is destroyed.
-//
-//
-// NOTE: make it work cross chunks lol
 void Chunk::calculateLight() {
     unsigned size = blockArray.size();
     for (size_t i = 0; i < size; ++i) {
@@ -716,106 +712,98 @@ void Chunk::calculateLight() {
             static_cast<ushort>((block & typeMask) >> typeOffset),
         };
         if (blockType.glowValue) {
-            lightTraverse(i, blockType.glowValue, true);
-        } else {
-            blockArray[i] |= (12 << 16);
+            lightTraverse(i, blockType.glowValue);
         }
-
     }
 }
 
-void Chunk::lightTraverse(size_t startIndex, unsigned initialGlow, bool source) {
-    blockArray[startIndex] |= (initialGlow << 16);
-    if (!source && !isTransparent(blockArray[startIndex])) {
-        return;
-    }
-    std::queue<std::pair<size_t, unsigned>> visitQueue;
+
+void Chunk::lightTraverse(size_t startIndex, unsigned char initialGlow, bool foreign) {
+    lightingFaces[startIndex].fill(initialGlow);
+    std::queue<std::pair<size_t, unsigned char>> visitQueue;
     visitQueue.emplace(startIndex, initialGlow);
 
     while (!visitQueue.empty()) {
-        // size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
         auto [index, glow] = visitQueue.front();
         visitQueue.pop();
 
         if (!glow) {
             continue;
         }
-
-        // Go one step in -x
-        int tempIndex = index - worldHeight;
-        unsigned currentBlock;
+        // Go one step in -x (Left)
         if (index % (worldHeight * 16) >= worldHeight) {
-            currentBlock = blockArray[tempIndex];
-            if (((currentBlock >> 16) & 15) < glow){
-                blockArray[tempIndex] |= (glow - 1 << 16);
+            size_t tempIndex = index - worldHeight;
+            unsigned currentBlock = blockArray[tempIndex];
+            if (lightingFaces[tempIndex][3] < glow) {
+                lightingFaces[tempIndex][3] = glow | (foreign << 16);
                 if (isTransparent(currentBlock)) {
                     visitQueue.emplace(tempIndex, glow - 1);
                 }
-            } 
+            }
         } else {
-            leftChunk->lightTraverse(index + worldHeight * 15, glow - 1);
+            // leftChunk->lightTraverse(index + worldHeight * 15, glow - 1, true);
         }
 
-        // Go one step in +x
-        tempIndex = index + worldHeight;
+        // Go one step in +x (Right)
         if (index % (worldHeight * 16) <= (worldHeight * 15)) {
-            currentBlock = blockArray[tempIndex];
-            if (((currentBlock >> 16) & 15) < glow){
-                blockArray[tempIndex] |= (glow - 1 << 16);
+            size_t tempIndex = index + worldHeight;
+            unsigned currentBlock = blockArray[tempIndex];
+            if (lightingFaces[tempIndex][2] < glow) {
+                lightingFaces[tempIndex][2] = glow | (foreign << 16);
                 if (isTransparent(currentBlock)) {
                     visitQueue.emplace(tempIndex, glow - 1);
                 }
-            } 
+            }
         } else {
-            rightChunk->lightTraverse(index - worldHeight * 15, glow - 1);
+            // rightChunk->lightTraverse(index - worldHeight * 15, glow - 1, true);
         }
 
-        // Go one step in -z
-        tempIndex = index - worldHeight * 16;
+        // Go one step in -z (Backward)
         if (index > (worldHeight * 16)) {
-            currentBlock = blockArray[tempIndex];
-            if (((currentBlock >> 16) & 15) < glow){
-                blockArray[tempIndex] |= (glow - 1 << 16);
+            size_t tempIndex = index - worldHeight * 16;
+            unsigned currentBlock = blockArray[tempIndex];
+            if (lightingFaces[tempIndex][4] < glow) {
+                lightingFaces[tempIndex][4] = glow | (foreign << 16);
                 if (isTransparent(currentBlock)) {
                     visitQueue.emplace(tempIndex, glow - 1);
                 }
-            } 
+            }
         } else {
-            backChunk->lightTraverse(index + worldHeight * 16 * 15, glow - 1);
+            // backChunk->lightTraverse(index + worldHeight * 16 * 15, glow - 1, true);
         }
 
-        // Go one step in +z
-        tempIndex = index + worldHeight * 16;
+        // Go one step in +z (Forward)
         if (index < (worldHeight * 16 * 15)) {
-            currentBlock = blockArray[tempIndex];
-            if (((currentBlock >> 16) & 15) < glow){
-                blockArray[tempIndex] |= (glow - 1 << 16);
+            size_t tempIndex = index + worldHeight * 16;
+            unsigned currentBlock = blockArray[tempIndex];
+            if (lightingFaces[tempIndex][5] < glow) {
+                lightingFaces[tempIndex][5] = glow | (foreign << 16);
                 if (isTransparent(currentBlock)) {
                     visitQueue.emplace(tempIndex, glow - 1);
                 }
-            } 
+            }
         } else {
-            frontChunk->lightTraverse(index - worldHeight * 16 * 15, glow - 1);
-        } 
+            // frontChunk->lightTraverse(index - worldHeight * 16 * 15, glow - 1, true);
+        }
 
-        // Go one step in -y
-        tempIndex = index - 1;
-        currentBlock = blockArray[tempIndex];
-        if (((currentBlock >> 16) & 15) < glow){
-            blockArray[tempIndex] |= (glow - 1 << 16);
+        // Go one step in -y (Down)
+        size_t tempIndex = index - 1;
+        unsigned currentBlock = blockArray[tempIndex];
+        if (lightingFaces[tempIndex][0] < glow) {
+            lightingFaces[tempIndex][0] = glow | (foreign << 16);
             if (isTransparent(currentBlock)) {
                 visitQueue.emplace(tempIndex, glow - 1);
             }
-        } 
+        }
 
-        // Go one step in +y
+        // Go one step in +y (Up)
         tempIndex = index + 1;
         currentBlock = blockArray[tempIndex];
-        if (((currentBlock >> 16) & 15) < glow){
-            blockArray[tempIndex] |= (glow - 1 << 16);
+        if (lightingFaces[tempIndex][1] < glow) {
+            lightingFaces[tempIndex][1] = glow | (foreign << 16);
             if (isTransparent(currentBlock)) {
                 visitQueue.emplace(tempIndex, glow - 1);
             }
-        } 
+        }
     }
 }

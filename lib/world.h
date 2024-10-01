@@ -22,6 +22,7 @@ class Chunk;
 class World {
 public:
     World(unsigned, glm::vec3);
+    World(){}
     ~World();
 
     // Draws out every chunk in visibleChunks
