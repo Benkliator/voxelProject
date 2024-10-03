@@ -44,7 +44,7 @@ private:
     bool onGround = false;
     glm::uvec3 chunkPos;
 
-    Block::BlockType selectedBlock = Block::Glass;
+    Block::BlockType selectedBlock = Block::Sand;
     Block::BlockFace selectedFace = Block::Top;
 
     enum Mode : ushort {

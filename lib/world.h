@@ -13,6 +13,7 @@
 #include <deque>
 
 const unsigned worldHeight = 254;
+const unsigned globalLightValue = 10;
 //////////////////////////////////////////////////////////////////
 
 class Chunk;

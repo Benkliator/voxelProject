@@ -56,6 +56,7 @@ World::World(unsigned size, glm::vec3 center) {
     std::cout << "Creating meshes..." << std::endl;
     std::for_each(visibleChunks.begin(), visibleChunks.end(), 
         [](Chunk& chunk) {
+            chunk.calculateLight();
             chunk.generateMesh();
         });
 
@@ -185,6 +186,7 @@ bool World::meshCatchup() {
         }
     }
     if (!loadQueue.empty()) {
+        loadQueue.front()->calculateLight();
         loadQueue.front()->clearMesh();
         loadQueue.front()->generateMesh();
         loadQueue.pop_front();

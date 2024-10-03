@@ -29,6 +29,11 @@ Chunk::Chunk(unsigned x, unsigned z, World* w) : world{ w } {
         z * 16,
     };
     generateTerrain();
+    for (auto& blocks : lightingFaces) {
+        for (auto& face : blocks) {
+            face = globalLightValue;
+        }
+    }
 }
 
 Chunk::~Chunk() {}
@@ -38,15 +43,6 @@ bool Chunk::hasLoaded() {
 }
 
 void Chunk::generateMesh() {
-    // Im going insane 
-    for (auto& blocks : lightingFaces) {
-        for (auto& face : blocks) {
-            if (!((face >> 16) & 15)) {
-                face = 3;
-            }
-        }
-    }
-    calculateLight();
     findAdjacentChunks();
     const unsigned obstruct = Block::Dirt << typeOffset;
     for (size_t i = 0; i < blockArray.size(); i++) {
@@ -201,23 +197,30 @@ bool Chunk::removeBlock(unsigned x, unsigned y, unsigned z) {
     if (!isAir(getBlock(x, y, z))) {
         size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
         blockArray[ix] = 0;
+
+        // it is important to calculate light locally after adjacent chunks,
+        // as permission to remove light from this chunk is given in the 
+        // parameters
+        frontChunk->calculateLight(Block::Back);
+        backChunk->calculateLight(Block::Front);
+        rightChunk->calculateLight(Block::Left);
+        leftChunk->calculateLight(Block::Right);
+        calculateLight();
+
+        frontChunk->clearMesh();
+        frontChunk->generateMesh();
+
+        backChunk->clearMesh();
+        backChunk->generateMesh();
+
+        rightChunk->clearMesh();
+        rightChunk->generateMesh();
+
+        leftChunk->clearMesh();
+        leftChunk->generateMesh();
+
         clearMesh();
         generateMesh();
-
-        if (frontChunk && z == 15) {
-            frontChunk->clearMesh();
-            frontChunk->generateMesh();
-        } else if (backChunk && z == 0) {
-            backChunk->clearMesh();
-            backChunk->generateMesh();
-        }
-        if (rightChunk && x == 15) {
-            rightChunk->clearMesh();
-            rightChunk->generateMesh();
-        } else if (leftChunk && x == 0) {
-            leftChunk->clearMesh();
-            leftChunk->generateMesh();
-        }
         // reloadMesh(x, y, z);
         return true;
     };
@@ -232,22 +235,30 @@ bool Chunk::placeBlock(Block::BlockType bt,
     if (isAir(block)) {
         size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
         blockArray[ix] = bt << typeOffset;
+
+        // it is important to calculate light locally after adjacent chunks,
+        // as permission to remove light from this chunk is given in the 
+        // parameters
+        frontChunk->calculateLight(Block::Back);
+        backChunk->calculateLight(Block::Front);
+        rightChunk->calculateLight(Block::Left);
+        leftChunk->calculateLight(Block::Right);
+        calculateLight();
+
+        frontChunk->clearMesh();
+        frontChunk->generateMesh();
+
+        backChunk->clearMesh();
+        backChunk->generateMesh();
+
+        rightChunk->clearMesh();
+        rightChunk->generateMesh();
+
+        leftChunk->clearMesh();
+        leftChunk->generateMesh();
+
         clearMesh();
         generateMesh();
-        if (frontChunk && z == 15) {
-            frontChunk->clearMesh();
-            frontChunk->generateMesh();
-        } else if (backChunk && z == 0) {
-            backChunk->clearMesh();
-            backChunk->generateMesh();
-        }
-        if (rightChunk && x == 15) {
-            rightChunk->clearMesh();
-            rightChunk->generateMesh();
-        } else if (leftChunk && x == 0) {
-            leftChunk->clearMesh();
-            leftChunk->generateMesh();
-        }
         // reloadMesh(x, y, z);
         return true;
     };
@@ -704,7 +715,19 @@ void Chunk::transferData(std::vector<std::pair<glm::ivec3, enum Block::BlockType
     loadStructure(&temp, 0, 0, 0);
 }
 
-void Chunk::calculateLight() {
+void Chunk::calculateLight(enum Block::BlockFace face) {
+    unsigned ownershipMetadata = (static_cast<unsigned>(face) + 1) << 4;
+    if (face == Block::Top) {
+        ownershipMetadata = 0;
+    }    
+    for (auto& blocks : lightingFaces) {
+        for (auto& face : blocks) {
+            if ((face & 0b11110000) == ownershipMetadata ||
+                (face & 0b11110000) == 0) {
+                face = globalLightValue;
+            }
+        }
+    }
     unsigned size = blockArray.size();
     for (size_t i = 0; i < size; ++i) {
         unsigned block = blockArray[i];
@@ -712,17 +735,29 @@ void Chunk::calculateLight() {
             static_cast<ushort>((block & typeMask) >> typeOffset),
         };
         if (blockType.glowValue) {
-            lightTraverse(i, blockType.glowValue);
+            lightTraverse(i, blockType.glowValue, Block::Top, true);
         }
     }
 }
 
-
-void Chunk::lightTraverse(size_t startIndex, unsigned char initialGlow, bool foreign) {
-    lightingFaces[startIndex].fill(initialGlow);
+void Chunk::lightTraverse(size_t startIndex, unsigned char initialGlow, enum Block::BlockFace face, bool fullBlock) {
+    // Describes where light comes from
+    unsigned ownershipMetadata = (static_cast<unsigned>(face) + 1) << 4;
     std::queue<std::pair<size_t, unsigned char>> visitQueue;
-    visitQueue.emplace(startIndex, initialGlow);
-
+    if (fullBlock) {
+        // In the case of 0 the light origin is in this chunk
+        ownershipMetadata = 0;
+        lightingFaces[startIndex].fill(initialGlow);
+        visitQueue.emplace(startIndex, initialGlow);
+    } else if (lightingFaces[startIndex][static_cast<size_t>(face)] < initialGlow) {
+        lightingFaces[startIndex][static_cast<size_t>(face)] = initialGlow;
+        unsigned block = blockArray[startIndex];
+        if (isTransparent(block)) {
+            visitQueue.emplace(startIndex, initialGlow - 1);
+        } else {
+            return;
+        }
+    }
     while (!visitQueue.empty()) {
         auto [index, glow] = visitQueue.front();
         visitQueue.pop();
@@ -730,67 +765,68 @@ void Chunk::lightTraverse(size_t startIndex, unsigned char initialGlow, bool for
         if (!glow) {
             continue;
         }
+
         // Go one step in -x (Left)
         if (index % (worldHeight * 16) >= worldHeight) {
             size_t tempIndex = index - worldHeight;
             unsigned currentBlock = blockArray[tempIndex];
-            if (lightingFaces[tempIndex][3] < glow) {
-                lightingFaces[tempIndex][3] = glow | (foreign << 16);
+            if ((lightingFaces[tempIndex][3] & 15) < glow) {
+                lightingFaces[tempIndex][3] = glow | ownershipMetadata;
                 if (isTransparent(currentBlock)) {
                     visitQueue.emplace(tempIndex, glow - 1);
                 }
             }
-        } else {
-            // leftChunk->lightTraverse(index + worldHeight * 15, glow - 1, true);
+        } else if (leftChunk){
+            leftChunk->lightTraverse(index + worldHeight * 15, glow - 1, Block::Right);
         }
 
         // Go one step in +x (Right)
         if (index % (worldHeight * 16) <= (worldHeight * 15)) {
             size_t tempIndex = index + worldHeight;
             unsigned currentBlock = blockArray[tempIndex];
-            if (lightingFaces[tempIndex][2] < glow) {
-                lightingFaces[tempIndex][2] = glow | (foreign << 16);
+            if ((lightingFaces[tempIndex][2] & 15) < glow) {
+                lightingFaces[tempIndex][2] = glow | ownershipMetadata;
                 if (isTransparent(currentBlock)) {
                     visitQueue.emplace(tempIndex, glow - 1);
                 }
             }
-        } else {
-            // rightChunk->lightTraverse(index - worldHeight * 15, glow - 1, true);
+        } else if (rightChunk){
+            rightChunk->lightTraverse(index - worldHeight * 15, glow - 1, Block::Left);
         }
 
         // Go one step in -z (Backward)
         if (index > (worldHeight * 16)) {
             size_t tempIndex = index - worldHeight * 16;
             unsigned currentBlock = blockArray[tempIndex];
-            if (lightingFaces[tempIndex][4] < glow) {
-                lightingFaces[tempIndex][4] = glow | (foreign << 16);
+            if ((lightingFaces[tempIndex][4] & 15) < glow) {
+                lightingFaces[tempIndex][4] = glow | ownershipMetadata;
                 if (isTransparent(currentBlock)) {
                     visitQueue.emplace(tempIndex, glow - 1);
                 }
             }
-        } else {
-            // backChunk->lightTraverse(index + worldHeight * 16 * 15, glow - 1, true);
+        } else if (backChunk) {
+            backChunk->lightTraverse(index + worldHeight * 16 * 15, glow - 1, Block::Front);
         }
 
         // Go one step in +z (Forward)
         if (index < (worldHeight * 16 * 15)) {
             size_t tempIndex = index + worldHeight * 16;
             unsigned currentBlock = blockArray[tempIndex];
-            if (lightingFaces[tempIndex][5] < glow) {
-                lightingFaces[tempIndex][5] = glow | (foreign << 16);
+            if ((lightingFaces[tempIndex][5] & 15) < glow) {
+                lightingFaces[tempIndex][5] = glow | ownershipMetadata;
                 if (isTransparent(currentBlock)) {
                     visitQueue.emplace(tempIndex, glow - 1);
                 }
             }
-        } else {
-            // frontChunk->lightTraverse(index - worldHeight * 16 * 15, glow - 1, true);
+        } else if (frontChunk) {
+            frontChunk->lightTraverse(index - worldHeight * 16 * 15, glow - 1, Block::Back);
         }
 
         // Go one step in -y (Down)
         size_t tempIndex = index - 1;
         unsigned currentBlock = blockArray[tempIndex];
-        if (lightingFaces[tempIndex][0] < glow) {
-            lightingFaces[tempIndex][0] = glow | (foreign << 16);
+        if ((lightingFaces[tempIndex][0] & 15) < glow) {
+            lightingFaces[tempIndex][0] = glow | ownershipMetadata;
             if (isTransparent(currentBlock)) {
                 visitQueue.emplace(tempIndex, glow - 1);
             }
@@ -799,8 +835,8 @@ void Chunk::lightTraverse(size_t startIndex, unsigned char initialGlow, bool for
         // Go one step in +y (Up)
         tempIndex = index + 1;
         currentBlock = blockArray[tempIndex];
-        if (lightingFaces[tempIndex][1] < glow) {
-            lightingFaces[tempIndex][1] = glow | (foreign << 16);
+        if ((lightingFaces[tempIndex][1] & 15) < glow) {
+            lightingFaces[tempIndex][1] = glow | ownershipMetadata;
             if (isTransparent(currentBlock)) {
                 visitQueue.emplace(tempIndex, glow - 1);
             }

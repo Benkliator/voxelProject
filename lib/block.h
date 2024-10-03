@@ -46,12 +46,12 @@ struct Block {
     };
 
     enum BlockFace : ushort {
-        Top,
+        Top = 0,
         Bottom,
-        Front,
-        Back,
         Left,
         Right,
+        Front,
+        Back,
     };
 
     ushort top;

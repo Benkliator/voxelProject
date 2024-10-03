@@ -62,7 +62,8 @@ public:
 
     void findAdjacentChunks();
     void transferData(std::vector<std::pair<glm::ivec3, enum Block::BlockType>>);
-    void lightTraverse(size_t, unsigned char, bool = false);
+    void lightTraverse(size_t, unsigned char, enum Block::BlockFace = Block::Top, bool = false);
+    void calculateLight(enum Block::BlockFace = Block::Top);
 
 private:
     void generateTerrain();
@@ -71,8 +72,6 @@ private:
 
     void loadOpaqueFace(const MeshData*, unsigned, unsigned, unsigned, unsigned, unsigned, unsigned, bool);
     void loadTransparentFace(const MeshData*, unsigned, unsigned, unsigned, unsigned, unsigned, unsigned, bool);
-
-    void calculateLight();
 
     std::array<ushort, 4> getOcclusion(unsigned, unsigned, unsigned, ushort);
     std::array<unsigned, 16 * 16 * 254> blockArray;
