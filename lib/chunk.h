@@ -13,6 +13,7 @@
 #include <vector>
 #include <cmath>
 #include <random>
+#include <cstdint>
 
 class World;
 
@@ -62,8 +63,8 @@ public:
 
     void findAdjacentChunks();
     void transferData(std::vector<std::pair<glm::ivec3, enum Block::BlockType>>);
-    void lightTraverse(size_t, unsigned char, enum Block::BlockFace = Block::Top, bool = false);
-    void calculateLight(enum Block::BlockFace = Block::Top);
+    void lightTraverse(size_t, unsigned char, enum Block::BlockFace = Block::FullBlock);
+    void calculateLight(enum Block::BlockFace = Block::FullBlock);
 
 private:
     void generateTerrain();
@@ -74,10 +75,10 @@ private:
     void loadTransparentFace(const MeshData*, unsigned, unsigned, unsigned, unsigned, unsigned, unsigned, bool);
 
     std::array<ushort, 4> getOcclusion(unsigned, unsigned, unsigned, ushort);
-    std::array<unsigned, 16 * 16 * 254> blockArray;
+    std::array<uint_fast16_t, 16 * 16 * 254> blockArray{};
     // Light values for each face of a block,
     // Top, Bottom, Left, Right, Front, Back
-    std::array<std::array<unsigned char, 6>, 16 * 16 * 254> lightingFaces;
+    std::array<std::array<uint_fast8_t, 6>, 16 * 16 * 254> lightingFaces{};
     glm::uvec3 pos;
 
     World* world;

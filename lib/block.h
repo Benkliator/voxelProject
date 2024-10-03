@@ -52,6 +52,7 @@ struct Block {
         Right,
         Front,
         Back,
+        FullBlock,
     };
 
     ushort top;

@@ -46,7 +46,7 @@ void Chunk::generateMesh() {
     findAdjacentChunks();
     const unsigned obstruct = Block::Dirt << typeOffset;
     for (size_t i = 0; i < blockArray.size(); i++) {
-        unsigned block = blockArray[i];
+        uint_fast16_t block = blockArray[i];
         if (isAir(block)) {
             continue;
         }
@@ -316,9 +316,12 @@ void Chunk::generateTerrain() {
                 } else {
                     bt = Block::Air;
                 }
-                unsigned block = bt << typeOffset;
+                uint_fast16_t block = bt << typeOffset;
                 size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
                 blockArray[ix] = block;
+                if (y == height) {
+                    break;
+                }
             }
         }
     }
@@ -330,9 +333,9 @@ void Chunk::generateTerrain() {
             enum Block::BlockType bt = Block::Log;
             if ((heightmap[i] != -1)) {
                 int y = heightmap[i];
-                int ix = y + 1 + (z * 16 * worldHeight) + (x * worldHeight);
+                size_t ix = y + 1 + (z * 16 * worldHeight) + (x * worldHeight);
                 for (int j = 0; j < treeHeight[i]; ++j) {
-                    unsigned block = bt << typeOffset;
+                    uint_fast16_t block = bt << typeOffset;
                     blockArray[ix + j] = block;
                 }
                 if (treeHeight[i]) {
@@ -359,7 +362,7 @@ void Chunk::loadStructure(const StructureData* structure, unsigned x, unsigned y
             backChunkUpdates.emplace_back(glm::ivec3(nx, ny, nz + 16), bt);
         } else {
             size_t ix = ny + (nz * 16 * worldHeight) + (nx * worldHeight);
-            unsigned block = bt << typeOffset;
+            uint_fast16_t block = bt << typeOffset;
             blockArray[ix] = block;
         }
     }
@@ -717,7 +720,7 @@ void Chunk::transferData(std::vector<std::pair<glm::ivec3, enum Block::BlockType
 
 void Chunk::calculateLight(enum Block::BlockFace face) {
     unsigned ownershipMetadata = (static_cast<unsigned>(face) + 1) << 4;
-    if (face == Block::Top) {
+    if (face == Block::FullBlock) {
         ownershipMetadata = 0;
     }    
     for (auto& blocks : lightingFaces) {
@@ -730,28 +733,28 @@ void Chunk::calculateLight(enum Block::BlockFace face) {
     }
     unsigned size = blockArray.size();
     for (size_t i = 0; i < size; ++i) {
-        unsigned block = blockArray[i];
+        uint_fast16_t block = blockArray[i];
         Block blockType{
             static_cast<ushort>((block & typeMask) >> typeOffset),
         };
         if (blockType.glowValue) {
-            lightTraverse(i, blockType.glowValue, Block::Top, true);
+            lightTraverse(i, blockType.glowValue, Block::FullBlock);
         }
     }
 }
 
-void Chunk::lightTraverse(size_t startIndex, unsigned char initialGlow, enum Block::BlockFace face, bool fullBlock) {
+void Chunk::lightTraverse(size_t startIndex, uint_fast8_t initialGlow, enum Block::BlockFace face) {
     // Describes where light comes from
     unsigned ownershipMetadata = (static_cast<unsigned>(face) + 1) << 4;
-    std::queue<std::pair<size_t, unsigned char>> visitQueue;
-    if (fullBlock) {
+    std::queue<std::pair<size_t, uint_fast8_t>> visitQueue;
+    if (face == Block::FullBlock) {
         // In the case of 0 the light origin is in this chunk
         ownershipMetadata = 0;
         lightingFaces[startIndex].fill(initialGlow);
         visitQueue.emplace(startIndex, initialGlow);
     } else if (lightingFaces[startIndex][static_cast<size_t>(face)] < initialGlow) {
         lightingFaces[startIndex][static_cast<size_t>(face)] = initialGlow;
-        unsigned block = blockArray[startIndex];
+        uint_fast16_t block = blockArray[startIndex];
         if (isTransparent(block)) {
             visitQueue.emplace(startIndex, initialGlow - 1);
         } else {
@@ -769,7 +772,7 @@ void Chunk::lightTraverse(size_t startIndex, unsigned char initialGlow, enum Blo
         // Go one step in -x (Left)
         if (index % (worldHeight * 16) >= worldHeight) {
             size_t tempIndex = index - worldHeight;
-            unsigned currentBlock = blockArray[tempIndex];
+            uint_fast16_t currentBlock = blockArray[tempIndex];
             if ((lightingFaces[tempIndex][3] & 15) < glow) {
                 lightingFaces[tempIndex][3] = glow | ownershipMetadata;
                 if (isTransparent(currentBlock)) {
@@ -783,7 +786,7 @@ void Chunk::lightTraverse(size_t startIndex, unsigned char initialGlow, enum Blo
         // Go one step in +x (Right)
         if (index % (worldHeight * 16) <= (worldHeight * 15)) {
             size_t tempIndex = index + worldHeight;
-            unsigned currentBlock = blockArray[tempIndex];
+            uint_fast16_t currentBlock = blockArray[tempIndex];
             if ((lightingFaces[tempIndex][2] & 15) < glow) {
                 lightingFaces[tempIndex][2] = glow | ownershipMetadata;
                 if (isTransparent(currentBlock)) {
@@ -797,7 +800,7 @@ void Chunk::lightTraverse(size_t startIndex, unsigned char initialGlow, enum Blo
         // Go one step in -z (Backward)
         if (index > (worldHeight * 16)) {
             size_t tempIndex = index - worldHeight * 16;
-            unsigned currentBlock = blockArray[tempIndex];
+            uint_fast16_t currentBlock = blockArray[tempIndex];
             if ((lightingFaces[tempIndex][4] & 15) < glow) {
                 lightingFaces[tempIndex][4] = glow | ownershipMetadata;
                 if (isTransparent(currentBlock)) {
@@ -811,7 +814,7 @@ void Chunk::lightTraverse(size_t startIndex, unsigned char initialGlow, enum Blo
         // Go one step in +z (Forward)
         if (index < (worldHeight * 16 * 15)) {
             size_t tempIndex = index + worldHeight * 16;
-            unsigned currentBlock = blockArray[tempIndex];
+            uint_fast16_t currentBlock = blockArray[tempIndex];
             if ((lightingFaces[tempIndex][5] & 15) < glow) {
                 lightingFaces[tempIndex][5] = glow | ownershipMetadata;
                 if (isTransparent(currentBlock)) {
@@ -823,22 +826,26 @@ void Chunk::lightTraverse(size_t startIndex, unsigned char initialGlow, enum Blo
         }
 
         // Go one step in -y (Down)
-        size_t tempIndex = index - 1;
-        unsigned currentBlock = blockArray[tempIndex];
-        if ((lightingFaces[tempIndex][0] & 15) < glow) {
-            lightingFaces[tempIndex][0] = glow | ownershipMetadata;
-            if (isTransparent(currentBlock)) {
-                visitQueue.emplace(tempIndex, glow - 1);
+        {
+            size_t tempIndex = index - 1;
+            uint_fast16_t currentBlock = blockArray[tempIndex];
+            if ((lightingFaces[tempIndex][0] & 15) < glow) {
+                lightingFaces[tempIndex][0] = glow | ownershipMetadata;
+                if (isTransparent(currentBlock)) {
+                    visitQueue.emplace(tempIndex, glow - 1);
+                }
             }
         }
 
         // Go one step in +y (Up)
-        tempIndex = index + 1;
-        currentBlock = blockArray[tempIndex];
-        if ((lightingFaces[tempIndex][1] & 15) < glow) {
-            lightingFaces[tempIndex][1] = glow | ownershipMetadata;
-            if (isTransparent(currentBlock)) {
-                visitQueue.emplace(tempIndex, glow - 1);
+        {
+            size_t tempIndex = index + 1;
+            uint_fast16_t currentBlock = blockArray[tempIndex];
+            if ((lightingFaces[tempIndex][1] & 15) < glow) {
+                lightingFaces[tempIndex][1] = glow | ownershipMetadata;
+                if (isTransparent(currentBlock)) {
+                    visitQueue.emplace(tempIndex, glow - 1);
+                }
             }
         }
     }
