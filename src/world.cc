@@ -10,7 +10,7 @@
 #include <optional>
 #include <numeric>
 
-World::World(unsigned size, glm::vec3 center) {
+World::World(unsigned size, glm::vec3 center, GameTime* t) : gameTime { t } {
     if (!(size % 2)) {
         renderDistance = size + 1;
     } else {

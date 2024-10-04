@@ -1,6 +1,7 @@
 #pragma once
 
 #include "chunk.h"
+#include "gametime.h"
 #include "synchQueue.h"
 
 #include <functional>
@@ -13,7 +14,7 @@
 #include <deque>
 
 const unsigned worldHeight = 254;
-const unsigned globalLightValue = 3;
+const unsigned globalLightValue = 12;
 //////////////////////////////////////////////////////////////////
 
 class Chunk;
@@ -22,7 +23,7 @@ class Chunk;
 // based on camera/player position.
 class World {
 public:
-    World(unsigned, glm::vec3);
+    World(unsigned, glm::vec3, GameTime*);
     World(){}
     ~World();
 
@@ -58,4 +59,6 @@ private:
     unsigned textureMap;
     unsigned shaderProgram;
     glm::mat4 projection;
+
+    GameTime* gameTime;
 };

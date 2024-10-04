@@ -7,7 +7,7 @@
 #include <glm/trigonometric.hpp>
 #include <vector>
 
-Skybox::Skybox() {
+Skybox::Skybox(GameTime* t) : gameTime { t } {
     float vertices[]{
         -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f, 0.5f,
         -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f, 0.5f, 0.5f,
@@ -82,12 +82,19 @@ Skybox::~Skybox() {
 
 void Skybox::draw(glm::mat4& view) {
     glUseProgram(shaderProgram);
-    if (sin(angle) < -0.1) {
-        glBindTexture(GL_TEXTURE_CUBE_MAP, dayTexture);
-    } else if (0.1 < sin(angle)) {
-        glBindTexture(GL_TEXTURE_CUBE_MAP, nightTexture);
-    } else {
-        glBindTexture(GL_TEXTURE_CUBE_MAP, duskTexture);
+    switch (timeState) {
+        case GameTime::Day:
+            glBindTexture(GL_TEXTURE_CUBE_MAP, dayTexture);
+            break;
+        case GameTime::Night:
+            glBindTexture(GL_TEXTURE_CUBE_MAP, nightTexture);
+            break;
+        case GameTime::Dusk:
+            glBindTexture(GL_TEXTURE_CUBE_MAP, duskTexture);
+            break;
+        case GameTime::Dawn:
+            glBindTexture(GL_TEXTURE_CUBE_MAP, duskTexture);
+            break;
     }
     glBindVertexArray(VAO);
 
@@ -143,6 +150,7 @@ void Skybox::draw(glm::mat4& view) {
     glDepthMask(true);
 }
 
-void Skybox::update(double time) {
-    angle = glm::radians(time);
+void Skybox::update() {
+    angle = gameTime->getSkyboxAngle();
+    timeState = gameTime->getTimeState();
 }

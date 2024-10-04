@@ -61,12 +61,13 @@ Game::Game() {
         std::cerr << "OpenGL error: " << error << std::endl;
     }
 
-    skybox = new Skybox{};
+    gameTime = new GameTime{};
+    skybox = new Skybox{ gameTime };
     unsigned offset = 2000;
     glm::vec3 startCoords{ 16 * offset + RENDER_DISTANCE * 8,
                            70,
                            16 * offset + RENDER_DISTANCE * 8 };
-    world = new World{ RENDER_DISTANCE, startCoords };
+    world = new World{ RENDER_DISTANCE, startCoords, gameTime };
     player = new Player{ world, startCoords };
 }
 
@@ -125,7 +126,8 @@ void Game::tickUpdate() {
             gameCV.wait(lock);
 
             processInput();
-            skybox->update(currentTick / static_cast<double>(tickRate));
+            gameTime->incrementTime();
+            skybox->update();
         }
         gameCV.notify_all();
         const auto end = std::chrono::high_resolution_clock::now();

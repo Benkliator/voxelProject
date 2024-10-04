@@ -3,6 +3,7 @@
 #include "player.h"
 #include "skybox.h"
 #include "world.h"
+#include "gametime.h"
 
 #include <thread>
 #include <chrono>
@@ -31,6 +32,7 @@ private:
     Player* player = nullptr;
     Skybox* skybox = nullptr;
     World* world = nullptr;
+    GameTime* gameTime = nullptr;
 
     GLFWwindow* window = nullptr;
 
@@ -43,9 +45,6 @@ private:
 
     unsigned tickRate = 20;
     unsigned currentTick = 1;
-
-    // Corresponds to hour (Military Time)
-    unsigned time = 0;
 
     std::mutex gameMutex;
     std::condition_variable gameCV;

@@ -1,16 +1,17 @@
 #pragma once
 
+#include "gametime.h"
 #include <glm/fwd.hpp>
 
 class Skybox {
 public:
-    Skybox();
+    Skybox(GameTime*);
     ~Skybox();
 
     // Does what you think it does.
     void draw(glm::mat4&);
 
-    void update(double);
+    void update();
 
 private:
     unsigned VAO;
@@ -23,5 +24,7 @@ private:
     unsigned nightTexture;
     unsigned duskTexture;
 
-    float angle = 0;
+    GameTime* gameTime = nullptr;
+    GameTime::TimeState timeState;
+    float angle;
 };

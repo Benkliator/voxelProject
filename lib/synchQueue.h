@@ -4,7 +4,7 @@
 
 template<typename T>
 class synchQueue {
-    public:
+public:
         synchQueue() {}
 
         void push(T object) {
@@ -34,7 +34,7 @@ class synchQueue {
             return elements.empty();
         }
 
-    private:
+private:
         std::queue<T> elements;
         std::mutex synchMutex;
         std::condition_variable synchCV;
