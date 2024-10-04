@@ -20,6 +20,8 @@ Game::Game() {
 
     glfwMakeContextCurrent(window);
 
+    //glfwSwapInterval(0);
+
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
     glfwSetWindowUserPointer(window, this);

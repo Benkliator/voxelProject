@@ -12,6 +12,8 @@ void main(void)
     vec4 tex = texture(ourTexture, texCoord) * light;
     if (tex.a < 0.02) {
         discard;
+    } else if (tex.a > 0.9) {
+        tex.a = 1;
     }
     fragColor = tex;
 }
