@@ -14,7 +14,6 @@
 #include <deque>
 
 const unsigned worldHeight = 254;
-const unsigned globalLightValue = 12;
 //////////////////////////////////////////////////////////////////
 
 class Chunk;
@@ -39,6 +38,7 @@ public:
     bool meshCatchup();
     void fullMeshCatchup();
     void sortVisibleChunks();
+    unsigned getLight();
 
 private:
     void shaderInit();

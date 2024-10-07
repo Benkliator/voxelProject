@@ -227,10 +227,17 @@ void World::draw(glm::mat4& view) {
                        GL_FALSE,
                        glm::value_ptr(view));
 
+    glUniform1ui(glGetUniformLocation(shaderProgram, "daylight"),
+                 getLight());
+
     for (auto i : renderOrder) {
         if (visibleChunks[i].hasLoaded())
             visibleChunks[i].draw(shaderProgram);
     }
+}
+
+unsigned World::getLight() {
+    return gameTime->getLight();
 }
 
 void World::shaderInit() {

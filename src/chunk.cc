@@ -31,7 +31,7 @@ Chunk::Chunk(unsigned x, unsigned z, World* w) : world{ w } {
     generateTerrain();
     for (auto& blocks : lightingFaces) {
         for (auto& face : blocks) {
-            face = globalLightValue;
+            face = 0;
         }
     }
 }
@@ -727,7 +727,7 @@ void Chunk::calculateLight(enum Block::BlockFace face) {
         for (auto& face : blocks) {
             if ((face & 0b11110000) == ownershipMetadata ||
                 (face & 0b11110000) == 0) {
-                face = globalLightValue;
+                face = 0;
             }
         }
     }
@@ -761,6 +761,7 @@ void Chunk::lightTraverse(size_t startIndex, uint_fast8_t initialGlow, enum Bloc
             return;
         }
     }
+
     while (!visitQueue.empty()) {
         auto [index, glow] = visitQueue.front();
         visitQueue.pop();

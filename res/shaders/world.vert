@@ -5,6 +5,7 @@ uniform mat4 view;
 uniform mat4 projection;
 
 uniform uvec3 chunkPos;
+uniform uint daylight;
 
 out vec2 texCoord;
 out vec4 light;
@@ -12,6 +13,10 @@ out vec4 light;
 void main(void)
 {
     float lightValue = float((vertex.y >> 18u) & 15u) / 15.0;    
+
+    if ((lightValue == 0) || ((daylight / 15.0) > lightValue)) {
+        lightValue = daylight / 15.0;
+    }
 
     light = vec4(lightValue, lightValue, lightValue, 1.0);
     float x = float((vertex.x  & 31u)             + chunkPos.x) - 0.5;
