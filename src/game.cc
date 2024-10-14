@@ -20,6 +20,7 @@ Game::Game() {
 
     glfwMakeContextCurrent(window);
 
+    // Disable VSync
     //glfwSwapInterval(0);
 
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);

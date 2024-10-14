@@ -29,11 +29,6 @@ Chunk::Chunk(unsigned x, unsigned z, World* w) : world{ w } {
         z * 16,
     };
     generateTerrain();
-    for (auto& blocks : lightingFaces) {
-        for (auto& face : blocks) {
-            face = 0;
-        }
-    }
 }
 
 Chunk::~Chunk() {}
@@ -65,11 +60,7 @@ void Chunk::generateMesh() {
         bool right;
         if (x >= 1 && x <= 14 && z >= 1 && z <= 14) {
             top = isTransparent(getBlock(x, y + 1, z), block);
-            if (y != 0) {
-                bottom = isTransparent(getBlock(x, y - 1, z), block);
-            } else {
-                bottom = false;
-            }
+            bottom = (y != 0 ? isTransparent(getBlock(x, y - 1, z), block) : false);
             back =  isTransparent(getBlock(x, y, z - 1), block);
             front = isTransparent(getBlock(x, y, z + 1), block);
             left =  isTransparent(getBlock(x - 1, y, z), block);
@@ -197,31 +188,7 @@ bool Chunk::removeBlock(unsigned x, unsigned y, unsigned z) {
     if (!isAir(getBlock(x, y, z))) {
         size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
         blockArray[ix] = 0;
-
-        // it is important to calculate light locally after adjacent chunks,
-        // as permission to remove light from this chunk is given in the 
-        // parameters
-        frontChunk->calculateLight(Block::Back);
-        backChunk->calculateLight(Block::Front);
-        rightChunk->calculateLight(Block::Left);
-        leftChunk->calculateLight(Block::Right);
-        calculateLight();
-
-        frontChunk->clearMesh();
-        frontChunk->generateMesh();
-
-        backChunk->clearMesh();
-        backChunk->generateMesh();
-
-        rightChunk->clearMesh();
-        rightChunk->generateMesh();
-
-        leftChunk->clearMesh();
-        leftChunk->generateMesh();
-
-        clearMesh();
-        generateMesh();
-        // reloadMesh(x, y, z);
+        reloadAjacentChunks();
         return true;
     };
     return false;
@@ -235,7 +202,13 @@ bool Chunk::placeBlock(Block::BlockType bt,
     if (isAir(block)) {
         size_t ix = y + (z * 16 * worldHeight) + (x * worldHeight);
         blockArray[ix] = bt << typeOffset;
+        reloadAjacentChunks();
+        return true;
+    };
+    return false;
+}
 
+void Chunk::reloadAjacentChunks() {
         // it is important to calculate light locally after adjacent chunks,
         // as permission to remove light from this chunk is given in the 
         // parameters
@@ -259,10 +232,6 @@ bool Chunk::placeBlock(Block::BlockType bt,
 
         clearMesh();
         generateMesh();
-        // reloadMesh(x, y, z);
-        return true;
-    };
-    return false;
 }
 
 void Chunk::clearMesh() {
@@ -509,106 +478,106 @@ Chunk::getOcclusion(unsigned x, unsigned y, unsigned z, ushort face) {
     std::array<ushort, 4> vertexOcclusion{ 0, 0, 0, 0 };
     const ushort air = Block::Air << typeOffset;
     switch (face) {
-    case Block::Top: {
-        if (!isAir(getBlockGlobal(x, y + 1, z + 1).value_or(air))) {
-            vertexOcclusion[1] += 1;
-            vertexOcclusion[2] += 1;
-        }
-        if (!isAir(getBlockGlobal(x, y + 1, z - 1).value_or(air))) {
-            vertexOcclusion[0] += 1;
-            vertexOcclusion[3] += 1;
-        }
-        if (!isAir(getBlockGlobal(x + 1, y + 1, z).value_or(air))) {
-            vertexOcclusion[0] += 1;
-            vertexOcclusion[1] += 1;
-        }
-        if (!isAir(getBlockGlobal(x - 1, y + 1, z).value_or(air))) {
-            vertexOcclusion[2] += 1;
-            vertexOcclusion[3] += 1;
-        }
-        if (!isAir(getBlockGlobal(x + 1, y + 1, z + 1).value_or(air))) {
-            vertexOcclusion[1] += 1;
-        }
-        if (!isAir(getBlockGlobal(x - 1, y + 1, z + 1).value_or(air))) {
-            vertexOcclusion[2] += 1;
-        }
-        if (!isAir(getBlockGlobal(x + 1, y + 1, z - 1).value_or(air))) {
-            vertexOcclusion[0] += 1;
-        }
-        if (!isAir(getBlockGlobal(x - 1, y + 1, z - 1).value_or(air))) {
-            vertexOcclusion[3] += 1;
-        }
-    } break;
-    case Block::Back: {
-        vertexOcclusion[0] = 1;
-        vertexOcclusion[1] = 1;
-        vertexOcclusion[2] = 1;
-        vertexOcclusion[3] = 1;
-        if (!isAir(getBlock(x, y - 1, z))) {
+        case Block::Top: {
+            if (!isAir(getBlockGlobal(x, y + 1, z + 1).value_or(air))) {
+                vertexOcclusion[1] += 1;
+                vertexOcclusion[2] += 1;
+            }
+            if (!isAir(getBlockGlobal(x, y + 1, z - 1).value_or(air))) {
+                vertexOcclusion[0] += 1;
+                vertexOcclusion[3] += 1;
+            }
+            if (!isAir(getBlockGlobal(x + 1, y + 1, z).value_or(air))) {
+                vertexOcclusion[0] += 1;
+                vertexOcclusion[1] += 1;
+            }
+            if (!isAir(getBlockGlobal(x - 1, y + 1, z).value_or(air))) {
+                vertexOcclusion[2] += 1;
+                vertexOcclusion[3] += 1;
+            }
+            if (!isAir(getBlockGlobal(x + 1, y + 1, z + 1).value_or(air))) {
+                vertexOcclusion[1] += 1;
+            }
+            if (!isAir(getBlockGlobal(x - 1, y + 1, z + 1).value_or(air))) {
+                vertexOcclusion[2] += 1;
+            }
+            if (!isAir(getBlockGlobal(x + 1, y + 1, z - 1).value_or(air))) {
+                vertexOcclusion[0] += 1;
+            }
+            if (!isAir(getBlockGlobal(x - 1, y + 1, z - 1).value_or(air))) {
+                vertexOcclusion[3] += 1;
+            }
+        } break;
+        case Block::Back: {
             vertexOcclusion[0] = 1;
-            vertexOcclusion[3] = 1;
-        }
-        if (!isAir(getBlock(x, y + 1, z))) {
             vertexOcclusion[1] = 1;
             vertexOcclusion[2] = 1;
-        }
-        if (!isAir(getBlockGlobal(x, y - 1, z - 1).value_or(air))) {
-            vertexOcclusion[0] = 3;
-            vertexOcclusion[3] = 3;
-        }
-    } break;
-    case Block::Front: {
-        vertexOcclusion[0] = 1;
-        vertexOcclusion[1] = 1;
-        vertexOcclusion[2] = 1;
-        vertexOcclusion[3] = 1;
-        if (!isAir(getBlock(x, y - 1, z))) {
+            vertexOcclusion[3] = 1;
+            if (!isAir(getBlock(x, y - 1, z))) {
+                vertexOcclusion[0] = 1;
+                vertexOcclusion[3] = 1;
+            }
+            if (!isAir(getBlock(x, y + 1, z))) {
+                vertexOcclusion[1] = 1;
+                vertexOcclusion[2] = 1;
+            }
+            if (!isAir(getBlockGlobal(x, y - 1, z - 1).value_or(air))) {
+                vertexOcclusion[0] = 3;
+                vertexOcclusion[3] = 3;
+            }
+        } break;
+        case Block::Front: {
+            vertexOcclusion[0] = 1;
             vertexOcclusion[1] = 1;
             vertexOcclusion[2] = 1;
-        }
-        if (!isAir(getBlock(x, y + 1, z))) {
-            vertexOcclusion[0] = 1;
             vertexOcclusion[3] = 1;
+            if (!isAir(getBlock(x, y - 1, z))) {
+                vertexOcclusion[1] = 1;
+                vertexOcclusion[2] = 1;
+            }
+            if (!isAir(getBlock(x, y + 1, z))) {
+                vertexOcclusion[0] = 1;
+                vertexOcclusion[3] = 1;
+            }
+            if (!isAir(getBlockGlobal(x, y - 1, z + 1).value_or(air))) {
+                vertexOcclusion[1] = 3;
+                vertexOcclusion[2] = 3;
+            }
+        } break;
+        case Block::Right: {
+            if (!isAir(getBlock(x, y - 1, z))) {
+                vertexOcclusion[1] = 1;
+                vertexOcclusion[2] = 1;
+            }
+            if (!isAir(getBlock(x, y + 1, z))) {
+                vertexOcclusion[0] = 1;
+                vertexOcclusion[3] = 1;
+            }
+            if (!isAir(getBlockGlobal(x + 1, y - 1, z).value_or(air))) {
+                vertexOcclusion[1] = 3;
+                vertexOcclusion[2] = 3;
+            }
+        } break;
+        case Block::Left: {
+            if (!isAir(getBlock(x, y - 1, z))) {
+                vertexOcclusion[1] = 1;
+                vertexOcclusion[2] = 1;
+            }
+            if (!isAir(getBlock(x, y + 1, z))) {
+                vertexOcclusion[0] = 1;
+                vertexOcclusion[3] = 1;
+            }
+            if (!isAir(getBlockGlobal(x - 1, y - 1, z).value_or(air))) {
+                vertexOcclusion[1] = 3;
+                vertexOcclusion[2] = 3;
+            }
+        } break;
+        case Block::Bottom: {
+            vertexOcclusion[0] = 2;
+            vertexOcclusion[1] = 2;
+            vertexOcclusion[2] = 2;
+            vertexOcclusion[3] = 2;
         }
-        if (!isAir(getBlockGlobal(x, y - 1, z + 1).value_or(air))) {
-            vertexOcclusion[1] = 3;
-            vertexOcclusion[2] = 3;
-        }
-    } break;
-    case Block::Right: {
-        if (!isAir(getBlock(x, y - 1, z))) {
-            vertexOcclusion[1] = 1;
-            vertexOcclusion[2] = 1;
-        }
-        if (!isAir(getBlock(x, y + 1, z))) {
-            vertexOcclusion[0] = 1;
-            vertexOcclusion[3] = 1;
-        }
-        if (!isAir(getBlockGlobal(x + 1, y - 1, z).value_or(air))) {
-            vertexOcclusion[1] = 3;
-            vertexOcclusion[2] = 3;
-        }
-    } break;
-    case Block::Left: {
-        if (!isAir(getBlock(x, y - 1, z))) {
-            vertexOcclusion[1] = 1;
-            vertexOcclusion[2] = 1;
-        }
-        if (!isAir(getBlock(x, y + 1, z))) {
-            vertexOcclusion[0] = 1;
-            vertexOcclusion[3] = 1;
-        }
-        if (!isAir(getBlockGlobal(x - 1, y - 1, z).value_or(air))) {
-            vertexOcclusion[1] = 3;
-            vertexOcclusion[2] = 3;
-        }
-    } break;
-    case Block::Bottom: {
-        vertexOcclusion[0] = 2;
-        vertexOcclusion[1] = 2;
-        vertexOcclusion[2] = 2;
-        vertexOcclusion[3] = 2;
-    }
     }
     return vertexOcclusion;
 }
@@ -719,10 +688,9 @@ void Chunk::transferData(std::vector<std::pair<glm::ivec3, enum Block::BlockType
 }
 
 void Chunk::calculateLight(enum Block::BlockFace face) {
-    unsigned ownershipMetadata = (static_cast<unsigned>(face) + 1) << 4;
-    if (face == Block::FullBlock) {
-        ownershipMetadata = 0;
-    }    
+    unsigned ownershipMetadata = (face == Block::FullBlock 
+                                    ? 0
+                                    : (static_cast<unsigned>(face) + 1) << 4);
     for (auto& blocks : lightingFaces) {
         for (auto& face : blocks) {
             if ((face & 0b11110000) == ownershipMetadata ||

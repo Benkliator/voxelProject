@@ -73,12 +73,13 @@ private:
 
     void loadOpaqueFace(const MeshData*, unsigned, unsigned, unsigned, unsigned, unsigned, unsigned, bool);
     void loadTransparentFace(const MeshData*, unsigned, unsigned, unsigned, unsigned, unsigned, unsigned, bool);
+    void reloadAjacentChunks();
 
     std::array<ushort, 4> getOcclusion(unsigned, unsigned, unsigned, ushort);
     std::array<uint_fast16_t, 16 * 16 * 254> blockArray{};
     // Light values for each face of a block,
     // Top, Bottom, Left, Right, Front, Back
-    std::array<std::array<uint_fast8_t, 6>, 16 * 16 * 254> lightingFaces{};
+    std::array<std::array<uint_fast8_t, 6>, 16 * 16 * 254> lightingFaces{0};
     glm::uvec3 pos;
 
     World* world;
